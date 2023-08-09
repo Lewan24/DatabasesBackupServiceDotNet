@@ -7,7 +7,7 @@ So I decided to create own flexible service that will backup selected databases.
 
 ### Configuration
 Every database connection will be configured in Json config file, something like that:
-```json
+```
 [
   {
     DbType: "MySql",
