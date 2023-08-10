@@ -5,6 +5,10 @@ So I decided to create own flexible service that will backup selected databases.
 
 ## Work logic
 
+### Logic Scheme
+
+![Project scheme](https://github.com/Lewan24/DatabasesBackupServiceDotNet/blob/main/ServiceLogicProject_v1.0_Drawio.jpg)
+
 ### Configuration
 Every database connection will be configured in Json config file, something like that:
 ```
