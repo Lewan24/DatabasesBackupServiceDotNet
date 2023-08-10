@@ -10,7 +10,17 @@ So I decided to create own flexible service that will backup selected databases.
 ![Project scheme](https://github.com/Lewan24/DatabasesBackupServiceDotNet/blob/main/ServiceLogicProject_v1.0_Drawio.jpg)
 
 ### Configuration
-Every database connection will be configured in Json config file, something like that:
+
+Application needs 2 files to work with:
+
+- appsettings.json
+```
+{
+  "LogsFileName": "Logs.txt",
+  "IncludeDateOfCreateLogFile": true
+}
+```
+- databasesConfigurations.json
 ```
 [
   {
@@ -22,14 +32,14 @@ Every database connection will be configured in Json config file, something like
   },
   {
     DbType: "MySql",
-    DbName: "TestDb2",
+    DbName: "TestDb",
     DbUser: "root",
     DbPasswd: "passwd",
-    DbServerAndPort: "localhost:3306"
+    DbServerAndPort: "example:3306"
   },
   {
     DbType: "PostgreSql",
-    DbName: "TestDb",
+    DbName: "TestDb2",
     DbUser: "root",
     DbPasswd: "passwd",
     DbServerAndPort: "localhost:3306"
@@ -41,13 +51,15 @@ Service will load json as list of configs and for every config (database) will b
 ```
 ├── ServiceApplication.exe
 └── Backups
-    ├── MySql
+    ├── TestDb_MySql_localhost_3306
         ├── TestDb_08_08_2023.zip
-        ├── TestDb_09_08_2023.zip
-        └── TestDb2_09_08_2023.zip
-    └── PostgreSql
         └── TestDb_09_08_2023.zip
+    ├── TestDb_MySql_example_3306
+        └── TestDb_09_08_2023.zip
+    └── TestDb2_PostgreSql_localhost_3306
+        └── TestDb2_09_08_2023.zip
 ```
+The naming of backups is to think about.
 
 ## Project references
 Project reference is my public repository for background console application.
