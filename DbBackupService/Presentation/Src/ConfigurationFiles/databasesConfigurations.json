@@ -1,0 +1,14 @@
+[
+  {
+    "DbType": "MySql",
+    "DbName": "TestDb"
+  },
+  {
+    "DbType": "PostgreSql",
+    "DbName": "Example"
+  },
+  {
+    "DbType": "MySql",
+    "DbName": "ExampleTestDb"
+  }
+]

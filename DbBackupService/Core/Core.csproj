@@ -6,4 +6,10 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+      <Reference Include="NLog">
+        <HintPath>..\..\..\..\..\.nuget\packages\nlog\5.2.3\lib\netstandard2.0\NLog.dll</HintPath>
+      </Reference>
+    </ItemGroup>
+
 </Project>
