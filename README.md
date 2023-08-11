@@ -17,6 +17,7 @@ Application needs 2 files to work with:
 ```
 {
   "LogsFileName": "Logs.txt",
+  "BackupSaveDirectory": "/home/user/Desktop/DbBackups",
   "IncludeDateOfCreateLogFile": true
 }
 ```
@@ -24,40 +25,35 @@ Application needs 2 files to work with:
 ```
 [
   {
-    DbType: "MySql",
-    DbName: "TestDb",
-    DbUser: "root",
-    DbPasswd: "passwd",
-    DbServerAndPort: "localhost:3306"
+    "DbType": "MySql",
+    "DbName": "orders",
+    "DbUser": "root",
+    "DbPasswd": "root",
+    "DbServerAndPort": "localhost:3306"
   },
   {
-    DbType: "MySql",
-    DbName: "TestDb",
-    DbUser: "root",
-    DbPasswd: "passwd",
-    DbServerAndPort: "example:3306"
-  },
-  {
-    DbType: "PostgreSql",
-    DbName: "TestDb2",
-    DbUser: "root",
-    DbPasswd: "passwd",
-    DbServerAndPort: "localhost:3306"
+    "DbType": "PostgreSql",
+    "DbName": "TestDb",
+    "DbUser": "postgresuser",
+    "DbPasswd": "passwd",
+    "DbServerAndPort": "localhost:5432"
   }
-  // etc.
 ]
 ```
 Service will load json as list of configs and for every config (database) will backup it to depending on databasename and type directory with current backup date. Example:
 ```
-├── ServiceApplication.exe
+├── Application
+    ├── ServiceApplication          # executable file
+    └── Src
+        ├── ConfigurationFiles
 └── Backups
-    ├── TestDb_MySql_localhost_3306
-        ├── TestDb_08_08_2023.zip
-        └── TestDb_09_08_2023.zip
-    ├── TestDb_MySql_example_3306
-        └── TestDb_09_08_2023.zip
-    └── TestDb2_PostgreSql_localhost_3306
-        └── TestDb2_09_08_2023.zip
+    ├── TestDb_localhost:3306
+        ├── TestDb_08_08_2023_06:00.zip
+        └── TestDb_09_08_2023_06:00.zip
+    ├── TestDb_example:3306
+        └── TestDb_09_08_2023_06:00.zip
+    └── TestDb2_localhost:3306
+        └── TestDb2_09_08_2023_06:00.zip
 ```
 The naming of backups is to think about.
 
