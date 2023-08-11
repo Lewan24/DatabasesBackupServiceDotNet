@@ -1,4 +1,5 @@
-﻿using Application.Data.Interfaces;
+﻿using System.IO;
+using Application.Data.Interfaces;
 using Application.Data.Services;
 using Infrastructure.Configuration;
 using NLog;

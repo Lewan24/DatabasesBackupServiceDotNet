@@ -1,4 +1,7 @@
+using System;
 using System.Diagnostics;
+using System.IO;
+using System.Threading.Tasks;
 using Core.Entities;
 using Core.Interfaces;
 using NLog;
