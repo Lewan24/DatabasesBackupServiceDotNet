@@ -5,7 +5,15 @@
         <TargetFramework>net7.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <AssemblyName>DatabasesBackupService</AssemblyName>
+        <ApplicationIcon>Src\Media\appicon.ico</ApplicationIcon>
+        <PlatformTarget>x64</PlatformTarget>
+        <SignAssembly>False</SignAssembly>
     </PropertyGroup>
+
+    <ItemGroup>
+      <Content Include="Src\Media\appicon.ico" />
+    </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\Application\Application.csproj" />
@@ -23,6 +31,9 @@
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
       <None Update="Src\ConfigurationFiles\databasesConfigurations.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="Src\Media\appicon.ico">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
     </ItemGroup>

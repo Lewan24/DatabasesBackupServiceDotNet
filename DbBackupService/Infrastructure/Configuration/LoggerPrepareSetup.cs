@@ -13,8 +13,8 @@ public static class LoggerConfiguration
 
         if (config!.IncludeDateOfCreateLogFile)
         {
-            var tempName = logsFileName.Split('.').AsSpan();
-            logsFileName = $"{tempName[0]}_{DateTime.Today.ToShortDateString()}";
+            var tempName = logsFileName.Split('.');
+            logsFileName = $"{tempName[0]}_{DateTime.Today:dd.MM.yy}";
             
             for (var i = 1; i < tempName.Length; i++)
                 logsFileName += $".{tempName[i]}";

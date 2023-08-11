@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Application.Data.Interfaces;
 using Core.Entities;
 using Core.Interfaces;
@@ -24,7 +21,7 @@ public class DbBackupService : IDbBackupService
     public async Task RunService(List<DatabaseConfigModel> dbConfigurations)
     {
         _logger.Info("{ServiceName} has started", nameof(DbBackupService));
-        _logger.Info("Preparing backups for {DbCConfigsCount}...", dbConfigurations.Count);
+        _logger.Info("Preparing backups for {DbCConfigsCount} databases...", dbConfigurations.Count);
         
         await PerformBackup(dbConfigurations);
         

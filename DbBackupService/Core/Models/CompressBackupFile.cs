@@ -1,5 +1,3 @@
-using System;
-using System.IO;
 using System.IO.Compression;
 
 namespace Core.Models;
@@ -23,7 +21,7 @@ public static class CompressBackupFile
         {
             var completeFilePath = Path.Combine(fileBasePath, fileName);
             var zipFileName = Path.Combine(fileBasePath,
-                $"{fileName.Split(".sql")[0]}_{DateTime.Today.ToShortDateString()}_{DateTime.Now.ToShortTimeString()}.zip");
+                $"{fileName.Split(".sql")[0]}_{DateTime.Today:dd.MM.yy}_{DateTime.Now:H.mm}.zip");
 
             if (File.Exists(zipFileName))
                 throw new Exception("Zip with the same name already exists. Can't perform compresion.");
@@ -36,6 +34,8 @@ public static class CompressBackupFile
 
             using var entryStream = entry.Open();
             sourceStream.CopyTo(entryStream);
+
+            sourceStream.Dispose();
 
             if (File.Exists(completeFilePath)) File.Delete(completeFilePath);
 

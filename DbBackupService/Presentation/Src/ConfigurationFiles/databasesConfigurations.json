@@ -1,16 +1,23 @@
 [
   {
     "DbType": "MySql",
-    "DbName": "orders",
+    "DbName": "PP",
     "DbUser": "root",
-    "DbPasswd": "root",
-    "DbServerAndPort": "localhost:3306"
+    "DbPasswd": "hTfFuVI3pkVmZr5xwLAC",
+    "DbServerAndPort": "10.0.121.6:4425"
   },
   {
-    "DbType": "PostgreSql",
-    "DbName": "TestDb",
-    "DbUser": "postgresuser",
-    "DbPasswd": "passwd",
-    "DbServerAndPort": "localhost:5432"
+    "DbType": "MySql",
+    "DbName": "PP.OrderSystem",
+    "DbUser": "root",
+    "DbPasswd": "hTfFuVI3pkVmZr5xwLAC",
+    "DbServerAndPort": "10.0.121.6:4425"
+  },
+  {
+    "DbType": "MySql",
+    "DbName": "PP.Reservations",
+    "DbUser": "root",
+    "DbPasswd": "hTfFuVI3pkVmZr5xwLAC",
+    "DbServerAndPort": "10.0.121.6:4425"
   }
 ]
