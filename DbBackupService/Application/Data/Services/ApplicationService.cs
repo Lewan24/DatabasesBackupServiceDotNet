@@ -1,8 +1,6 @@
 using Application.Data.Interfaces;
-using Core.Entities;
 using Core.Exceptions;
 using Core.Models;
-using Infrastructure.Configuration;
 using Newtonsoft.Json;
 using NLog;
 
@@ -12,13 +10,11 @@ public class ApplicationService : IApplicationService
 {
     private readonly Logger _logger;
     private readonly IDbBackupService _backupService;
-    private readonly ApplicationConfiguration? _appConfig;
     
-    public ApplicationService(Logger logger, IDbBackupService backupService, string? configJson)
+    public ApplicationService(Logger logger, IDbBackupService backupService)
     {
         _logger = logger.Factory.GetLogger(nameof(ApplicationService));
         _backupService = backupService;
-        _appConfig = PrepareApplicationConfiguration.Prepare(configJson).Result;
     }
     
     public async Task RunService()
@@ -49,14 +45,11 @@ public class ApplicationService : IApplicationService
     {
         try
         {
-            if (_appConfig?.LogsFileName is null)
-                throw new Exception("App configuration is null, can't perform other actions");
-            
             var jsonFilePath = Path.Combine(Directory.GetCurrentDirectory(), "Src", "ConfigurationFiles", "databasesConfigurations.json");
             var jsonContent = File.ReadAllText(jsonFilePath);
             
             var configs = JsonConvert.DeserializeObject<List<DatabaseConfigModel>>(jsonContent)!;
-
+            
             return Task.FromResult(configs);
         }
         catch (Exception e)
@@ -66,7 +59,7 @@ public class ApplicationService : IApplicationService
         }
     }
     
-    public async Task StopService()
+    private async Task StopService()
     {
         var madeBackupsCount = await _backupService.GetBackupsCounter();
         _logger.Info("{ServiceName} successfully stopped with {BackupsCount} made backups", nameof(ApplicationService), madeBackupsCount);

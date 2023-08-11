@@ -2,9 +2,11 @@ namespace Core.Models;
 
 public class DatabaseConfigModel
 {
-    // TODO: Add other properties like dbserver, user passwd etc
     public DatabaseType DbType { get; set; } = DatabaseType.MySql;
     public string? DbName { get; set; }
+    public string? DbUser { get; set; }
+    public string? DbPasswd { get; set; }
+    public string? DbServerAndPort { get; set; }
 }
 
 public enum DatabaseType

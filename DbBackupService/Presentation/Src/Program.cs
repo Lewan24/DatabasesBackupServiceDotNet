@@ -3,15 +3,16 @@ using Application.Data.Services;
 using Infrastructure.Configuration;
 using NLog;
 
-var configFile = Path.Combine(Directory.GetCurrentDirectory(), "Src" ,"ConfigurationFiles", "appsettings.json");
-var configJson = File.ReadAllText(configFile);
+var configFilePath = Path.Combine(Directory.GetCurrentDirectory(), "Src" ,"ConfigurationFiles", "appsettings.json");
+var configJson = File.ReadAllText(configFilePath);
+var applicationConfiguration = await PrepareApplicationConfiguration.Prepare(configJson);
 
-var logger = LoggerConfiguration.PrepareSetup(configJson).GetCurrentClassLogger();
+var logger = LoggerConfiguration.PrepareSetup(applicationConfiguration).GetCurrentClassLogger();
 
-logger.Info("Preparing application services...");
+logger.Info("\nPreparing application services...");
 
-IDbBackupService backupService = new DbBackupService(logger);
-IApplicationService application = new ApplicationService(logger, backupService, configJson);
+IDbBackupService backupService = new DbBackupService(logger, applicationConfiguration!);
+IApplicationService application = new ApplicationService(logger, backupService);
 
 logger.Info("Starting application...");
 await application.RunService();

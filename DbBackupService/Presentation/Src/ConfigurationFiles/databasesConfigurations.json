@@ -1,14 +1,16 @@
 [
   {
     "DbType": "MySql",
-    "DbName": "TestDb"
+    "DbName": "orders",
+    "DbUser": "root",
+    "DbPasswd": "root",
+    "DbServerAndPort": "localhost:3306"
   },
   {
     "DbType": "PostgreSql",
-    "DbName": "Example"
-  },
-  {
-    "DbType": "MySql",
-    "DbName": "ExampleTestDb"
+    "DbName": "TestDb",
+    "DbUser": "postgresuser",
+    "DbPasswd": "passwd",
+    "DbServerAndPort": "localhost:5432"
   }
 ]

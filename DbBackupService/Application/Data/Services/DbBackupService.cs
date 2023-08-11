@@ -1,4 +1,5 @@
 using Application.Data.Interfaces;
+using Core.Entities;
 using Core.Interfaces;
 using Core.Models;
 using NLog;
@@ -8,10 +9,12 @@ namespace Application.Data.Services;
 public class DbBackupService : IDbBackupService
 {
     private readonly Logger _logger;
+    private readonly ApplicationConfiguration _appConfig;
     private int _madeBackupsCounter;
     
-    public DbBackupService(Logger logger)
+    public DbBackupService(Logger logger, ApplicationConfiguration appConfig)
     {
+        _appConfig = appConfig;
         _logger = logger.Factory.GetLogger(nameof(DbBackupService));
     }
     
@@ -35,8 +38,8 @@ public class DbBackupService : IDbBackupService
             {
                 IDatabase database = dbConfig.DbType switch
                 {
-                    DatabaseType.MySql => new MySqlDatabase(dbConfig, _logger),
-                    DatabaseType.PostgreSql => new PostgreSqlDatabase(dbConfig, _logger),
+                    DatabaseType.MySql => new MySqlDatabase(dbConfig, _logger, _appConfig),
+                    DatabaseType.PostgreSql => new PostgreSqlDatabase(dbConfig, _logger, _appConfig),
                     _ => throw new NotSupportedException(
                         $"Selected type of database is not supported: {dbConfig.DbType}")
                 };
