@@ -1,8 +1,7 @@
 using Application.Data.Interfaces;
-using Core.Entities;
+using Core.Entities.Databases;
 using Core.Entities.Models;
 using Core.Interfaces;
-using Core.Models;
 using NLog;
 
 namespace Application.Data.Services;

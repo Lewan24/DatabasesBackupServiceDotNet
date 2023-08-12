@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Threading.Tasks;
 using Application.Data.Interfaces;
 using Core.Entities.Models;
 using Core.Exceptions;
@@ -14,7 +10,7 @@ public class ApplicationService : IApplicationService
 {
     private readonly Logger _logger;
     private readonly IDbBackupService _backupService;
-    
+
     public ApplicationService(Logger logger, IDbBackupService backupService)
     {
         _logger = logger.Factory.GetLogger(nameof(ApplicationService));

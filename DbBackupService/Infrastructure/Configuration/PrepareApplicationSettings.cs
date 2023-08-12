@@ -3,21 +3,21 @@ using Newtonsoft.Json;
 
 namespace Infrastructure.Configuration;
 
-public static class PrepareApplicationConfiguration
+public static class PrepareApplicationSettings
 {
-    public static Task<ApplicationConfigurationModel?> Prepare(string? configurationJson)
+    public static Task<AppEmailConfigurationModel> Prepare(string? configurationJson)
     {
         try
         {
             if (configurationJson is null)
                 throw new ArgumentNullException(nameof(configurationJson));
 
-            return Task.FromResult(JsonConvert.DeserializeObject<ApplicationConfigurationModel?>(configurationJson));
+            return Task.FromResult(JsonConvert.DeserializeObject<AppEmailConfigurationModel>(configurationJson))!;
         }
         catch (Exception e)
         {
             Console.WriteLine(e.Message);
-            return Task.FromResult(new ApplicationConfigurationModel())!;
+            return Task.FromResult(new AppEmailConfigurationModel())!;
         }
     }
 }
