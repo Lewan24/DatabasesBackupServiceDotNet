@@ -16,9 +16,23 @@ Application needs 2 files to work with:
 - appsettings.json
 ```
 {
-  "LogsFileName": "Logs.txt",
-  "BackupSaveDirectory": "/home/user/Desktop/DbBackups",
-  "IncludeDateOfCreateLogFile": true
+  "AppConfiguration": {
+    "LogsFileName": "Logs.txt",
+    "BackupSaveDirectory": "C:\\Backups",
+    "IncludeDateOfCreateLogFile": true
+  },
+  "EmailProviderConfiguration": {
+    "EnableEmailProvider": true,
+    "SendEmailOnEachDbSuccessfulBackup": false,
+    "SendEmailOnEachDbFailureBackup": true,
+    "SendEmailWithStatisticsAfterBackups": true,
+    "EmailCredentials": {
+      "UserEmail": "user@gmail.com",
+      "Password": "Passwd",
+      "SmtpHost": "smtp.gmail.com",
+      "SmtpPort": 587
+    }
+  }
 }
 ```
 - databasesConfigurations.json
