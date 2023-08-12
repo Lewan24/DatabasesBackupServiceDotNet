@@ -2,19 +2,20 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
-using Core.Entities;
+using Core.Entities.Models;
 using Core.Interfaces;
+using Core.StaticClassess;
 using NLog;
 
-namespace Core.Models;
+namespace Core.Entities.Databases;
 
 public class PostgreSqlDatabase : IDatabase
 {
     private readonly DatabaseConfigModel _databaseConfig;
-    private readonly ApplicationConfiguration _appConfig;
+    private readonly ApplicationConfigurationModel _appConfig;
     private readonly Logger _logger;
 
-    public PostgreSqlDatabase(DatabaseConfigModel databaseConfig, Logger logger, ApplicationConfiguration appConfig)
+    public PostgreSqlDatabase(DatabaseConfigModel databaseConfig, Logger logger, ApplicationConfigurationModel appConfig)
     {
         _databaseConfig = databaseConfig;
         _appConfig = appConfig;
@@ -31,7 +32,7 @@ public class PostgreSqlDatabase : IDatabase
                 throw new ArgumentNullException(nameof(_databaseConfig.DbName));
 
             var backupPaths = PrepareDatabaseBackupStrings.PrepareBackupPaths(_databaseConfig, _appConfig);
-            
+
             if (!Directory.Exists(backupPaths.DatabaseBackupPath))
                 Directory.CreateDirectory(backupPaths.DatabaseBackupPath);
 
@@ -46,9 +47,9 @@ public class PostgreSqlDatabase : IDatabase
                 FileName = "pg_dump",
                 Arguments = $@"-d postgres://{_databaseConfig.DbUser}:{_databaseConfig.DbPasswd}@{_databaseConfig.DbServerAndPort}/{_databaseConfig.DbName} -f ""{combinedBackupPathBackupFile}"" -F c",
                 CreateNoWindow = true,
-                UseShellExecute = false  
+                UseShellExecute = false
             };
-            
+
             process.StartInfo = startInfo;
             process.Start();
             await process.WaitForExitAsync();

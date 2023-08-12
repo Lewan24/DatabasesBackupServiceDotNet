@@ -1,6 +1,6 @@
-namespace Core.Entities;
+namespace Core.Entities.Models;
 
-public class ApplicationConfiguration
+public class ApplicationConfigurationModel
 {
     public string? LogsFileName { get; set; } = string.Empty;
     public string? BackupSaveDirectory { get; set; } = string.Empty;

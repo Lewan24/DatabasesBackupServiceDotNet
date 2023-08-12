@@ -1,23 +1,24 @@
-using Core.Entities;
 using Core.Interfaces;
 using NLog;
 using MySql.Data.MySqlClient;
+using Core.Entities.Models;
+using Core.StaticClassess;
 
-namespace Core.Models;
+namespace Core.Entities.Databases;
 
 public class MySqlDatabase : IDatabase
 {
     private readonly DatabaseConfigModel _databaseConfig;
-    private readonly ApplicationConfiguration _appConfig;
+    private readonly ApplicationConfigurationModel _appConfig;
     private readonly Logger _logger;
-    
-    public MySqlDatabase(DatabaseConfigModel databaseConfig, Logger logger, ApplicationConfiguration appConfig)
+
+    public MySqlDatabase(DatabaseConfigModel databaseConfig, Logger logger, ApplicationConfigurationModel appConfig)
     {
         _databaseConfig = databaseConfig;
         _appConfig = appConfig;
         _logger = logger.Factory.GetLogger(nameof(MySqlDatabase));
     }
-    
+
     public async Task<bool> PerformBackup()
     {
         _logger.Info("Performing backup for {DatabaseName}", _databaseConfig.DbName);
@@ -34,14 +35,14 @@ public class MySqlDatabase : IDatabase
                 Directory.CreateDirectory(backupPaths.DatabaseBackupPath);
 
             var combinedBackupPathBackupFile = Path.Combine(backupPaths.DatabaseBackupPath, backupPaths.BackupFileName);
-            
+
             if (File.Exists(combinedBackupPathBackupFile))
                 File.Delete(combinedBackupPathBackupFile);
-            
+
             await using var connection = new MySqlConnection(connectionString);
             await using var cmd = new MySqlCommand();
             using var backup = new MySqlBackup(cmd);
-        
+
             cmd.Connection = connection;
             connection.Open();
             backup.ExportToFile(combinedBackupPathBackupFile);
@@ -49,14 +50,14 @@ public class MySqlDatabase : IDatabase
 
             var compressionResult = CompressBackupFile.Perform(backupPaths.DatabaseBackupPath, backupPaths.BackupFileName);
             _logger.Info("Completed backup for {DatabaseName}. Backup path: {ZipFilePath}", _databaseConfig.DbName, compressionResult);
-            
+
             return true;
         }
         catch (Exception e)
         {
             _logger.Debug(e);
             _logger.Warn(e);
-            
+
             return false;
         }
     }

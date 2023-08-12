@@ -1,5 +1,6 @@
 using Application.Data.Interfaces;
 using Core.Entities;
+using Core.Entities.Models;
 using Core.Interfaces;
 using Core.Models;
 using NLog;
@@ -9,10 +10,10 @@ namespace Application.Data.Services;
 public class DbBackupService : IDbBackupService
 {
     private readonly Logger _logger;
-    private readonly ApplicationConfiguration _appConfig;
+    private readonly ApplicationConfigurationModel _appConfig;
     private int _madeBackupsCounter;
     
-    public DbBackupService(Logger logger, ApplicationConfiguration appConfig)
+    public DbBackupService(Logger logger, ApplicationConfigurationModel appConfig)
     {
         _appConfig = appConfig;
         _logger = logger.Factory.GetLogger(nameof(DbBackupService));

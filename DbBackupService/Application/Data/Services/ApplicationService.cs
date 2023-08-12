@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Application.Data.Interfaces;
+using Core.Entities.Models;
 using Core.Exceptions;
-using Core.Models;
 using Newtonsoft.Json;
 using NLog;
 

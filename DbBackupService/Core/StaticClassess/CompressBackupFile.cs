@@ -1,6 +1,6 @@
 using System.IO.Compression;
 
-namespace Core.Models;
+namespace Core.StaticClassess;
 
 public static class CompressBackupFile
 {
