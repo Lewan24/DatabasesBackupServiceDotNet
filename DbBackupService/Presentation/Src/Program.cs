@@ -11,7 +11,6 @@ var logger = LoggerConfiguration.PrepareSetup(applicationSettings.AppConfigurati
 
 logger.Info("\nPreparing application services...");
 
-// TODO: check where sending emails functionality is needed and implement
 IEmailProviderService emailProviderService = new EmailProviderService(applicationSettings.EmailProviderConfiguration, logger);
 IDbBackupService backupService = new DbBackupService(logger, applicationSettings.AppConfiguration!);
 IApplicationService applicationService = new ApplicationService(logger, backupService);

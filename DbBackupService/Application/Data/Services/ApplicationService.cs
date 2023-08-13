@@ -10,11 +10,13 @@ public class ApplicationService : IApplicationService
 {
     private readonly Logger _logger;
     private readonly IDbBackupService _backupService;
+    private readonly IEmailProviderService _emailProviderService;
 
-    public ApplicationService(Logger logger, IDbBackupService backupService)
+    public ApplicationService(Logger logger, IDbBackupService backupService, IEmailProviderService emailProviderService)
     {
         _logger = logger.Factory.GetLogger(nameof(ApplicationService));
         _backupService = backupService;
+        _emailProviderService = emailProviderService;
     }
     
     public async Task RunService()

@@ -10,11 +10,14 @@ public class DbBackupService : IDbBackupService
 {
     private readonly Logger _logger;
     private readonly ApplicationConfigurationModel _appConfig;
+    private readonly IEmailProviderService _emailProviderService;
+
     private int _madeBackupsCounter;
-    
-    public DbBackupService(Logger logger, ApplicationConfigurationModel appConfig)
+
+    public DbBackupService(Logger logger, ApplicationConfigurationModel appConfig, IEmailProviderService emailProviderService)
     {
         _appConfig = appConfig;
+        _emailProviderService = emailProviderService;
         _logger = logger.Factory.GetLogger(nameof(DbBackupService));
     }
     
