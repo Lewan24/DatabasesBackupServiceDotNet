@@ -65,7 +65,14 @@ public class ApplicationService : IApplicationService
     {
         var madeBackupsCount = await _backupService.GetBackupsCounter();
         _logger.Info("{ServiceName} successfully stopped with {BackupsCount} made backups", nameof(ApplicationService), madeBackupsCount);
-        
+
+        await _emailProviderService.PrepareAndSendEmail(new MailModel("Backups Service Statistics", $@"<h4>Backups statistics on day: {DateTime.Today:d}</h4>
+
+Backups finish time: <b><i>{DateTime.Now:t}</i></b><br>
+Number of Successfully made backups: <b><i>{madeBackupsCount}</i></b><br><br>
+
+<i>Thanks for using Backup Service. See you on next mail :)</i>"));
+
         _logger.Debug("Service stopped");
     }
 }

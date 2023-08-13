@@ -9,11 +9,11 @@ var applicationSettings = await PrepareApplicationSettings.Prepare(configJson);
 
 var logger = LoggerConfiguration.PrepareSetup(applicationSettings.AppConfiguration).GetCurrentClassLogger();
 
-logger.Info("\nPreparing application services...");
+logger.Info("Preparing application services...");
 
 IEmailProviderService emailProviderService = new EmailProviderService(applicationSettings.EmailProviderConfiguration, logger);
-IDbBackupService backupService = new DbBackupService(logger, applicationSettings.AppConfiguration!);
-IApplicationService applicationService = new ApplicationService(logger, backupService);
+IDbBackupService backupService = new DbBackupService(logger, applicationSettings.AppConfiguration!, emailProviderService);
+IApplicationService applicationService = new ApplicationService(logger, backupService, emailProviderService);
 
 logger.Info("Starting application...");
 await applicationService.RunService();

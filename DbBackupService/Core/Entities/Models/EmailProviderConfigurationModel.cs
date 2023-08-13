@@ -2,13 +2,13 @@
 
 public class EmailProviderConfigurationModel
 {
-    public bool EnableEmailProvider { get; set; } = true;
-    public bool SendEmailOnEachDbSuccessfulBackup { get; set; }
-    public bool SendEmailOnEachDbFailureBackup { get; set; } = true;
-    public bool SendEmailWithStatisticsAfterBackups { get; set; } = true;
-    public bool SendEmailOnOtherFailures { get; set; } = true;
+    public EmailSettings ProviderSettings { get; set; }
     public EmailProviderCredentials EmailSenderCredentials { get; set; }
-    public IQueryable<string> EmailReceivers { get; set; }
+    public List<string> EmailReceivers { get; set; }
 }
 
-public record EmailProviderCredentials(string UserEmail, string Password, string SmtpHost, int SmtpPort = 587);
+public record EmailProviderCredentials(string EmailSender, string EmailSenderDisplayName, string Password, string SmtpHost, int SmtpPort = 587);
+
+public record EmailSettings(bool EnableEmailProvider = true, bool UseStartTls = true, bool UseSslInstead = false, 
+    bool SendEmailOnEachDbSuccessfulBackup = false, bool SendEmailOnEachDbFailureBackup = true,
+    bool SendEmailWithStatisticsAfterBackups = true, bool SendEmailOnOtherFailures = true);

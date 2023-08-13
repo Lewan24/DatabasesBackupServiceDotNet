@@ -22,13 +22,16 @@ Application needs 2 files to work with:
     "IncludeDateOfCreateLogFile": true
   },
   "EmailProviderConfiguration": {
-    "EnableEmailProvider": false,
-    "SendEmailOnEachDbSuccessfulBackup": false,
-    "SendEmailOnEachDbFailureBackup": true,
-    "SendEmailWithStatisticsAfterBackups": true,
-    "SendEmailOnOtherFailures": true,
+    "EmailSettings": {
+		"EnableEmailProvider": false,
+		"SendEmailOnEachDbSuccessfulBackup": false,
+		"SendEmailOnEachDbFailureBackup": true,
+		"SendEmailWithStatisticsAfterBackups": true,
+		"SendEmailOnOtherFailures": true
+	},
     "EmailSenderCredentials": {
-      "UserEmail": "user@gmail.com",
+      "EmailSender": "user@gmail.com",
+      "EmailSenderDisplayName": "Backup Service",
       "Password": "Passwd",
       "SmtpHost": "smtp.gmail.com",
       "SmtpPort": 587

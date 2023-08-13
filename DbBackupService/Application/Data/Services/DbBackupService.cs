@@ -28,7 +28,7 @@ public class DbBackupService : IDbBackupService
         
         await PerformBackup(dbConfigurations);
         
-        _logger.Info("{ServiceName} has finished its work", nameof(DbBackupService));
+        _logger.Info("{ServiceName} finished its job and stoped.", nameof(DbBackupService));
     }
 
     private async Task PerformBackup(List<DatabaseConfigModel> dbConfigurations)

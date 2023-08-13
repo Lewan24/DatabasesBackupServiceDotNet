@@ -1,6 +1,8 @@
-﻿namespace Application.Data.Interfaces;
+﻿using Core.Entities.Models;
+
+namespace Application.Data.Interfaces;
 
 public interface IEmailProviderService
 {
-    Task SendMail();
+    Task PrepareAndSendEmail(MailModel mailRequest);
 }
