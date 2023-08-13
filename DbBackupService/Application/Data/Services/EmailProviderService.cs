@@ -108,4 +108,6 @@ public class EmailProviderService : IEmailProviderService
             throw;
         }
     }
+
+    public Task<EmailSettings> GetEmailSettings() => Task.FromResult(_configuration.ProviderSettings);
 }

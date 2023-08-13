@@ -1,7 +1,4 @@
-using System;
 using System.Diagnostics;
-using System.IO;
-using System.Threading.Tasks;
 using Core.Entities.Models;
 using Core.Interfaces;
 using Core.StaticClassess;
@@ -22,7 +19,7 @@ public class PostgreSqlDatabase : IDatabase
         _logger = logger.Factory.GetLogger(nameof(PostgreSqlDatabase));
     }
 
-    public async Task<bool> PerformBackup()
+    public async Task PerformBackup()
     {
         _logger.Info("Performing backup for {DatabaseName}", _databaseConfig.DbName);
 
@@ -57,15 +54,15 @@ public class PostgreSqlDatabase : IDatabase
 
             var compressionResult = CompressBackupFile.Perform(backupPaths.DatabaseBackupPath, backupPaths.BackupFileName);
             _logger.Info("Completed backup for {DatabaseName}. Backup path: {ZipFilePath}", _databaseConfig.DbName, compressionResult);
-
-            return true;
         }
         catch (Exception e)
         {
             _logger.Debug(e);
             _logger.Warn(e);
 
-            return false;
+            throw;
         }
     }
+
+    public Task<string?> GetDatabaseName() => Task.FromResult(_databaseConfig.DbName);
 }

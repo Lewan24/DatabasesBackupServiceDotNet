@@ -5,4 +5,5 @@ namespace Application.Data.Interfaces;
 public interface IEmailProviderService
 {
     Task PrepareAndSendEmail(MailModel mailRequest);
+    Task<EmailSettings> GetEmailSettings();
 }

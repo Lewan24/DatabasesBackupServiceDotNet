@@ -19,7 +19,7 @@ public class MySqlDatabase : IDatabase
         _logger = logger.Factory.GetLogger(nameof(MySqlDatabase));
     }
 
-    public async Task<bool> PerformBackup()
+    public async Task PerformBackup()
     {
         _logger.Info("Performing backup for {DatabaseName}", _databaseConfig.DbName);
 
@@ -50,15 +50,14 @@ public class MySqlDatabase : IDatabase
 
             var compressionResult = CompressBackupFile.Perform(backupPaths.DatabaseBackupPath, backupPaths.BackupFileName);
             _logger.Info("Completed backup for {DatabaseName}. Backup path: {ZipFilePath}", _databaseConfig.DbName, compressionResult);
-
-            return true;
         }
         catch (Exception e)
         {
             _logger.Debug(e);
             _logger.Warn(e);
-
-            return false;
+            throw;
         }
     }
+
+    public Task<string?> GetDatabaseName() => Task.FromResult(_databaseConfig.DbName);
 }

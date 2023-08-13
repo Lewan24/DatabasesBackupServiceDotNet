@@ -2,6 +2,7 @@ using Application.Data.Interfaces;
 using Core.Entities.Databases;
 using Core.Entities.Models;
 using Core.Interfaces;
+using Core.StaticClassess;
 using NLog;
 
 namespace Application.Data.Services;
@@ -52,19 +53,30 @@ public class DbBackupService : IDbBackupService
 
             foreach (var db in databasesList)
             {
-                var result = await db.PerformBackup();
+                await db.PerformBackup();
+
+                _madeBackupsCounter++;
                 
-                if (result)
-                    _madeBackupsCounter++;
+                if ((await _emailProviderService.GetEmailSettings()).SendEmailOnEachDbSuccessfulBackup)
+                    await _emailProviderService.PrepareAndSendEmail(new MailModel($"Successful backup of {db.GetDatabaseName()}",
+                        PrepareEmailMessageBody.PrepareDbBackupSuccessReport($"<b>Backup for {db.GetDatabaseName()} has been made with success.</b><br>Backup finish time: <b>{DateTime.Now:t}</b>")));
             }
         }
         catch (NotSupportedException e)
         {
             _logger.Warn(e, "Exception thrown while preparing databases");
+
+            if ((await _emailProviderService.GetEmailSettings()).SendEmailOnOtherFailures)
+                await _emailProviderService.PrepareAndSendEmail(new MailModel("There was a problem in the backup service",
+                    PrepareEmailMessageBody.PrepareErrorReport($"<b>Error occurs while doing dbType assignment to each database configuration</b><br><i><b>Error message: </b>{e.Message}</i>")));
         }
         catch (Exception e)
         {
             _logger.Warn(e, "Exception thrown while performing backup in database");
+
+            if ((await _emailProviderService.GetEmailSettings()).SendEmailOnEachDbFailureBackup)
+                await _emailProviderService.PrepareAndSendEmail(new MailModel("There was a problem in the backup service",
+                    PrepareEmailMessageBody.PrepareDbBackupFailureReport($"<b>Error occurs while performing backup</b><br><i><b>Error message: </b>{e.Message}</i>")));
         }
     }
     

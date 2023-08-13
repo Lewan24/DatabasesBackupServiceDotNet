@@ -22,13 +22,15 @@ Application needs 2 files to work with:
     "IncludeDateOfCreateLogFile": true
   },
   "EmailProviderConfiguration": {
-    "EmailSettings": {
-		"EnableEmailProvider": false,
-		"SendEmailOnEachDbSuccessfulBackup": false,
-		"SendEmailOnEachDbFailureBackup": true,
-		"SendEmailWithStatisticsAfterBackups": true,
-		"SendEmailOnOtherFailures": true
-	},
+    "ProviderSettings": {
+      "EnableEmailProvider": false,
+      "UseStartTls": false,
+      "UseSslInstead": true,
+      "SendEmailOnEachDbSuccessfulBackup": false,
+      "SendEmailOnEachDbFailureBackup": true,
+      "SendEmailWithStatisticsAfterBackups": true,
+      "SendEmailOnOtherFailures": true
+    },
     "EmailSenderCredentials": {
       "EmailSender": "user@gmail.com",
       "EmailSenderDisplayName": "Backup Service",
@@ -104,6 +106,10 @@ On linux there is no task scheduler, so probably in the future, I will add funct
 Inside application there is an additional service that handles sending emails.
 You can set all settings in appsettings.json like which emails should be sent, who will receive these emails, and of cource email sender credentials to let service use them for sending emails to receivers.
 By default the email provider is disabled in settings, so you don't need to enable it or set any options for email provider, the service will not run if the provider si disabled in settings.
+
+### Email send protocol
+If you need to send email via StartTls then in settings set parameter "UseStartTls" as true, if UseStartTls is false, then it will check next parameter: "UseSslInstead".
+If StartTls and UseSslInstead are false, then email will be set to auto value, so the provider will automatically try to set matching protocol.
 
 ## Project references
 Project reference is my public repository for background console application.

@@ -1,6 +1,7 @@
 using Application.Data.Interfaces;
 using Core.Entities.Models;
 using Core.Exceptions;
+using Core.StaticClassess;
 using Newtonsoft.Json;
 using NLog;
 
@@ -27,15 +28,16 @@ public class ApplicationService : IApplicationService
         {
             _logger.Info("Getting needed configurations...");
             var dbConfigurationsList = await ReadDatabaseConfigurations();
-
-            if (dbConfigurationsList.Count == 0)
-                throw new EmptyListOfConfigurationsException("Can't receive any db configuration");
-
+            
             await _backupService.RunService(dbConfigurationsList);
         }
-        catch (EmptyListOfConfigurationsException e)
+        catch (Exception e)
         {
             _logger.Warn(e);
+            // TODO: Check and test different types of emails like errors, each db success email, or each failure
+            if ((await _emailProviderService.GetEmailSettings()).SendEmailOnOtherFailures)
+                await _emailProviderService.PrepareAndSendEmail(new MailModel("There was a problem in the backup service",
+                    PrepareEmailMessageBody.PrepareErrorReport($"<b>Error occurs while reading databases configurations</b><br><i><b>Error message: </b>{e.Message}</i>")));
         }
         finally
         {
@@ -43,21 +45,21 @@ public class ApplicationService : IApplicationService
         }
     }
 
-    private Task<List<DatabaseConfigModel>> ReadDatabaseConfigurations()
+    private async Task<List<DatabaseConfigModel>> ReadDatabaseConfigurations()
     {
         try
         {
             var jsonFilePath = Path.Combine(Directory.GetCurrentDirectory(), "Src", "ConfigurationFiles", "databasesConfigurations.json");
-            var jsonContent = File.ReadAllText(jsonFilePath);
+            var jsonContent = await File.ReadAllTextAsync(jsonFilePath);
             
             var configs = JsonConvert.DeserializeObject<List<DatabaseConfigModel>>(jsonContent)!;
             
-            return Task.FromResult(configs);
+            return configs;
         }
         catch (Exception e)
         {
             _logger.Warn(e, "Error on reading config file");
-            return Task.FromResult(new List<DatabaseConfigModel>());
+            throw;
         }
     }
     
@@ -66,12 +68,8 @@ public class ApplicationService : IApplicationService
         var madeBackupsCount = await _backupService.GetBackupsCounter();
         _logger.Info("{ServiceName} successfully stopped with {BackupsCount} made backups", nameof(ApplicationService), madeBackupsCount);
 
-        await _emailProviderService.PrepareAndSendEmail(new MailModel("Backups Service Statistics", $@"<h4>Backups statistics on day: {DateTime.Today:d}</h4>
-
-Backups finish time: <b><i>{DateTime.Now:t}</i></b><br>
-Number of Successfully made backups: <b><i>{madeBackupsCount}</i></b><br><br>
-
-<i>Thanks for using Backup Service. See you on next mail :)</i>"));
+        await _emailProviderService.PrepareAndSendEmail(new MailModel("Backups Service Statistics", 
+            PrepareEmailMessageBody.PrepareStatisticsReport("Backups finish time: <b><i>{DateTime.Now:t}</i></b><br>Number of Successfully made backups: <b><i>{madeBackupsCount}</i></b>")));
 
         _logger.Debug("Service stopped");
     }
