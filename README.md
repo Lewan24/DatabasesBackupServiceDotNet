@@ -1,7 +1,15 @@
 # Service Application
 
-The main reason of creating this kind of application is the little frustration of free 3d-party programs that forces user to pay for a functionallity of creating database backups for multiple databases and servers. These programs only works fine for 1 max 2 connections and databases.
-So I decided to create own flexible service that will backup selected databases.
+## Purpose and project problem
+The main problem and reason of creating this kind of application is the little frustration of free 3d-party programs that forces user to pay for a functionallity like making databases backups for multiple databases. These programs only works fine for 1 max 2 databases.
+
+So I decided to create own flexible service that will backup multiple (actually with no limit) databases, selected in json configuration file. 
+This application is free to use to anyone, it's also open-source so feel free to write any advices, or issues with enchantments, what I could add. 
+
+Anyway the main purpose of using service is just making backups for databases. 
+In main goal service includes email informing system, backups encryption, history of backups, statistics report.
+
+Maybe in future after finishing all goals and tasks, I will add dedicated application to create statistics, reports, changing settings in user friendly way in this service (This probably will be working with existing dbBackupservice application path, and will be using logs, histories and generally application directory to handle all logic and work).
 
 ## Work logic
 
@@ -68,6 +76,7 @@ Application needs 2 files to work with:
 You need to remember that the application only accepts 2 types of databases:
 - MySql
 - PostgreSql
+
 If the type will be other, then service will throw warning in logs and console and will not backup this one database with invalid db type.
 
 Service will load json as list of configs and for every config (database) will backup it to depending on databasename and type directory with current backup date. Example:
@@ -93,6 +102,7 @@ Service will load json as list of configs and for every config (database) will b
 
 ## Running application
 Service is a console application that doesn't need user integration, so everything is doing automatically, logs and information are stored in log file that will be inside application directory after first run.
+
 Main purpose of running service regularly is to set Windows Task Scheduler:
 - Create new Task
 - In 'General' section the best options to set are Run with highest privileges, the reason is that sometimes application would like to ask for permissions to create directory or remove created file etc.
@@ -100,11 +110,14 @@ Main purpose of running service regularly is to set Windows Task Scheduler:
 - In 'Actions' section click 'New...', select 'Start a program' from list on the top of window, then click 'Browse...' and select application service.
 
 After these actions the task is ready and will trigger every day at 6.00 am in this specific example.
-On linux there is no task scheduler, so probably in the future, I will add functionallity to the service that automatically will be running every some selected time. (The problem is that, the service-console will be oppened 24/7 // need to think on it)
+
+On linux there is no task scheduler, so the best way is just write a simple bash script to run service. And set the script to be run on some period of time regularly.
 
 ## Email informing functionallity
 Inside application there is an additional service that handles sending emails.
+
 You can set all settings in appsettings.json like which emails should be sent, who will receive these emails, and of cource email sender credentials to let service use them for sending emails to receivers.
+
 By default the email provider is disabled in settings, so you don't need to enable it or set any options for email provider, the service will not run if the provider si disabled in settings.
 
 ### Email send protocol
@@ -117,4 +130,6 @@ This one will be working in similar way like with the help of windows task sched
 Project: https://github.com/Lewan24/ServiceConsoleAppSample
 
 ## End words
-This application for now (09.08.2023) is in project architecture designing process. In some days the .NET project will be uploaded probably as the init project or the ready application.
+Thanks for visiting my github and repos, I hope you like it and got you interested or even got you inspired to use the idea or application in your projects.
+
+Keep coding. See ya!
