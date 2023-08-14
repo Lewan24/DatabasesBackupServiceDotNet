@@ -7,7 +7,7 @@ So I decided to create own flexible service that will backup selected databases.
 
 ### Logic Scheme
 
-![Project scheme](https://github.com/Lewan24/DatabasesBackupServiceDotNet/blob/main/ServiceLogicProject_v1.0_Drawio.jpg)
+![Project scheme](https://github.com/Lewan24/DatabasesBackupServiceDotNet/blob/main/ServiceLogicProject_v1.2_Drawio.png)
 
 ### Configuration
 
