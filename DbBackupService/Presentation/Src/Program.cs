@@ -16,9 +16,7 @@ IDbBackupService backupService = new DbBackupService(logger, applicationSettings
 IApplicationService applicationService = new ApplicationService(logger, backupService, emailProviderService);
 
 logger.Info("Starting application...");
-await applicationService.RunService();
+ await applicationService.RunService();
 
 logger.Info("Shutting down Application");
 LogManager.Shutdown();
-
-// TODO: Add tests project

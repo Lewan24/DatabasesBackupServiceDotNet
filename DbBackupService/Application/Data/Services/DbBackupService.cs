@@ -58,8 +58,8 @@ public class DbBackupService : IDbBackupService
                 _madeBackupsCounter++;
                 
                 if ((await _emailProviderService.GetEmailSettings()).SendEmailOnEachDbSuccessfulBackup)
-                    await _emailProviderService.PrepareAndSendEmail(new MailModel($"Successful backup of {db.GetDatabaseName()}",
-                        PrepareEmailMessageBody.PrepareDbBackupSuccessReport($"<b>Backup for {db.GetDatabaseName()} has been made with success.</b><br>Backup finish time: <b>{DateTime.Now:t}</b>")));
+                    await _emailProviderService.PrepareAndSendEmail(new MailModel($"Successful backup of '{await db.GetDatabaseName()}'",
+                        PrepareEmailMessageBody.PrepareDbBackupSuccessReport($"<b><span style='color: green'>Backup for '{await db.GetDatabaseName()}' has been made with success.</span></b><br>Backup finish time: <b>{DateTime.Now:t}</b>")));
             }
         }
         catch (NotSupportedException e)
@@ -68,7 +68,7 @@ public class DbBackupService : IDbBackupService
 
             if ((await _emailProviderService.GetEmailSettings()).SendEmailOnOtherFailures)
                 await _emailProviderService.PrepareAndSendEmail(new MailModel("There was a problem in the backup service",
-                    PrepareEmailMessageBody.PrepareErrorReport($"<b>Error occurs while doing dbType assignment to each database configuration</b><br><i><b>Error message: </b>{e.Message}</i>")));
+                    PrepareEmailMessageBody.PrepareErrorReport($"<b><span style='color: red'>Error occurs while doing dbType assignment to each database configuration</span></b><br><i><b>Error message: </b><span style='color: red'>{e.Message}</span></i>")));
         }
         catch (Exception e)
         {
@@ -76,7 +76,7 @@ public class DbBackupService : IDbBackupService
 
             if ((await _emailProviderService.GetEmailSettings()).SendEmailOnEachDbFailureBackup)
                 await _emailProviderService.PrepareAndSendEmail(new MailModel("There was a problem in the backup service",
-                    PrepareEmailMessageBody.PrepareDbBackupFailureReport($"<b>Error occurs while performing backup</b><br><i><b>Error message: </b>{e.Message}</i>")));
+                    PrepareEmailMessageBody.PrepareDbBackupFailureReport($"<b><span style='color: red'>Error occurs while performing backup</span></b><br><i><b>Error message: </b><span style='color: red'>{e.Message}</span></i>")));
         }
     }
     

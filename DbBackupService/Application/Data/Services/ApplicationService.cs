@@ -34,10 +34,10 @@ public class ApplicationService : IApplicationService
         catch (Exception e)
         {
             _logger.Warn(e);
-            // TODO: Check and test different types of emails like errors, each db success email, or each failure
+            
             if ((await _emailProviderService.GetEmailSettings()).SendEmailOnOtherFailures)
                 await _emailProviderService.PrepareAndSendEmail(new MailModel("There was a problem in the backup service",
-                    PrepareEmailMessageBody.PrepareErrorReport($"<b>Error occurs while reading databases configurations</b><br><i><b>Error message: </b>{e.Message}</i>")));
+                    PrepareEmailMessageBody.PrepareErrorReport($"<b><span style='color: red'>Error occurs while reading databases configurations</span></b><br><i><b>Error message: </b><span style='color: red'>{e.Message}</span></i>")));
         }
         finally
         {
@@ -69,7 +69,7 @@ public class ApplicationService : IApplicationService
         _logger.Info("{ServiceName} successfully stopped with {BackupsCount} made backups", nameof(ApplicationService), madeBackupsCount);
 
         await _emailProviderService.PrepareAndSendEmail(new MailModel("Backups Service Statistics", 
-            PrepareEmailMessageBody.PrepareStatisticsReport("Backups finish time: <b><i>{DateTime.Now:t}</i></b><br>Number of Successfully made backups: <b><i>{madeBackupsCount}</i></b>")));
+            PrepareEmailMessageBody.PrepareStatisticsReport($"Backups finish time: <b><i>{DateTime.Now:t}</i></b><br>Number of Successfully made backups: <b><i><span style='color: green'>{madeBackupsCount}</span></i></b>")));
 
         _logger.Debug("Service stopped");
     }
