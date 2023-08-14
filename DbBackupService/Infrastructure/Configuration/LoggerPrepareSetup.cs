@@ -1,4 +1,4 @@
-using Core.Entities;
+using Core.Entities.Models;
 using NLog;
 using NLog.Config;
 
@@ -6,7 +6,7 @@ namespace Infrastructure.Configuration;
 
 public static class LoggerConfiguration
 {
-    public static ISetupBuilder PrepareSetup(ApplicationConfiguration? config)
+    public static ISetupBuilder PrepareSetup(ApplicationConfigurationModel? config)
     {
         var logsFileName = config?.LogsFileName ?? "logs.txt";
 

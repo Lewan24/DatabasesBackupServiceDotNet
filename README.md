@@ -16,9 +16,33 @@ Application needs 2 files to work with:
 - appsettings.json
 ```
 {
-  "LogsFileName": "Logs.txt",
-  "BackupSaveDirectory": "/home/user/Desktop/DbBackups",
-  "IncludeDateOfCreateLogFile": true
+  "AppConfiguration": {
+    "LogsFileName": "Logs.txt",
+    "BackupSaveDirectory": "C:\\Backups",
+    "IncludeDateOfCreateLogFile": true
+  },
+  "EmailProviderConfiguration": {
+    "ProviderSettings": {
+      "EnableEmailProvider": false,
+      "UseStartTls": false,
+      "UseSslInstead": true,
+      "SendEmailOnEachDbSuccessfulBackup": false,
+      "SendEmailOnEachDbFailureBackup": true,
+      "SendEmailWithStatisticsAfterBackups": true,
+      "SendEmailOnOtherFailures": true
+    },
+    "EmailSenderCredentials": {
+      "EmailSender": "user@gmail.com",
+      "EmailSenderDisplayName": "Backup Service",
+      "Password": "Passwd",
+      "SmtpHost": "smtp.gmail.com",
+      "SmtpPort": 587
+    },
+    "EmailReceivers": [
+      "admin@gmail.com",
+      "moderator@gmail.com"
+    ]
+  }
 }
 ```
 - databasesConfigurations.json
@@ -77,6 +101,15 @@ Main purpose of running service regularly is to set Windows Task Scheduler:
 
 After these actions the task is ready and will trigger every day at 6.00 am in this specific example.
 On linux there is no task scheduler, so probably in the future, I will add functionallity to the service that automatically will be running every some selected time. (The problem is that, the service-console will be oppened 24/7 // need to think on it)
+
+## Email informing functionallity
+Inside application there is an additional service that handles sending emails.
+You can set all settings in appsettings.json like which emails should be sent, who will receive these emails, and of cource email sender credentials to let service use them for sending emails to receivers.
+By default the email provider is disabled in settings, so you don't need to enable it or set any options for email provider, the service will not run if the provider si disabled in settings.
+
+### Email send protocol
+If you need to send email via StartTls then in settings set parameter "UseStartTls" as true, if UseStartTls is false, then it will check next parameter: "UseSslInstead".
+If StartTls and UseSslInstead are false, then email will be set to auto value, so the provider will automatically try to set matching protocol.
 
 ## Project references
 Project reference is my public repository for background console application.

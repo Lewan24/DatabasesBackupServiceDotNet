@@ -1,4 +1,4 @@
-using Core.Models;
+using Core.Entities.Models;
 
 namespace Application.Data.Interfaces;
 

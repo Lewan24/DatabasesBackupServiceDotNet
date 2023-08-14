@@ -5,19 +5,18 @@ using NLog;
 
 var configFilePath = Path.Combine(Directory.GetCurrentDirectory(), "Src" ,"ConfigurationFiles", "appsettings.json");
 var configJson = File.ReadAllText(configFilePath);
-var applicationConfiguration = await PrepareApplicationConfiguration.Prepare(configJson);
+var applicationSettings = await PrepareApplicationSettings.Prepare(configJson);
 
-var logger = LoggerConfiguration.PrepareSetup(applicationConfiguration).GetCurrentClassLogger();
+var logger = LoggerConfiguration.PrepareSetup(applicationSettings.AppConfiguration).GetCurrentClassLogger();
 
-logger.Info("\nPreparing application services...");
+logger.Info("Preparing application services...");
 
-IDbBackupService backupService = new DbBackupService(logger, applicationConfiguration!);
-IApplicationService application = new ApplicationService(logger, backupService);
+IEmailProviderService emailProviderService = new EmailProviderService(applicationSettings.EmailProviderConfiguration, logger);
+IDbBackupService backupService = new DbBackupService(logger, applicationSettings.AppConfiguration!, emailProviderService);
+IApplicationService applicationService = new ApplicationService(logger, backupService, emailProviderService);
 
 logger.Info("Starting application...");
-await application.RunService();
+ await applicationService.RunService();
 
 logger.Info("Shutting down Application");
 LogManager.Shutdown();
-
-// TODO: Add tests project

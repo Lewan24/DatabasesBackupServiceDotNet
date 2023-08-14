@@ -1,6 +1,6 @@
-using Core.Entities;
+using Core.Entities.Models;
 
-namespace Core.Models;
+namespace Core.StaticClassess;
 
 public static class PrepareDatabaseBackupStrings
 {
@@ -12,14 +12,14 @@ public static class PrepareDatabaseBackupStrings
         return connectionString;
     }
 
-    public static (string DatabaseBackupPath, string BackupFileName) PrepareBackupPaths(DatabaseConfigModel databaseConfiguration, ApplicationConfiguration appConfig)
+    public static (string DatabaseBackupPath, string BackupFileName) PrepareBackupPaths(DatabaseConfigModel databaseConfiguration, ApplicationConfigurationModel appConfig)
     {
         var fileName = $"{databaseConfiguration.DbName}.sql";
 
         var server = databaseConfiguration.DbServerAndPort.Split(':');
         var backupPath = Path.Combine(appConfig.BackupSaveDirectory!,
             $"{databaseConfiguration.DbName!}_{server[0]}_{server[1]}");
-        
+
         return new(backupPath, fileName);
     }
 }

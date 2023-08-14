@@ -1,8 +1,7 @@
-using System.Threading.Tasks;
-
 namespace Core.Interfaces;
 
 public interface IDatabase
 {
-    Task<bool> PerformBackup();
+    Task PerformBackup();
+    Task<string?> GetDatabaseName();
 }
