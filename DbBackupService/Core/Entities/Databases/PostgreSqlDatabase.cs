@@ -38,20 +38,35 @@ public class PostgreSqlDatabase : IDatabase
             if (File.Exists(combinedBackupPathBackupFile))
                 File.Delete(combinedBackupPathBackupFile);
 
-            var process = new Process();
+			var server = _databaseConfig.DbServerAndPort!.Split(':');
             var startInfo = new ProcessStartInfo
             {
                 FileName = "pg_dump",
-                Arguments = $@"-d postgres://{_databaseConfig.DbUser}:{_databaseConfig.DbPasswd}@{_databaseConfig.DbServerAndPort}/{_databaseConfig.DbName} -f ""{combinedBackupPathBackupFile}"" -F c",
+				Arguments = $@"-Fc ""host={server[0]} port={server[1]} dbname={_databaseConfig.DbName} user={_databaseConfig.DbUser} password={_databaseConfig.DbPasswd}"" > {combinedBackupPathBackupFile}",
+                RedirectStandardError = true,
                 CreateNoWindow = true,
                 UseShellExecute = false
             };
 
-            process.StartInfo = startInfo;
+            var process = new Process()
+            {
+                StartInfo = startInfo
+            };
+
             process.Start();
-            await process.WaitForExitAsync();
+            
+            var processError = await process.StandardError.ReadToEndAsync();
+
+            // TODO: For some reason, the pg_dump is not returning exit status to process, so the .net is just running other code like checking and compressing (actually downloading file) so throws errors
+            // Problem is the big file, anyway, it needs to wait enough time to download it, and wait for exit or return success.
+            process.WaitForExit();
+
+            if (process.ExitCode != 0)
+                throw new Exception($"pg_dump exited with code: {process.ExitCode} instead of 0 // error: {processError}");
+
             process.Close();
 
+            _logger.Info("Performing backup compression...");
             var compressionResult = CompressBackupFile.Perform(backupPaths.DatabaseBackupPath, backupPaths.BackupFileName);
             _logger.Info("Completed backup for {DatabaseName}. Backup path: {ZipFilePath}", _databaseConfig.DbName, compressionResult);
         }

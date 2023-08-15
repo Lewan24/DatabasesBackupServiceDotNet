@@ -48,6 +48,7 @@ public class MySqlDatabase : IDatabase
             backup.ExportToFile(combinedBackupPathBackupFile);
             await connection.CloseAsync();
 
+            _logger.Info("Performing backup compression...");
             var compressionResult = CompressBackupFile.Perform(backupPaths.DatabaseBackupPath, backupPaths.BackupFileName);
             _logger.Info("Completed backup for {DatabaseName}. Backup path: {ZipFilePath}", _databaseConfig.DbName, compressionResult);
         }
