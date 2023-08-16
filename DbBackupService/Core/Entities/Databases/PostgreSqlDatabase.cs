@@ -25,18 +25,8 @@ public class PostgreSqlDatabase : IDatabase
 
         try
         {
-            if (string.IsNullOrWhiteSpace(_databaseConfig.DbName))
-                throw new ArgumentNullException(nameof(_databaseConfig.DbName));
-
-            var backupPaths = PrepareDatabaseBackupStrings.PrepareBackupPaths(_databaseConfig, _appConfig);
-
-            if (!Directory.Exists(backupPaths.DatabaseBackupPath))
-                Directory.CreateDirectory(backupPaths.DatabaseBackupPath);
-
-            var combinedBackupPathBackupFile = Path.Combine(backupPaths.DatabaseBackupPath, backupPaths.BackupFileName);
-
-            if (File.Exists(combinedBackupPathBackupFile))
-                File.Delete(combinedBackupPathBackupFile);
+            var backupPaths = PrepareBackupDirectories.CheckDbNameAndPrepareBackupPaths(_databaseConfig, _appConfig);
+            var combinedBackupPathBackupFile = await PrepareBackupDirectories.PrepareNeededDirectoryAndClean(backupPaths, _appConfig, _logger);
 
 			var server = _databaseConfig.DbServerAndPort!.Split(':');
             
