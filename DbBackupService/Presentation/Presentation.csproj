@@ -27,12 +27,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <None Update="Src\ConfigurationFiles\appsettings.json">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
-      <None Update="Src\ConfigurationFiles\databasesConfigurations.json">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
       <None Update="Src\Media\appicon.ico">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>

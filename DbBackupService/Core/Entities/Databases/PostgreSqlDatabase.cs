@@ -39,33 +39,71 @@ public class PostgreSqlDatabase : IDatabase
                 File.Delete(combinedBackupPathBackupFile);
 
 			var server = _databaseConfig.DbServerAndPort!.Split(':');
-            var startInfo = new ProcessStartInfo
+            
+            var userFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            var pgpassFilePath = "";
+            
+            var isLinux = Environment.OSVersion.Platform == PlatformID.Unix || Environment.OSVersion.Platform == PlatformID.MacOSX;
+            if (isLinux)
+                pgpassFilePath = Path.Combine(userFolderPath, ".pgpass");
+            else
             {
-                FileName = "pg_dump",
-				Arguments = $@"-Fc ""host={server[0]} port={server[1]} dbname={_databaseConfig.DbName} user={_databaseConfig.DbUser} password={_databaseConfig.DbPasswd}"" > {combinedBackupPathBackupFile}",
-                RedirectStandardError = true,
-                CreateNoWindow = true,
-                UseShellExecute = false
-            };
+                var postgresConfDirectory = Path.Combine(userFolderPath, "AppData", "Roaming", "postgresql");
+                if (!Directory.Exists(postgresConfDirectory))
+                    Directory.CreateDirectory(postgresConfDirectory);
 
-            var process = new Process()
+                pgpassFilePath = Path.Combine(postgresConfDirectory, "pgpass.conf");
+            }
+            
+            await File.WriteAllTextAsync(pgpassFilePath, $"{server[0]}:{server[1]}:{_databaseConfig.DbName}:{_databaseConfig.DbUser}:{_databaseConfig.DbPasswd}");
+            
+            if (isLinux)
             {
-                StartInfo = startInfo
+                var processChmod = new Process
+                {
+                    StartInfo = new ProcessStartInfo
+                    {
+                        FileName = "chmod",
+                        Arguments = $"0600 {pgpassFilePath}",
+                        RedirectStandardError = true,
+                        CreateNoWindow = true,
+                        UseShellExecute = false
+                    }
+                };
+
+                processChmod.Start();
+                var processChmodErrors = await processChmod.StandardError.ReadToEndAsync();
+                await processChmod.WaitForExitAsync();
+
+                if (processChmod.ExitCode != 0)
+                    throw new Exception($".pgpass chmod modification process exited with code: {processChmod.ExitCode} instead of 0 // error: {processChmodErrors}");
+
+                processChmod.Close();
+            }
+
+            var process = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = "pg_dump",
+                    Arguments = $@"-h {server[0]} -p {server[1]} -U {_databaseConfig.DbUser} -F c -b -v -f {combinedBackupPathBackupFile} {_databaseConfig.DbName}",
+                    RedirectStandardError = true,
+                    CreateNoWindow = true,
+                    UseShellExecute = false
+                }
             };
 
             process.Start();
-            
             var processError = await process.StandardError.ReadToEndAsync();
-
-            // TODO: For some reason, the pg_dump is not returning exit status to process, so the .net is just running other code like checking and compressing (actually downloading file) so throws errors
-            // Problem is the big file, anyway, it needs to wait enough time to download it, and wait for exit or return success.
-            process.WaitForExit();
+            await process.WaitForExitAsync();
 
             if (process.ExitCode != 0)
                 throw new Exception($"pg_dump exited with code: {process.ExitCode} instead of 0 // error: {processError}");
 
             process.Close();
 
+            await File.WriteAllTextAsync(pgpassFilePath, "Cleaned");
+            
             _logger.Info("Performing backup compression...");
             var compressionResult = CompressBackupFile.Perform(backupPaths.DatabaseBackupPath, backupPaths.BackupFileName);
             _logger.Info("Completed backup for {DatabaseName}. Backup path: {ZipFilePath}", _databaseConfig.DbName, compressionResult);
