@@ -17,6 +17,9 @@ Maybe in future after finishing all goals and tasks, I will add dedicated applic
 
 ![Project scheme](https://github.com/Lewan24/DatabasesBackupServiceDotNet/blob/main/ServiceLogicProject_v1.2_Drawio.png)
 
+### Platform compability
+The application is created as main purpose for windows, but it's also compatibile with linux if needed.
+
 ### Configuration
 
 Application needs 2 files to work with:
