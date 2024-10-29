@@ -1,9 +1,9 @@
 namespace Core.Entities.Models;
 
-public class ApplicationConfigurationModel
+public record ApplicationConfigurationModel
 {
-    public string? LogsFileName { get; set; } = string.Empty;
-    public string? BackupSaveDirectory { get; set; } = string.Empty;
-    public bool IncludeDateOfCreateLogFile { get; set; } = false;
-    public int TimeInDaysToHoldBackups { get; set; } = 2;
+    public string? LogsFileName { get; init; } = string.Empty;
+    public string? BackupSaveDirectory { get; init; } = string.Empty;
+    public bool IncludeDateOfCreateLogFile { get; init; } = false;
+    public int TimeInDaysToHoldBackups { get; init; } = 2;
 }

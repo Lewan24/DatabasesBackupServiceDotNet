@@ -1,8 +1,3 @@
-using System;
-
 namespace Core.Exceptions;
 
-public class EmptyListOfConfigurationsException : Exception
-{
-    public EmptyListOfConfigurationsException(string message) : base(message){}
-}
+public class EmptyListOfConfigurationsException(string message) : Exception(message);

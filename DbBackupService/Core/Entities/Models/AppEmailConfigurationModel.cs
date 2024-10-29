@@ -1,7 +1,7 @@
 ﻿namespace Core.Entities.Models;
 
-public class AppEmailConfigurationModel
+public record AppEmailConfigurationModel
 {
-    public ApplicationConfigurationModel AppConfiguration { get; set; }
-    public EmailProviderConfigurationModel EmailProviderConfiguration { get; set; }
+    public ApplicationConfigurationModel AppConfiguration { get; init; } = new();
+    public EmailProviderConfigurationModel EmailProviderConfiguration { get; init; } = new();
 }

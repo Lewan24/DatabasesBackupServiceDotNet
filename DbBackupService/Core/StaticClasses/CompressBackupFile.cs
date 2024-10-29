@@ -1,16 +1,16 @@
 using System.IO.Compression;
 
-namespace Core.StaticClassess;
+namespace Core.StaticClasses;
 
 public static class CompressBackupFile
 {
     /// <summary>
-    /// Performs zip compression on specific file. Method creates zip file with current short date
+    ///     Performs zip compression on specific file. Method creates zip file with current short date
     /// </summary>
     /// <example>
-    /// File name: test.sql //
-    /// Zip file: test_11.08.2023_.zip //
-    /// File inside zip: test.sql
+    ///     File name: test.sql //
+    ///     Zip file: test_11.08.2023_.zip //
+    ///     File inside zip: test.sql
     /// </example>
     /// <param name="fileBasePath">Base path of directory where the file currently is</param>
     /// <param name="fileName">name of file that we want to compress</param>
@@ -24,7 +24,7 @@ public static class CompressBackupFile
                 $"{fileName.Split(".sql")[0]}_{DateTime.Today:dd.MM.yy}_{DateTime.Now:H.mm}.zip");
 
             if (File.Exists(zipFileName))
-                throw new Exception("Zip with the same name already exists. Can't perform compresion.");
+                throw new Exception("Zip with the same name already exists. Can't perform compression.");
 
             using var sourceStream = new FileStream(completeFilePath, FileMode.Open);
             using var zipStream = new FileStream(zipFileName, FileMode.Create);
@@ -34,8 +34,6 @@ public static class CompressBackupFile
 
             using var entryStream = entry.Open();
             sourceStream.CopyTo(entryStream);
-
-            sourceStream.Dispose();
 
             if (File.Exists(completeFilePath)) File.Delete(completeFilePath);
 

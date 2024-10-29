@@ -1,25 +1,19 @@
 using Application.Data.Interfaces;
 using Core.Entities.Models;
-using Core.Exceptions;
-using Core.StaticClassess;
+using Core.StaticClasses;
 using Newtonsoft.Json;
 using NLog;
 
 namespace Application.Data.Services;
 
-public class ApplicationService : IApplicationService
+public class ApplicationService(
+    Logger logger,
+    IDbBackupService backupService,
+    IEmailProviderService emailProviderService)
+    : IApplicationService
 {
-    private readonly Logger _logger;
-    private readonly IDbBackupService _backupService;
-    private readonly IEmailProviderService _emailProviderService;
+    private readonly Logger _logger = logger.Factory.GetLogger(nameof(ApplicationService));
 
-    public ApplicationService(Logger logger, IDbBackupService backupService, IEmailProviderService emailProviderService)
-    {
-        _logger = logger.Factory.GetLogger(nameof(ApplicationService));
-        _backupService = backupService;
-        _emailProviderService = emailProviderService;
-    }
-    
     public async Task RunService()
     {
         _logger.Debug("Service started");
@@ -28,16 +22,18 @@ public class ApplicationService : IApplicationService
         {
             _logger.Info("Getting needed configurations...");
             var dbConfigurationsList = await ReadDatabaseConfigurations();
-            
-            await _backupService.RunService(dbConfigurationsList);
+
+            await backupService.RunService(dbConfigurationsList);
         }
         catch (Exception e)
         {
             _logger.Warn(e);
-            
-            if ((await _emailProviderService.GetEmailSettings()).SendEmailOnOtherFailures)
-                await _emailProviderService.PrepareAndSendEmail(new MailModel("There was a problem in the backup service",
-                    PrepareEmailMessageBody.PrepareErrorReport($"<b><span style='color: red'>Error occurs while reading databases configurations</span></b><br><i><b>Error message: </b><span style='color: red'>{e.Message}</span></i>")));
+
+            if ((await emailProviderService.GetEmailSettings()).SendEmailOnOtherFailures)
+                await emailProviderService.PrepareAndSendEmail(new MailModel(
+                    "There was a problem in the backup service",
+                    EmailMessageBody.PrepareErrorReport(
+                        $"<b><span style='color: red'>Error occurs while reading databases configurations</span></b><br><i><b>Error message: </b><span style='color: red'>{e.Message}</span></i>")));
         }
         finally
         {
@@ -49,11 +45,12 @@ public class ApplicationService : IApplicationService
     {
         try
         {
-            var jsonFilePath = Path.Combine(Directory.GetCurrentDirectory(), "Src", "ConfigurationFiles", "databasesConfigurations.json");
+            var jsonFilePath = Path.Combine(Directory.GetCurrentDirectory(), "Src", "ConfigurationFiles",
+                "databasesConfigurations.json");
             var jsonContent = await File.ReadAllTextAsync(jsonFilePath);
-            
+
             var configs = JsonConvert.DeserializeObject<List<DatabaseConfigModel>>(jsonContent)!;
-            
+
             return configs;
         }
         catch (Exception e)
@@ -62,14 +59,16 @@ public class ApplicationService : IApplicationService
             throw;
         }
     }
-    
+
     private async Task StopService()
     {
-        var madeBackupsCount = await _backupService.GetBackupsCounter();
-        _logger.Info("{ServiceName} successfully stopped with {BackupsCount} made backups", nameof(ApplicationService), madeBackupsCount);
+        var madeBackupsCount = await backupService.GetBackupsCounter();
+        _logger.Info("{ServiceName} successfully stopped with {BackupsCount} made backups", nameof(ApplicationService),
+            madeBackupsCount);
 
-        await _emailProviderService.PrepareAndSendEmail(new MailModel("Backups Service Statistics", 
-            PrepareEmailMessageBody.PrepareStatisticsReport($"Backups finish time: <b><i>{DateTime.Now:t}</i></b><br>Number of Successfully made backups: <b><i><span style='color: green'>{madeBackupsCount}</span></i></b>")));
+        await emailProviderService.PrepareAndSendEmail(new MailModel("Backups Service Statistics",
+            EmailMessageBody.PrepareStatisticsReport(
+                $"Backups finish time: <b><i>{DateTime.Now:t}</i></b><br>Number of Successfully made backups: <b><i><span style='color: green'>{madeBackupsCount}</span></i></b>")));
 
         _logger.Debug("Service stopped");
     }

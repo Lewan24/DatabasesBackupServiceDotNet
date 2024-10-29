@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 
 namespace Infrastructure.Configuration;
 
-public static class PrepareApplicationSettings
+public static class ApplicationSettings
 {
     public static Task<AppEmailConfigurationModel> Prepare(string? configurationJson)
     {
@@ -17,7 +17,7 @@ public static class PrepareApplicationSettings
         catch (Exception e)
         {
             Console.WriteLine(e.Message);
-            return Task.FromResult(new AppEmailConfigurationModel())!;
+            return Task.FromResult(new AppEmailConfigurationModel());
         }
     }
 }

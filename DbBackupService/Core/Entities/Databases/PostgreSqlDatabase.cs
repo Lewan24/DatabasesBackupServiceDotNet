@@ -1,52 +1,52 @@
 using System.Diagnostics;
 using Core.Entities.Models;
 using Core.Interfaces;
-using Core.StaticClassess;
+using Core.StaticClasses;
 using NLog;
 
 namespace Core.Entities.Databases;
 
-public class PostgreSqlDatabase : IDatabase
+public class PostgreSqlDatabase(
+    DatabaseConfigModel databaseConfig,
+    Logger logger,
+    ApplicationConfigurationModel appConfig)
+    : IDatabase
 {
-    private readonly DatabaseConfigModel _databaseConfig;
-    private readonly ApplicationConfigurationModel _appConfig;
-    private readonly Logger _logger;
-
-    public PostgreSqlDatabase(DatabaseConfigModel databaseConfig, Logger logger, ApplicationConfigurationModel appConfig)
-    {
-        _databaseConfig = databaseConfig;
-        _appConfig = appConfig;
-        _logger = logger.Factory.GetLogger(nameof(PostgreSqlDatabase));
-    }
+    private readonly Logger _logger = logger.Factory.GetLogger(nameof(PostgreSqlDatabase));
 
     public async Task PerformBackup()
     {
-        _logger.Info("Performing backup for {DatabaseName}", _databaseConfig.DbName);
+        _logger.Info("Performing backup for {DatabaseName}", databaseConfig.DbName);
 
         try
         {
-            var backupPaths = PrepareBackupDirectories.CheckDbNameAndPrepareBackupPaths(_databaseConfig, _appConfig);
-            var combinedBackupPathBackupFile = await PrepareBackupDirectories.PrepareNeededDirectoryAndClean(backupPaths, _appConfig, _logger);
+            var backupPaths = BackupDirectories.CheckDbNameAndPrepareBackupPaths(databaseConfig, appConfig);
+            var combinedBackupPathBackupFile =
+                await BackupDirectories.PrepareNeededDirectoryAndClean(backupPaths, appConfig, _logger);
 
-			var server = _databaseConfig.DbServerAndPort!.Split(':');
-            
+            var server = databaseConfig.DbServerAndPort!.Split(':');
+
             var userFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-            var pgpassFilePath = "";
-            
-            var isLinux = Environment.OSVersion.Platform == PlatformID.Unix || Environment.OSVersion.Platform == PlatformID.MacOSX;
+            string pgPassFilePath;
+
+            var isLinux = Environment.OSVersion.Platform == PlatformID.Unix ||
+                          Environment.OSVersion.Platform == PlatformID.MacOSX;
             if (isLinux)
-                pgpassFilePath = Path.Combine(userFolderPath, ".pgpass");
+            {
+                pgPassFilePath = Path.Combine(userFolderPath, ".pgpass");
+            }
             else
             {
                 var postgresConfDirectory = Path.Combine(userFolderPath, "AppData", "Roaming", "postgresql");
                 if (!Directory.Exists(postgresConfDirectory))
                     Directory.CreateDirectory(postgresConfDirectory);
 
-                pgpassFilePath = Path.Combine(postgresConfDirectory, "pgpass.conf");
+                pgPassFilePath = Path.Combine(postgresConfDirectory, "pgpass.conf");
             }
-            
-            await File.WriteAllTextAsync(pgpassFilePath, $"{server[0]}:{server[1]}:{_databaseConfig.DbName}:{_databaseConfig.DbUser}:{_databaseConfig.DbPasswd}");
-            
+
+            await File.WriteAllTextAsync(pgPassFilePath,
+                $"{server[0]}:{server[1]}:{databaseConfig.DbName}:{databaseConfig.DbUser}:{databaseConfig.DbPasswd}");
+
             if (isLinux)
             {
                 var processChmod = new Process
@@ -54,7 +54,7 @@ public class PostgreSqlDatabase : IDatabase
                     StartInfo = new ProcessStartInfo
                     {
                         FileName = "chmod",
-                        Arguments = $"0600 {pgpassFilePath}",
+                        Arguments = $"0600 {pgPassFilePath}",
                         RedirectStandardError = true,
                         CreateNoWindow = true,
                         UseShellExecute = false
@@ -66,7 +66,8 @@ public class PostgreSqlDatabase : IDatabase
                 await processChmod.WaitForExitAsync();
 
                 if (processChmod.ExitCode != 0)
-                    throw new Exception($".pgpass chmod modification process exited with code: {processChmod.ExitCode} instead of 0 // error: {processChmodErrors}");
+                    throw new Exception(
+                        $".pgpass chmod modification process exited with code: {processChmod.ExitCode} instead of 0 // error: {processChmodErrors}");
 
                 processChmod.Close();
             }
@@ -76,7 +77,8 @@ public class PostgreSqlDatabase : IDatabase
                 StartInfo = new ProcessStartInfo
                 {
                     FileName = "pg_dump",
-                    Arguments = $@"-h {server[0]} -p {server[1]} -U {_databaseConfig.DbUser} -F c -b -v -f {combinedBackupPathBackupFile} {_databaseConfig.DbName}",
+                    Arguments =
+                        $@"-h {server[0]} -p {server[1]} -U {databaseConfig.DbUser} -F c -b -v -f {combinedBackupPathBackupFile} {databaseConfig.DbName}",
                     RedirectStandardError = true,
                     CreateNoWindow = true,
                     UseShellExecute = false
@@ -88,15 +90,18 @@ public class PostgreSqlDatabase : IDatabase
             await process.WaitForExitAsync();
 
             if (process.ExitCode != 0)
-                throw new Exception($"pg_dump exited with code: {process.ExitCode} instead of 0 // error: {processError}");
+                throw new Exception(
+                    $"pg_dump exited with code: {process.ExitCode} instead of 0 // error: {processError}");
 
             process.Close();
 
-            await File.WriteAllTextAsync(pgpassFilePath, "Cleaned");
-            
+            await File.WriteAllTextAsync(pgPassFilePath, "Cleaned");
+
             _logger.Info("Performing backup compression...");
-            var compressionResult = CompressBackupFile.Perform(backupPaths.DatabaseBackupPath, backupPaths.BackupFileName);
-            _logger.Info("Completed backup for {DatabaseName}. Backup path: {ZipFilePath}", _databaseConfig.DbName, compressionResult);
+            var compressionResult =
+                CompressBackupFile.Perform(backupPaths.DatabaseBackupPath, backupPaths.BackupFileName);
+            _logger.Info("Completed backup for {DatabaseName}. Backup path: {ZipFilePath}", databaseConfig.DbName,
+                compressionResult);
         }
         catch (Exception e)
         {
@@ -107,5 +112,8 @@ public class PostgreSqlDatabase : IDatabase
         }
     }
 
-    public Task<string?> GetDatabaseName() => Task.FromResult(_databaseConfig.DbName);
+    public Task<string?> GetDatabaseName()
+    {
+        return Task.FromResult(databaseConfig.DbName);
+    }
 }

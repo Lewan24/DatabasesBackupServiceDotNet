@@ -1,10 +1,9 @@
-using System.Globalization;
 using System.Text.RegularExpressions;
 using NLog;
 
-namespace Core.StaticClassess;
+namespace Core.StaticClasses;
 
-public static class DeleteOldBackup
+public static partial class DeleteOldBackup
 {
     public static Task Delete(string directoryPath, int daysThreshold, Logger logger)
     {
@@ -12,24 +11,23 @@ public static class DeleteOldBackup
         {
             var zipFiles = Directory.GetFiles(directoryPath, "*.zip");
 
-            var currentDate = DateTime.Now;
-
             foreach (var zipFile in zipFiles)
             {
                 var fileName = Path.GetFileNameWithoutExtension(zipFile);
-                var match = Regex.Match(fileName, @"\d{2}\.\d{2}\.\d{2}_\d{2}\.\d{2}");
+                var match = MyRegex().Match(fileName);
 
                 if (!match.Success) continue;
-                if (!DateTime.TryParseExact(match.Value, "dd.MM.yy_HH.mm", null, DateTimeStyles.None,
-                        out var backupDateTime)) continue;
-                var difference = currentDate - backupDateTime;
+                var backupDateTime = DateTime.Parse(match.Value);
 
-                if (!(difference.TotalDays > daysThreshold)) continue;
+                var difference = DateTime.Now - backupDateTime;
+
+                if (difference.TotalDays < daysThreshold)
+                    continue;
 
                 File.Delete(zipFile);
                 logger.Info($"Deleted old backup: {Path.GetFileName(zipFile)}");
             }
-            
+
             return Task.CompletedTask;
         }
         catch (Exception e)
@@ -38,4 +36,7 @@ public static class DeleteOldBackup
             return Task.CompletedTask;
         }
     }
+
+    [GeneratedRegex(@"\d{1,2}\.\d{1,2}\.\d{2,4}")]
+    private static partial Regex MyRegex();
 }

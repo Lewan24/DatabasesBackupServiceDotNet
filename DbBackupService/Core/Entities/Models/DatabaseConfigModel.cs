@@ -1,12 +1,12 @@
 namespace Core.Entities.Models;
 
-public class DatabaseConfigModel
+public record DatabaseConfigModel
 {
-    public DatabaseType DbType { get; set; } = DatabaseType.MySql;
-    public string? DbName { get; set; }
-    public string? DbUser { get; set; }
-    public string? DbPasswd { get; set; }
-    public string? DbServerAndPort { get; set; }
+    public DatabaseType DbType { get; init; } = DatabaseType.MySql;
+    public string? DbName { get; init; }
+    public string? DbUser { get; init; }
+    public string? DbPasswd { get; init; }
+    public string? DbServerAndPort { get; init; }
 }
 
 public enum DatabaseType

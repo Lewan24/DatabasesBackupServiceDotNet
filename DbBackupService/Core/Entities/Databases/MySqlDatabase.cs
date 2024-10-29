@@ -1,35 +1,28 @@
-using Core.Interfaces;
-using NLog;
-using MySql.Data.MySqlClient;
 using Core.Entities.Models;
-using Core.StaticClassess;
+using Core.Interfaces;
+using Core.StaticClasses;
+using MySql.Data.MySqlClient;
+using NLog;
 
 namespace Core.Entities.Databases;
 
-public class MySqlDatabase : IDatabase
+public class MySqlDatabase(DatabaseConfigModel databaseConfig, Logger logger, ApplicationConfigurationModel appConfig)
+    : IDatabase
 {
-    private readonly DatabaseConfigModel _databaseConfig;
-    private readonly ApplicationConfigurationModel _appConfig;
-    private readonly Logger _logger;
-
-    public MySqlDatabase(DatabaseConfigModel databaseConfig, Logger logger, ApplicationConfigurationModel appConfig)
-    {
-        _databaseConfig = databaseConfig;
-        _appConfig = appConfig;
-        _logger = logger.Factory.GetLogger(nameof(MySqlDatabase));
-    }
+    private readonly Logger _logger = logger.Factory.GetLogger(nameof(MySqlDatabase));
 
     public async Task PerformBackup()
     {
-        _logger.Info("Performing backup for {DatabaseName}", _databaseConfig.DbName);
+        _logger.Info("Performing backup for {DatabaseName}", databaseConfig.DbName);
 
         try
         {
-            var backupPaths = PrepareBackupDirectories.CheckDbNameAndPrepareBackupPaths(_databaseConfig, _appConfig);
-            var combinedBackupPathBackupFile = await PrepareBackupDirectories.PrepareNeededDirectoryAndClean(backupPaths, _appConfig, _logger);
+            var backupPaths = BackupDirectories.CheckDbNameAndPrepareBackupPaths(databaseConfig, appConfig);
+            var combinedBackupPathBackupFile =
+                await BackupDirectories.PrepareNeededDirectoryAndClean(backupPaths, appConfig, _logger);
 
-            var connectionString = PrepareDatabaseBackupStrings.PrepareConnectionString(_databaseConfig);
-            
+            var connectionString = DatabaseBackupStrings.PrepareConnectionString(databaseConfig);
+
             await using var connection = new MySqlConnection(connectionString);
             await using var cmd = new MySqlCommand();
             using var backup = new MySqlBackup(cmd);
@@ -40,8 +33,10 @@ public class MySqlDatabase : IDatabase
             await connection.CloseAsync();
 
             _logger.Info("Performing backup compression...");
-            var compressionResult = CompressBackupFile.Perform(backupPaths.DatabaseBackupPath, backupPaths.BackupFileName);
-            _logger.Info("Completed backup for {DatabaseName}. Backup path: {ZipFilePath}", _databaseConfig.DbName, compressionResult);
+            var compressionResult =
+                CompressBackupFile.Perform(backupPaths.DatabaseBackupPath, backupPaths.BackupFileName);
+            _logger.Info("Completed backup for {DatabaseName}. Backup path: {ZipFilePath}", databaseConfig.DbName,
+                compressionResult);
         }
         catch (Exception e)
         {
@@ -51,5 +46,8 @@ public class MySqlDatabase : IDatabase
         }
     }
 
-    public Task<string?> GetDatabaseName() => Task.FromResult(_databaseConfig.DbName);
+    public Task<string?> GetDatabaseName()
+    {
+        return Task.FromResult(databaseConfig.DbName);
+    }
 }

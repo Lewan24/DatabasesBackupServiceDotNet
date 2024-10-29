@@ -1,28 +1,21 @@
 ﻿using Application.Data.Interfaces;
 using Core.Entities.Models;
-using NLog;
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using MimeKit;
+using NLog;
 
 namespace Application.Data.Services;
 
-public class EmailProviderService : IEmailProviderService
+public class EmailProviderService(EmailProviderConfigurationModel configuration, Logger logger)
+    : IEmailProviderService
 {
-    private readonly EmailProviderConfigurationModel _configuration;
-    private readonly Logger _logger;
-
-    private readonly SmtpClient _smtpClient = new ();
-
-    public EmailProviderService (EmailProviderConfigurationModel configuration, Logger logger)
-    {
-        _configuration = configuration;
-        _logger = logger.Factory.GetLogger(nameof(EmailProviderService));
-    }
+    private readonly Logger _logger = logger.Factory.GetLogger(nameof(EmailProviderService));
+    private readonly SmtpClient _smtpClient = new();
 
     public async Task PrepareAndSendEmail(MailModel mailRequest)
     {
-        if (!_configuration.ProviderSettings.EnableEmailProvider)
+        if (!configuration.ProviderSettings.EnableEmailProvider)
         {
             _logger.Info("Can't send email. EmailProvider disabled in settings");
             return;
@@ -52,6 +45,11 @@ public class EmailProviderService : IEmailProviderService
         }
     }
 
+    public Task<EmailSettings> GetEmailSettings()
+    {
+        return Task.FromResult(configuration.ProviderSettings);
+    }
+
     private MimeMessage? PrepareMessage(MailModel request)
     {
         _logger.Info("Preparing mail message...");
@@ -63,15 +61,16 @@ public class EmailProviderService : IEmailProviderService
             Text = request.Body
         };
 
-        mail.From.Add(new MailboxAddress(_configuration.EmailSenderCredentials.EmailSenderDisplayName, _configuration.EmailSenderCredentials.EmailSender));
+        mail.From.Add(new MailboxAddress(configuration.EmailSenderCredentials.EmailSenderDisplayName,
+            configuration.EmailSenderCredentials.EmailSender));
 
-        if (!_configuration.EmailReceivers.Any())
+        if (!configuration.EmailReceivers.Any())
         {
             _logger.Warn("Receivers list can't be empty");
             return null;
         }
 
-        foreach (var receiver in _configuration.EmailReceivers)
+        foreach (var receiver in configuration.EmailReceivers)
             mail.To.Add(new MailboxAddress(receiver, receiver));
 
         return mail;
@@ -82,19 +81,19 @@ public class EmailProviderService : IEmailProviderService
         try
         {
             _logger.Info("Connecting to mail server...");
-            if (_configuration.ProviderSettings.UseStartTls)
-                await _smtpClient.ConnectAsync(_configuration.EmailSenderCredentials.SmtpHost,
-                    _configuration.EmailSenderCredentials.SmtpPort, SecureSocketOptions.StartTls);
-            else if (_configuration.ProviderSettings.UseSslInstead)
-                await _smtpClient.ConnectAsync(_configuration.EmailSenderCredentials.SmtpHost,
-                    _configuration.EmailSenderCredentials.SmtpPort, _configuration.ProviderSettings.UseSslInstead);
+            if (configuration.ProviderSettings.UseStartTls)
+                await _smtpClient.ConnectAsync(configuration.EmailSenderCredentials.SmtpHost,
+                    configuration.EmailSenderCredentials.SmtpPort, SecureSocketOptions.StartTls);
+            else if (configuration.ProviderSettings.UseSslInstead)
+                await _smtpClient.ConnectAsync(configuration.EmailSenderCredentials.SmtpHost,
+                    configuration.EmailSenderCredentials.SmtpPort, configuration.ProviderSettings.UseSslInstead);
             else
-                await _smtpClient.ConnectAsync(_configuration.EmailSenderCredentials.SmtpHost,
-                    _configuration.EmailSenderCredentials.SmtpPort);
+                await _smtpClient.ConnectAsync(configuration.EmailSenderCredentials.SmtpHost,
+                    configuration.EmailSenderCredentials.SmtpPort);
 
             _logger.Info("Authentication...");
-            await _smtpClient.AuthenticateAsync(_configuration.EmailSenderCredentials.EmailSender,
-                _configuration.EmailSenderCredentials.Password);
+            await _smtpClient.AuthenticateAsync(configuration.EmailSenderCredentials.EmailSender,
+                configuration.EmailSenderCredentials.Password);
 
             _logger.Info("Sending {EmailSubject}...", mail.Subject);
             await _smtpClient.SendAsync(mail);
@@ -108,6 +107,4 @@ public class EmailProviderService : IEmailProviderService
             throw;
         }
     }
-
-    public Task<EmailSettings> GetEmailSettings() => Task.FromResult(_configuration.ProviderSettings);
 }
