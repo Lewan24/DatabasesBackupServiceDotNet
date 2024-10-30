@@ -26,16 +26,19 @@ public static class CompressBackupFile
             if (File.Exists(zipFileName))
                 throw new Exception("Zip with the same name already exists. Can't perform compression.");
 
-            using var sourceStream = new FileStream(completeFilePath, FileMode.Open);
-            using var zipStream = new FileStream(zipFileName, FileMode.Create);
-            using var archive = new ZipArchive(zipStream, ZipArchiveMode.Create);
-            var entryName = Path.GetFileName(completeFilePath);
-            var entry = archive.CreateEntry(entryName, CompressionLevel.Optimal);
+            using (var sourceStream = new FileStream(completeFilePath, FileMode.Open))
+            {
+                using var zipStream = new FileStream(zipFileName, FileMode.Create);
+                using var archive = new ZipArchive(zipStream, ZipArchiveMode.Create);
+                var entryName = Path.GetFileName(completeFilePath);
+                var entry = archive.CreateEntry(entryName, CompressionLevel.Optimal);
 
-            using var entryStream = entry.Open();
-            sourceStream.CopyTo(entryStream);
+                using var entryStream = entry.Open();
+                sourceStream.CopyTo(entryStream);  
+            }
 
-            if (File.Exists(completeFilePath)) File.Delete(completeFilePath);
+            if (File.Exists(completeFilePath)) 
+                File.Delete(completeFilePath);
 
             return zipFileName;
         }

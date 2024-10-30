@@ -66,9 +66,10 @@ public class ApplicationService(
         _logger.Info("{ServiceName} successfully stopped with {BackupsCount} made backups", nameof(ApplicationService),
             madeBackupsCount);
 
-        await emailProviderService.PrepareAndSendEmail(new MailModel("Backups Service Statistics",
-            EmailMessageBody.PrepareStatisticsReport(
-                $"Backups finish time: <b><i>{DateTime.Now:t}</i></b><br>Number of Successfully made backups: <b><i><span style='color: green'>{madeBackupsCount}</span></i></b>")));
+        if ((await emailProviderService.GetEmailSettings()).SendEmailWithStatisticsAfterBackups)
+            await emailProviderService.PrepareAndSendEmail(new MailModel("Backups Service Statistics",
+                EmailMessageBody.PrepareStatisticsReport(
+                    $"Backups finish time: <b><i>{DateTime.Now:t}</i></b><br>Number of Successfully made backups: <b><i><span style='color: green'>{madeBackupsCount}</span></i></b>")));
 
         _logger.Debug("Service stopped");
     }
