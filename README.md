@@ -9,7 +9,11 @@ This application is free to use to anyone, it's also open-source so feel free to
 Anyway the main purpose of using service is just making backups for databases. 
 In main goal service includes email informing system, backups encryption, history of backups, statistics report.
 
-Maybe in future after finishing all goals and tasks, I will add dedicated application to create statistics, reports, changing settings in user friendly way in this service (This probably will be working with existing dbBackupservice application path, and will be using logs, histories and generally application directory to handle all logic and work).
+## Future goals
+In near future my goal is to create open-source portfolio application on github pages that will include configuration generator for each public application that I create.<br>
+
+So there will be dedicated page also for this DbBackupService, where you could generate config file using easy switches and buttons.<br>
+There also will be place to upload and modify existing config file, read documentation, tips, how to etc.
 
 ## Work logic
 
@@ -18,13 +22,14 @@ Maybe in future after finishing all goals and tasks, I will add dedicated applic
 ![Project scheme](https://github.com/Lewan24/DatabasesBackupServiceDotNet/blob/main/ServiceLogicProject_v1.2_Drawio.png)
 
 ### Platform compability
-The application was developed primarily for Windows, but is also compatible with Linux if needed.
+The application was developed primarily for Windows, but is also fully compatible with Linux if needed.
 
 ### Configuration
 
 Application needs 2 files to work with:
 
-- appsettings.json
+- appsettings.json<br>
+// Use "LogsFileName": "Logs\\\Logs.txt" instead of just Logs.txt to store logs inside Logs folder.<br>
 ```
 {
   "AppConfiguration": {
@@ -91,8 +96,6 @@ Service will load json as list of configs and for every config (database) will b
         ├── ConfigurationFiles
             ├── appsettings.json                # configuration file for application
             └── databasesConfigurations.json    # configuration file for databases
-        └── Media
-            └── *Some needed content*           # eg. icon file
 └── Backups
     ├── TestDb_localhost_3306
         ├── TestDb_08.08.2023_06.00.zip
