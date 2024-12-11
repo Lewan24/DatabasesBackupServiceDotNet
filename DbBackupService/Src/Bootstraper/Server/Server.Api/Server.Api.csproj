@@ -27,7 +27,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Modules\Backup\Modules.Backup.Api\Modules.Backup.Api.csproj" />
+    <ProjectReference Include="..\..\..\Modules\BackupModule\Modules.Backup.Api\Modules.Backup.Api.csproj" />
     <ProjectReference Include="..\..\Client\Client.UI\Client.UI.csproj" />
   </ItemGroup>
 
