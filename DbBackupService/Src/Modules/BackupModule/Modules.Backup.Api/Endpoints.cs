@@ -2,9 +2,9 @@
 
 namespace Modules.Backup.Api;
 
-public static class Endpoints
+internal static class Endpoints
 {
-    public static WebApplication MapBackupEndpoints(this WebApplication app)
+    public static WebApplication MapEndpoints(this WebApplication app)
     {
         var api = app.MapGroup("/backup");
 
