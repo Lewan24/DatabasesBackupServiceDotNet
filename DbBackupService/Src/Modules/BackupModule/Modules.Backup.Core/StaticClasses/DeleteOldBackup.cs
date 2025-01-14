@@ -14,7 +14,7 @@ public static partial class DeleteOldBackup
             foreach (var zipFile in zipFiles)
             {
                 var fileName = Path.GetFileNameWithoutExtension(zipFile);
-                var match = MyRegex().Match(fileName);
+                var match = Regex.Match(fileName, @"\d{1,2}\.\d{1,2}\.\d{2,4}");
 
                 if (!match.Success) continue;
                 var backupDateTime = DateTime.Parse(match.Value);
@@ -36,7 +36,4 @@ public static partial class DeleteOldBackup
             return Task.CompletedTask;
         }
     }
-
-    [GeneratedRegex(@"\d{1,2}\.\d{1,2}\.\d{2,4}")]
-    private static partial Regex MyRegex();
 }
