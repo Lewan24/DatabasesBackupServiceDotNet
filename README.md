@@ -10,10 +10,9 @@ Anyway the main purpose of using service is just making backups for databases.
 In main goal service includes email informing system, backups encryption, history of backups, statistics report.
 
 ## Future goals
-In near future my goal is to create open-source portfolio application on github pages that will include configuration generator for each public application that I create.<br>
+In near future my goal is to create open-source Docker Application with nice UI that backups your selected dbs.
 
-So there will be dedicated page also for this DbBackupService, where you could generate config file using easy switches and buttons.<br>
-There also will be place to upload and modify existing config file, read documentation, tips, how to etc.
+Everything is gonna be easy and fast to use, simple configuration, easy container update, volumes to store data and configuration on machine to not lost any needed data etc.
 
 ## Work logic
 
