@@ -28,6 +28,6 @@ app.UseBlazorFrameworkFiles();
 app.MapFallbackToFile("index.html");
 app.UseStaticFiles();
 
-app.MapBackupEndpoints();
+app.MapRequiredEndpoints();
 
 app.Run();

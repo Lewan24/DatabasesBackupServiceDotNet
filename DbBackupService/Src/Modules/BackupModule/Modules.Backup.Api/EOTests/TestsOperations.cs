@@ -6,10 +6,10 @@ using Microsoft.Extensions.Logging;
 
 namespace Modules.Backup.Api;
 
-internal abstract record Operations
+internal abstract record TestsOperations
 {
-    public static async Task<Results<Ok<string>, BadRequest<string>>> GetTestString(HttpContext context, 
-        [FromServices] ILogger<Operations> logger,
+    public static async Task<Results<Ok<string>, BadRequest<string>>> GetTestString(HttpContext context,
+        [FromServices] ILogger<TestsOperations> logger,
         [FromQuery] bool failRequest = false)
     {
         logger.LogInformation("Executing GetTestString operation.");
