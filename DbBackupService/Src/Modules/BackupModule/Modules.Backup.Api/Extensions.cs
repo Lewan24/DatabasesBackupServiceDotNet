@@ -15,7 +15,9 @@ public static class Extensions
 
     public static WebApplication MapBackupEndpoints(this WebApplication app)
     {
-        app.MapEndpoints();
+        Endpoints.MapConfigEndpoints(app);
+        Endpoints.MapBackupEndpoints(app);
+        Endpoints.MapTestEndpoints(app);
 
         return app;
     }
