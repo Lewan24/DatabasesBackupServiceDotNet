@@ -1,13 +1,13 @@
 # Service Application
 
 ## Purpose and project problem
-The main problem and reason of creating this kind of application is the little frustration of free 3d-party programs that forces user to pay for a functionallity like making databases backups for multiple databases. These programs only works fine for 1 max 2 databases.
+The main problem and reason of creating this kind of application is the frustration of free 3d-party programs that forces user to pay for a functionallity like making databases backups for multiple databases. These programs only works fine for 1 or 2 databases/servers.
 
-So I decided to create own flexible service that will backup multiple (actually with no limit) databases, selected in json configuration file. 
-This application is free to use to anyone, it's also open-source so feel free to write any advices, or issues with enchantments, what I could add. 
+So I decided to create own flexible service that will backup databases with no limitations of used connections.
+This application is free to use to anyone, it's also open-source so feel free to create issues with new funtionallities or improvements, that I could add. 
 
-Anyway the main purpose of using service is just making backups for databases. 
-In main goal service includes email informing system, backups encryption, history of backups, statistics report.
+The main goal of using my application is just making unlimited backups for databases. 
+I personally use it already in my company as simple db backup automation, so I dont need to focus and remember about creating backups.
 
 ## Future goals
 In near future my goal is to create open-source Docker Application with nice UI that backups your selected dbs.
