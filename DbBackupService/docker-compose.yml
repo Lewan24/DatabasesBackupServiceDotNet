@@ -1,0 +1,9 @@
+﻿services:
+  server.api:
+    image: server.api
+    build:
+      context: .
+      dockerfile: Src/Bootstraper/Server/Server.Api/Dockerfile
+    ports:
+      - "10443:8080"
+      - "10000:8081"
