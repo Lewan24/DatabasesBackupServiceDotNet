@@ -13,11 +13,12 @@ public static class Extensions
         return services;
     }
 
-    public static WebApplication MapBackupEndpoints(this WebApplication app)
+    public static WebApplication MapRequiredEndpoints(this WebApplication app)
     {
-        Endpoints.MapConfigEndpoints(app);
-        Endpoints.MapBackupEndpoints(app);
-        Endpoints.MapTestEndpoints(app);
+        ConfigEndpoints.MapConfigEndpoints(app);
+        AppEndpoints.MapAppEndpoints(app);
+        BackupEndpoints.MapBackupEndpoints(app);
+        TestsEndpoints.MapTestEndpoints(app);
 
         return app;
     }
