@@ -21,9 +21,16 @@ Everything is gonna be easy and fast to use, simple configuration, easy containe
 ![Project scheme](https://github.com/Lewan24/DatabasesBackupServiceDotNet/blob/main/ServiceLogicProject_v1.2_Drawio.png)
 
 ### Platform compability
-The application was developed primarily for Windows, but is also fully compatible with Linux if needed.
+The application was developed firstly for Windows and Linux.
+
+Now the project is realeased to docker hub, so you only need docker on your machine, pull the image, assign volumes and backup your dbs!
 
 ### Configuration
+
+Everyting you need to work is in Application, just open on port that you have run the container and set up what you need.
+
+Of course you can just create config files in volume and assing it to container, below are all files that are needed for application to work.
+If app detects that files are not compatible or something is missing, then it will change the name of file and will create proper one for your configuration.
 
 Application needs 2 files to work with:
 
@@ -106,33 +113,19 @@ Service will load json as list of configs and for every config (database) will b
 ```
 
 ## Running application
-Service is a console application that doesn't need user integration, so everything is doing automatically, logs and information are stored in log file that will be inside application directory after first run.
-
-Main purpose of running service regularly is to set Windows Task Scheduler:
-- Create new Task
-- In 'General' section the best options to set are Run with highest privileges, the reason is that sometimes application would like to ask for permissions to create directory or remove created file etc.
-- In 'Triggers' section click 'New...' and set how often the service will be run. Eg Daily, every 6.00 am, Stop task if it runs longet than 30 minutes, Enabled
-- In 'Actions' section click 'New...', select 'Start a program' from list on the top of window, then click 'Browse...' and select application service.
-
-After these actions the task is ready and will trigger every day at 6.00 am in this specific example.
-
-On linux there is no task scheduler, so the best way is just write a simple bash script to run service. And set the script to be run on some period of time regularly.
+Visit docker hub here: FutureLink
+and follow instructions.
 
 ## Email informing functionallity
 Inside application there is an additional service that handles sending emails.
 
-You can set all settings in appsettings.json like which emails should be sent, who will receive these emails, and of cource email sender credentials to let service use them for sending emails to receivers.
+You can set all settings in appsettings.json (or after oppening application via browser) like which emails should be sent, who will receive these emails, and of cource email sender credentials to let service use them for sending emails to receivers.
 
-By default the email provider is disabled in settings, so you don't need to enable it or set any options for email provider, the service will not run if the provider si disabled in settings.
+By default the email provider is disabled in settings, so you don't need to enable it or set any options for email provider, the service will not run if the provider is disabled in settings.
 
 ### Email send protocol
 If you need to send email via StartTls then in settings set parameter "UseStartTls" as true, if UseStartTls is false, then it will check next parameter: "UseSslInstead".
 If StartTls and UseSslInstead are false, then email will be set to auto value, so the provider will automatically try to set matching protocol.
-
-## Project references
-Project reference is my public repository for background console application.
-This one will be working in similar way like with the help of windows task scheduler.
-Project: https://github.com/Lewan24/ServiceConsoleAppSample
 
 ## End words
 Thanks for visiting my github and repos, I hope you like it and got you interested or even got you inspired to use the idea or application in your projects.
