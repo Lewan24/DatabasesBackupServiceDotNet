@@ -10,9 +10,10 @@ The main goal of using my application is just making unlimited backups for datab
 I personally use it already in my company as simple db backup automation, so I dont need to focus and remember about creating backups.
 
 ## Future goals
-In near future my goal is to create open-source Docker Application with nice UI that backups your selected dbs.
-
+Im currentry working on implementing new Architecture and changing from standalone app to Docker image with Api and nice UI.
 Everything is gonna be easy and fast to use, simple configuration, easy container update, volumes to store data and configuration on machine to not lost any needed data etc.
+
+Additionally I want to add encryption, more settings, accounts and permissions, backups sharing with password, local Database to store settings instead of json files.
 
 ## Work logic
 
