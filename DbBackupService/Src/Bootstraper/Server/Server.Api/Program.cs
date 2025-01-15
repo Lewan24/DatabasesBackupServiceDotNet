@@ -20,6 +20,7 @@ if (app.Environment.IsDevelopment())
         opt.WithTitle("Backup Service Api");
         opt.WithTheme(ScalarTheme.BluePlanet);
         opt.WithDefaultHttpClient(ScalarTarget.Http, ScalarClient.Curl);
+        opt.Servers = [];
     });
 }
 
