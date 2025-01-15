@@ -16,7 +16,6 @@ COPY ["Bootstraper/Server/Server.Api/Server.Api.csproj", "Bootstraper/Server/Ser
 COPY ["Modules/BackupModule/Modules.Backup.Api/Modules.Backup.Api.csproj", "Modules/BackupModule/Modules.Backup.Api/"]
 COPY ["Modules/BackupModule/Modules.Backup.Application/Modules.Backup.Application.csproj", "Modules/BackupModule/Modules.Backup.Application/"]
 COPY ["Modules/BackupModule/Modules.Backup.Core/Modules.Backup.Core.csproj", "Modules/BackupModule/Modules.Backup.Core/"]
-COPY ["Modules/BackupModule/Modules.Backup.Infrasctructure/Modules.Backup.Infrasctructure.csproj", "Modules/BackupModule/Modules.Backup.Infrasctructure/"]
 COPY ["Bootstraper/Client/Client.UI/Client.UI.csproj", "Bootstraper/Client/Client.UI/"]
 RUN dotnet restore "./Bootstraper/Server/Server.Api/Server.Api.csproj"
 COPY . .
