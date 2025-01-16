@@ -1,7 +1,11 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
+using Modules.Backup.Api.EOApp;
+using Modules.Backup.Api.EOBackup;
+using Modules.Backup.Api.EOConfig;
+using Modules.Backup.Api.EOTests;
 using Modules.Backup.Application;
-using Modules.Backup.Infrasctructure;
+using Modules.Backup.Infrastructure;
 
 namespace Modules.Backup.Api;
 
@@ -17,10 +21,10 @@ public static class Extensions
 
     public static WebApplication MapRequiredEndpoints(this WebApplication app)
     {
-        ConfigEndpoints.MapConfigEndpoints(app);
-        AppEndpoints.MapAppEndpoints(app);
-        BackupEndpoints.MapBackupEndpoints(app);
-        TestsEndpoints.MapTestEndpoints(app);
+        app.MapConfigEndpoints();
+        app.MapAppEndpoints();
+        app.MapBackupEndpoints();
+        app.MapTestEndpoints();
 
         return app;
     }

@@ -1,3 +1,4 @@
+using Modules.Backup.Core.Entities.DbContext;
 using Modules.Backup.Core.Entities.Models;
 using NLog;
 
@@ -6,7 +7,7 @@ namespace Modules.Backup.Core.StaticClasses;
 public static class BackupDirectories
 {
     public static (string DatabaseBackupPath, string BackupFileName) CheckDbNameAndPrepareBackupPaths(
-        DatabaseConfigModel databaseConfig, ApplicationConfigurationModel appConfig)
+        DbConnection databaseConfig, ApplicationConfigurationModel appConfig)
     {
         if (string.IsNullOrWhiteSpace(databaseConfig.DbName))
             throw new ArgumentNullException(nameof(databaseConfig.DbName));

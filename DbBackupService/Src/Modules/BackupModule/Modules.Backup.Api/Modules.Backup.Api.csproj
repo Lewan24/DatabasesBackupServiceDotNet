@@ -9,7 +9,7 @@
   <ItemGroup>
 	<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.0" />
     <ProjectReference Include="..\Modules.Backup.Application\Modules.Backup.Application.csproj" />
-    <ProjectReference Include="..\Modules.Backup.Infrasctructure\Modules.Backup.Infrasctructure.csproj" />
+    <ProjectReference Include="..\Modules.Backup.Infrastructure\Modules.Backup.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

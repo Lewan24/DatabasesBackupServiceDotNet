@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 
-namespace Modules.Backup.Api;
+namespace Modules.Backup.Api.EOTests;
 
 internal static class TestsEndpoints
 {

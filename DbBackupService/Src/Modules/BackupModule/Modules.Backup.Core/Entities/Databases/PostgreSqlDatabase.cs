@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Modules.Backup.Core.Entities.DbContext;
 using Modules.Backup.Core.Entities.Models;
 using Modules.Backup.Core.Interfaces;
 using Modules.Backup.Core.StaticClasses;
@@ -7,7 +8,7 @@ using NLog;
 namespace Modules.Backup.Core.Entities.Databases;
 
 public class PostgreSqlDatabase(
-    DatabaseConfigModel databaseConfig,
+    DbConnection databaseConfig,
     Logger logger,
     ApplicationConfigurationModel appConfig)
     : IDatabase
@@ -24,7 +25,7 @@ public class PostgreSqlDatabase(
             var combinedBackupPathBackupFile =
                 await BackupDirectories.PrepareNeededDirectoryAndClean(backupPaths, appConfig, _logger);
 
-            var server = databaseConfig.DbServerAndPort!.Split(':');
+            var server = databaseConfig.DbServerPort!.Split(':');
 
             var userFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
             string pgPassFilePath;

@@ -1,4 +1,5 @@
 using Modules.Backup.Application.Interfaces;
+using Modules.Backup.Core.Entities.DbContext;
 using Modules.Backup.Core.Entities.Models;
 using Modules.Backup.Core.StaticClasses;
 using Newtonsoft.Json;
@@ -41,7 +42,7 @@ public class ApplicationService(
         }
     }
 
-    private async Task<List<DatabaseConfigModel>> ReadDatabaseConfigurations()
+    private async Task<List<DbConnection>> ReadDatabaseConfigurations()
     {
         try
         {
@@ -49,7 +50,7 @@ public class ApplicationService(
                 "databasesConfigurations.json");
             var jsonContent = await File.ReadAllTextAsync(jsonFilePath);
 
-            var configs = JsonConvert.DeserializeObject<List<DatabaseConfigModel>>(jsonContent)!;
+            var configs = JsonConvert.DeserializeObject<List<DbConnection>>(jsonContent)!;
 
             return configs;
         }

@@ -1,5 +1,6 @@
 using Modules.Backup.Application.Interfaces;
 using Modules.Backup.Core.Entities.Databases;
+using Modules.Backup.Core.Entities.DbContext;
 using Modules.Backup.Core.Entities.Models;
 using Modules.Backup.Core.Interfaces;
 using Modules.Backup.Core.StaticClasses;
@@ -17,7 +18,7 @@ public class DbBackupService(
 
     private int _madeBackupsCounter;
 
-    public async Task RunService(List<DatabaseConfigModel> dbConfigurations)
+    public async Task RunService(List<DbConnection> dbConfigurations)
     {
         _logger.Info("{ServiceName} has started", nameof(DbBackupService));
         _logger.Info("Preparing backups for {DbCConfigsCount} databases...", dbConfigurations.Count);
@@ -32,7 +33,7 @@ public class DbBackupService(
         return Task.FromResult(_madeBackupsCounter);
     }
 
-    private async Task PerformBackup(List<DatabaseConfigModel> dbConfigurations)
+    private async Task PerformBackup(List<DbConnection> dbConfigurations)
     {
         try
         {

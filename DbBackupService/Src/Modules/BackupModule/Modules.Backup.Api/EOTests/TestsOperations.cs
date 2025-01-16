@@ -1,11 +1,10 @@
-﻿using System.Diagnostics;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Modules.Backup.Infrasctructure.Interfaces;
+using Modules.Backup.Infrastructure.Interfaces;
 
-namespace Modules.Backup.Api;
+namespace Modules.Backup.Api.EOTests;
 
 internal abstract record TestsOperations
 {

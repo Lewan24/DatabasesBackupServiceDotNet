@@ -1,9 +1,9 @@
-using Modules.Backup.Core.Entities.Models;
+using Modules.Backup.Core.Entities.DbContext;
 
 namespace Modules.Backup.Application.Interfaces;
 
 public interface IDbBackupService
 {
-    Task RunService(List<DatabaseConfigModel> dbConfigurations);
+    Task RunService(List<DbConnection> dbConfigurations);
     Task<int> GetBackupsCounter();
 }

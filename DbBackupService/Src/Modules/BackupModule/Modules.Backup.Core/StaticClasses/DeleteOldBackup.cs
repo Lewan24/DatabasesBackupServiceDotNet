@@ -3,7 +3,7 @@ using NLog;
 
 namespace Modules.Backup.Core.StaticClasses;
 
-public static partial class DeleteOldBackup
+public static class DeleteOldBackup
 {
     public static Task Delete(string directoryPath, int daysThreshold, Logger logger)
     {
