@@ -1,18 +1,12 @@
-﻿@inherits LayoutComponentBase
+﻿@inherits LayoutBase
 
 @inject IJSRuntime JsRuntime
 
-<PageTitle>Backup System</PageTitle>
-
-<MudThemeProvider IsDarkMode="true"/>
-<MudPopoverProvider />
-<MudDialogProvider CloseButton="true" CloseOnEscapeKey="true" Position="DialogPosition.Center"
-                   BackgroundClass="blurDialogBg"/>
-<MudSnackbarProvider/>
-
 <MudLayout>
     <MudAppBar Elevation="4" Dense="true">
-        <MudIconButton Icon="@Icons.Material.Filled.Menu" Size="Size.Small" OnClick="@(() => _drawerOpen = !_drawerOpen)" />
+        <MudIconButton Class="mr-4" Icon="@Icons.Material.Filled.Menu" Size="Size.Medium" OnClick="@(() => _drawerOpen = !_drawerOpen)" />
+        
+        <MudImage Alt="Logo" Elevation="4" Src="@Assets["media/BackupSystemLogo.jpg"]" Style="height: 80%;" />
         <MudSpacer/>
         <AuthorizeView>
             <Authorized>
