@@ -1,3 +1,53 @@
 ﻿@inherits LayoutComponentBase
 
-@Body
+@inject IJSRuntime JsRuntime
+
+<PageTitle>Backup System</PageTitle>
+
+<MudThemeProvider IsDarkMode="true"/>
+<MudPopoverProvider />
+<MudDialogProvider CloseButton="true" CloseOnEscapeKey="true" Position="DialogPosition.Center"
+                   BackgroundClass="blurDialogBg"/>
+<MudSnackbarProvider/>
+
+<MudLayout>
+    <MudAppBar Elevation="4" Dense="true">
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Size="Size.Small" OnClick="@(() => _drawerOpen = !_drawerOpen)" />
+        <MudSpacer/>
+        <AuthorizeView>
+            <Authorized>
+                <MudButton Color="Color.Secondary" Variant="Variant.Text"
+                           Size="Size.Small" StartIcon="@Icons.Material.Filled.ArrowRight">
+                    Logout
+                </MudButton>
+            </Authorized>
+            <NotAuthorized>
+                <MudButton Color="Color.Secondary" Variant="Variant.Text"
+                           Size="Size.Small" StartIcon="@Icons.Material.Filled.ArrowRight">
+                    Login
+                </MudButton>
+            </NotAuthorized>
+        </AuthorizeView>
+    </MudAppBar>
+    
+    <MudDrawer Variant="@DrawerVariant.Temporary" Elevation="5" @bind-Open="_drawerOpen" 
+               ClipMode="DrawerClipMode.Always" OverlayAutoClose="true" Overlay="true">
+        <NavMenu/>
+    </MudDrawer>
+
+    <MudMainContent>
+        @Body
+    </MudMainContent>
+</MudLayout>
+
+@code{
+    private bool _drawerOpen;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if(firstRender)
+            await JsRuntime.InvokeAsync<object>("hideElementById", "preload");
+
+        await base.OnAfterRenderAsync(firstRender);
+    }
+}

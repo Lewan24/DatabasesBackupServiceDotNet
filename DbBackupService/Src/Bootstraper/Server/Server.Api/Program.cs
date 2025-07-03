@@ -23,7 +23,6 @@ IConfiguration config = new ConfigurationBuilder()
 builder.Configuration.AddConfiguration(config);
 
 builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents()
     .AddAuthenticationStateSerialization(options => options.SerializeAllClaims = true);
 
@@ -163,9 +162,8 @@ app.UseHttpsRedirection();
 
 app.UseStaticFiles();
 app.MapStaticAssets();
-        
+
 app.MapRazorComponents<App>()
-    .AddInteractiveServerRenderMode()
     .AddInteractiveWebAssemblyRenderMode();
 
 app.UseRouting();
@@ -178,11 +176,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseAntiforgery();
-
-app.MapBlazorHub(options =>
-{
-    options.CloseOnAuthenticationExpiration = true;
-});
 
 app.MapHub<BackupHub>("/backuphub");
 
