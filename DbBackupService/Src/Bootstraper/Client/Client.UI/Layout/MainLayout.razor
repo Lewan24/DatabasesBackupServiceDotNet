@@ -1,6 +1,12 @@
-﻿@inherits LayoutBase
+﻿@inherits LayoutComponentBase
 
 @inject IJSRuntime JsRuntime
+
+<MudThemeProvider IsDarkMode="true"/>
+<MudPopoverProvider />
+<MudDialogProvider CloseButton="true" CloseOnEscapeKey="true" Position="DialogPosition.Center"
+                   BackgroundClass="blurDialogBg"/>
+<MudSnackbarProvider/>
 
 <MudLayout>
     <MudAppBar Elevation="4" Dense="true">

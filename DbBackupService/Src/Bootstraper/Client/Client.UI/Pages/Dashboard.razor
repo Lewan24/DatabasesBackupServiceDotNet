@@ -4,5 +4,7 @@
 
 <PageTitle>Dashboard</PageTitle>
 
-<button class="btn btn-primary btn-small" onclick="@(() => NavManager.NavigateTo("/scalar/v1", true))">Open API Documentation</button>
+<MudContainer Class="d-flex flex-row justify-center pa-4">
+    <MudButton Onclick="@(() => NavManager.NavigateTo("/scalar/v1", true))" Variant="Variant.Filled" Color="Color.Primary">Open API Documentation</MudButton>
+</MudContainer>
 
