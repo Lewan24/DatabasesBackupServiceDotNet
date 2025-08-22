@@ -4,11 +4,11 @@
 
 ---
 
-![.NET](https://img.shields.io/badge/.NET-9-blueviolet?logo=dotnet&logoColor=white)  
-![Blazor](https://img.shields.io/badge/Blazor-WebAssembly-purple?logo=blazor&logoColor=white)  
-![Docker](https://img.shields.io/badge/Docker-Ready-blue?logo=docker&logoColor=white)  
-![Database](https://img.shields.io/badge/Databases-MySQL%20|%20PostgreSQL%20|%20SQLite-lightgrey)  
-![License](https://img.shields.io/badge/License-MIT-green)  
+![.NET](https://img.shields.io/badge/.NET-9-blueviolet?logo=dotnet&logoColor=white)
+![Blazor](https://img.shields.io/badge/Blazor-WebAssembly-purple?logo=blazor&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-Ready-blue?logo=docker&logoColor=white)
+![Database](https://img.shields.io/badge/Databases-MySQL%20|%20PostgreSQL%20|%20SQLite-lightgrey)
+![License](https://img.shields.io/badge/License-MIT-green)
 
 ---
 
