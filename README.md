@@ -81,6 +81,6 @@ You are free to use it commercially and privately, extend it, and adapt it to yo
 
 ## 🤝 Contributing  
 Want to contribute?<br>
-Open an issue 🐛 in [Issues](../../issues)<br>  
-Propose a feature 💡<br>  
-Submit a pull request 🚀  
+Open an issue 🐛 in [Issues](../../issues)<br>
+Propose a feature 💡<br>
+Submit a pull request 🚀
