@@ -1,15 +1,16 @@
+# 💾 DatabasesBackupServiceDotNet  
+
 [🇵🇱 Read in English](README.md)
 
 ---
 
-![.NET](https://img.shields.io/badge/.NET-9-blueviolet?logo=dotnet&logoColor=white) ![Blazor](https://img.shields.io/badge/Blazor-WebAssembly-purple?logo=blazor&logoColor=white)
+![.NET](https://img.shields.io/badge/.NET-9-blueviolet?logo=dotnet&logoColor=white)
+![Blazor](https://img.shields.io/badge/Blazor-WebAssembly-purple?logo=blazor&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-Ready-blue?logo=docker&logoColor=white)
 ![Database](https://img.shields.io/badge/Databases-MySQL%20|%20PostgreSQL%20|%20SQLite-lightgrey)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
 ---
-
-# 💾 DatabasesBackupServiceDotNet  
 
 **DatabasesBackupServiceDotNet** to otwarto-źródłowa aplikacja konteneryzowana w **Dockerze**, napisana w **.NET 9 Blazor WebAssembly** w architekturze modularnego monolitu.  
 Aplikacja umożliwia **centralne zarządzanie kopiami zapasowymi wielu baz danych** – obecnie wspiera **MySQL** i **PostgreSQL**, a w planach znajduje się obsługa **MS SQL Server**.  
@@ -74,6 +75,6 @@ Możesz go używać komercyjnie i prywatnie, rozwijać i dostosowywać do własn
 
 ## 🤝 Kontrybucja
 Chcesz dołożyć swoją cegiełkę?<br>
-Otwórz zgłoszenie 🐛 w Issues<br>
+Otwórz zgłoszenie 🐛 w [Issues](../../issues)<br>
 Zaproponuj funkcję 💡<br>
 Wyślij pull request 🚀
