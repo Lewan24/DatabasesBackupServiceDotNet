@@ -1,8 +1,10 @@
-﻿@inherits LayoutComponentBase
+﻿@using Client.UI.Data.Layout
+
+@inherits LayoutComponentBase
 
 @inject IJSRuntime JsRuntime
 
-<MudThemeProvider IsDarkMode="true"/>
+<MudThemeProvider IsDarkMode="true" Theme="@DefaultLayout.Theme"/>
 <MudPopoverProvider />
 <MudDialogProvider CloseButton="true" CloseOnEscapeKey="true" Position="DialogPosition.Center"
                    BackgroundClass="blurDialogBg"/>
@@ -12,21 +14,21 @@
     <MudAppBar Elevation="4" Dense="true">
         <MudIconButton Class="mr-4" Icon="@Icons.Material.Filled.Menu" Size="Size.Medium" OnClick="@(() => _drawerOpen = !_drawerOpen)" />
         
-        <MudImage Alt="Logo" Elevation="4" Src="@Assets["media/BackupSystemLogo.jpg"]" Style="height: 80%;" />
         <MudSpacer/>
         <AuthorizeView>
             <Authorized>
-                <MudButton Color="Color.Secondary" Variant="Variant.Text"
-                           Size="Size.Small" StartIcon="@Icons.Material.Filled.ArrowRight">
-                    Logout
-                </MudButton>
+                <MudText>Welcome</MudText>
+                <MudText Color="Color.Primary" Class="ml-1">Test</MudText>
+                
+                <MudMenu Icon="@Icons.Material.Filled.ArrowDropDown" Color="Color.Primary" Size="Size.Medium">
+                    <MudMenuItem>
+                        <MudButton Color="Color.Primary" Variant="Variant.Text"
+                                   Size="Size.Small" StartIcon="@Icons.Material.Filled.ArrowRight">
+                            Logout
+                        </MudButton>
+                    </MudMenuItem>
+                </MudMenu>
             </Authorized>
-            <NotAuthorized>
-                <MudButton Color="Color.Secondary" Variant="Variant.Text"
-                           Size="Size.Small" StartIcon="@Icons.Material.Filled.ArrowRight">
-                    Login
-                </MudButton>
-            </NotAuthorized>
         </AuthorizeView>
     </MudAppBar>
     
@@ -42,7 +44,7 @@
 
 @code{
     private bool _drawerOpen;
-
+    
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if(firstRender)

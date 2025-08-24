@@ -4,8 +4,18 @@
 
 <PageTitle>Dashboard</PageTitle>
 
-<MudContainer Class="d-flex flex-row justify-center pa-4">
-    <MudButton Onclick="@(() => NavManager.NavigateTo("/scalar/v1", true))" Variant="Variant.Filled" Color="Color.Primary">Open API Documentation</MudButton>
+<MudContainer Class="d-flex flex-row justify-center pa-4 my-10">
+    <MudButton Href="@_apiUrl" Target="_blank" Variant="Variant.Filled" Color="Color.Primary">Open API Documentation</MudButton>
 </MudContainer>
 
-<MudText Class="mt-5" Align="Align.Center" Color="Color.Info">Here are gonna be all backups statistics. Charts, numbers and other nerd things.</MudText>
+<MudText Align="Align.Center">Here are gonna be all backups statistics. Charts, numbers and other nerd things.</MudText>
+
+@code{
+    private string _apiUrl = "";
+
+    protected override void OnInitialized()
+    {
+        _apiUrl = $"{NavManager.Uri}scalar/v1";
+    }
+
+}
