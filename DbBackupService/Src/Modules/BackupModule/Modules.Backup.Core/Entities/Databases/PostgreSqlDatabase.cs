@@ -8,7 +8,7 @@ using NLog;
 namespace Modules.Backup.Core.Entities.Databases;
 
 public class PostgreSqlDatabase(
-    DbConnection databaseConfig,
+    DbServerConnection databaseConfig,
     Logger logger,
     ApplicationConfigurationModel appConfig)
     : IDatabase
@@ -25,7 +25,7 @@ public class PostgreSqlDatabase(
             var combinedBackupPathBackupFile =
                 await BackupDirectories.PrepareNeededDirectoryAndClean(backupPaths, appConfig, _logger);
 
-            var server = databaseConfig.DbServerPort!.Split(':');
+            var server = $"{databaseConfig.ServerHost}:{databaseConfig.ServerPort}";
 
             var userFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
             string pgPassFilePath;
@@ -46,7 +46,7 @@ public class PostgreSqlDatabase(
             }
 
             await File.WriteAllTextAsync(pgPassFilePath,
-                $"{server[0]}:{server[1]}:{databaseConfig.DbName}:{databaseConfig.DbUser}:{databaseConfig.DbPasswd}");
+                $"{server}:{databaseConfig.DbName}:{databaseConfig.DbUser}:{databaseConfig.DbPasswd}");
 
             if (isLinux)
             {
@@ -79,7 +79,7 @@ public class PostgreSqlDatabase(
                 {
                     FileName = "pg_dump",
                     Arguments =
-                        $@"-h {server[0]} -p {server[1]} -U {databaseConfig.DbUser} -F c -b -v -f {combinedBackupPathBackupFile} {databaseConfig.DbName}",
+                        $@"-h {databaseConfig.ServerHost} -p {databaseConfig.ServerPort} -U {databaseConfig.DbUser} -F c -b -v -f {combinedBackupPathBackupFile} {databaseConfig.DbName}",
                     RedirectStandardError = true,
                     CreateNoWindow = true,
                     UseShellExecute = false

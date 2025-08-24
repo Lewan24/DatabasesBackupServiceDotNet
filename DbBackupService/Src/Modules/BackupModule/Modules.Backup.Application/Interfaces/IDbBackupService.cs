@@ -4,6 +4,6 @@ namespace Modules.Backup.Application.Interfaces;
 
 public interface IDbBackupService
 {
-    Task RunService(List<DbConnection> dbConfigurations);
+    Task RunService(List<DbServerConnection> dbConfigurations);
     Task<int> GetBackupsCounter();
 }

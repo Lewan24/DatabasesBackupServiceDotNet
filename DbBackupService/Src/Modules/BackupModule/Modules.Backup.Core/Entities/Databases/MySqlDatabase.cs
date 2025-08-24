@@ -7,7 +7,7 @@ using NLog;
 
 namespace Modules.Backup.Core.Entities.Databases;
 
-public class MySqlDatabase(DbConnection databaseConfig, Logger logger, ApplicationConfigurationModel appConfig)
+public class MySqlDatabase(DbServerConnection databaseConfig, Logger logger, ApplicationConfigurationModel appConfig)
     : IDatabase
 {
     private readonly Logger _logger = logger.Factory.GetLogger(nameof(MySqlDatabase));

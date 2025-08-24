@@ -18,7 +18,7 @@ public class DbBackupService(
 
     private int _madeBackupsCounter;
 
-    public async Task RunService(List<DbConnection> dbConfigurations)
+    public async Task RunService(List<DbServerConnection> dbConfigurations)
     {
         _logger.Info("{ServiceName} has started", nameof(DbBackupService));
         _logger.Info("Preparing backups for {DbCConfigsCount} databases...", dbConfigurations.Count);
@@ -33,7 +33,7 @@ public class DbBackupService(
         return Task.FromResult(_madeBackupsCounter);
     }
 
-    private async Task PerformBackup(List<DbConnection> dbConfigurations)
+    private async Task PerformBackup(List<DbServerConnection> dbConfigurations)
     {
         try
         {

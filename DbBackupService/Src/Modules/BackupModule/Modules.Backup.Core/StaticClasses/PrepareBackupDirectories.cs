@@ -7,7 +7,7 @@ namespace Modules.Backup.Core.StaticClasses;
 public static class BackupDirectories
 {
     public static (string DatabaseBackupPath, string BackupFileName) CheckDbNameAndPrepareBackupPaths(
-        DbConnection databaseConfig, ApplicationConfigurationModel appConfig)
+        DbServerConnection databaseConfig, ApplicationConfigurationModel appConfig)
     {
         if (string.IsNullOrWhiteSpace(databaseConfig.DbName))
             throw new ArgumentNullException(nameof(databaseConfig.DbName));

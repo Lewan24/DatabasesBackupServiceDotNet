@@ -42,7 +42,7 @@ public class ApplicationService(
         }
     }
 
-    private async Task<List<DbConnection>> ReadDatabaseConfigurations()
+    private async Task<List<DbServerConnection>> ReadDatabaseConfigurations()
     {
         try
         {
@@ -50,7 +50,7 @@ public class ApplicationService(
                 "databasesConfigurations.json");
             var jsonContent = await File.ReadAllTextAsync(jsonFilePath);
 
-            var configs = JsonConvert.DeserializeObject<List<DbConnection>>(jsonContent)!;
+            var configs = JsonConvert.DeserializeObject<List<DbServerConnection>>(jsonContent)!;
 
             return configs;
         }

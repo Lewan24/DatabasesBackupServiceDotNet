@@ -92,7 +92,7 @@ namespace Modules.Backup.Infrastructure.DbContexts.Migrations
                     b.ToTable("WorkHours");
                 });
 
-            modelBuilder.Entity("Modules.Backup.Core.Entities.DbContext.DbConnection", b =>
+            modelBuilder.Entity("Modules.Backup.Core.Entities.DbContext.DbServerConnection", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
