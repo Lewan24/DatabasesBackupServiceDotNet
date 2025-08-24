@@ -9,6 +9,6 @@ public sealed class RegisterRequest
     [Required] public string? Password { get; set; }
 
     [Required]
-    [Compare(nameof(Password), ErrorMessage = "Hasła się różnią!")]
+    [Compare(nameof(Password), ErrorMessage = "Passwords do not match!")]
     public string? PasswordConfirm { get; set; }
 }

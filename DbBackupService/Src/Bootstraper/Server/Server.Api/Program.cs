@@ -168,7 +168,7 @@ app.MapRazorComponents<App>()
 
 app.UseRouting();
 
-app.MapRequiredEndpoints();
+app.MapBackupModuleEndpoints();
 
 app.UseCors(defaultCorsPolicyName);
 

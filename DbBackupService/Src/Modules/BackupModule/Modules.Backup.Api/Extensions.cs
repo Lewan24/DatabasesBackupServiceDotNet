@@ -19,7 +19,7 @@ public static class Extensions
         return services;
     }
 
-    public static WebApplication MapRequiredEndpoints(this WebApplication app)
+    public static WebApplication MapBackupModuleEndpoints(this WebApplication app)
     {
         app.MapConfigEndpoints();
         app.MapAppEndpoints();

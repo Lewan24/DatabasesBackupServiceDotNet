@@ -78,7 +78,6 @@ public class AuthController(
     [HttpPost("ChangePassword")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [BasicTokenAuthorization]
     public async Task<IActionResult> ChangePassword(ChangePasswordRequest request)
     {
         logger.LogInformation("Changing password for {UserName}...", User.Identity?.Name);

@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
+using Modules.Auth.Api.Endpoints;
 using Modules.Auth.Application;
 using Modules.Auth.Infrastructure;
 
@@ -12,5 +14,12 @@ public static class Extensions
         services.AddApplicationLayer();
 
         return services;
+    }
+
+    public static WebApplication MapAuthModuleEndpoints(this WebApplication app)
+    {
+        app.MapAuthEndpoints();
+        
+        return app;
     }
 }
