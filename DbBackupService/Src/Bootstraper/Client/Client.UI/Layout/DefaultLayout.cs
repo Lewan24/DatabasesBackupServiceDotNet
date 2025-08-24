@@ -1,6 +1,6 @@
 ﻿using MudBlazor;
 
-namespace Client.UI.Data.Layout;
+namespace Client.UI.Layout;
 
 public static class DefaultLayout
 {
