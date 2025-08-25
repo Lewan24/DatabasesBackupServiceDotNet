@@ -1,6 +1,6 @@
-namespace Modules.Auth.Api.Entities;
+namespace Modules.Auth.Core.Entities;
 
-internal sealed record AuthSettings
+public sealed record AuthSettings
 {
     public bool AutoConfirmAccount { get; init; }
     public int DefaultTokenExpirationTimeInMinutes { get; init; } = 480;

@@ -1,17 +1,14 @@
 using System.Net;
 using System.Net.Http.Json;
 using Blazored.LocalStorage;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Modules.Auth.Core.Entities;
+using Client.UI.Data.Interfaces;
 using Modules.Auth.Shared.ActionsRequests;
-using Modules.Auth.Shared.Entities.Tokens;
-using Modules.Auth.Shared.Interfaces;
+using Modules.Auth.Shared.Entities;
 using Newtonsoft.Json;
 using OneOf;
 using OneOf.Types;
 
-namespace Modules.Auth.Application.Services;
+namespace Client.UI.Data.Services;
 
 internal class AuthService(HttpClient httpClient, IServiceScopeFactory scopeFactory, ILogger<AuthService> logger) : IAuthService
 {

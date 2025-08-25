@@ -1,7 +1,7 @@
 using OneOf;
 using OneOf.Types;
 
-namespace Modules.Auth.Shared.Interfaces.Token;
+namespace Modules.Auth.Shared.Interfaces;
 
 public interface ITokenValidationService
 {

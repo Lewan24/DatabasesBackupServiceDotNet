@@ -1,10 +1,10 @@
 using Microsoft.Extensions.Logging;
 using Modules.Auth.Infrastructure.Repositories;
-using Modules.Auth.Shared.Interfaces.Token;
+using Modules.Auth.Shared.Interfaces;
 using OneOf;
 using OneOf.Types;
 
-namespace Modules.Auth.Application.Services.Token;
+namespace Modules.Auth.Application.Services;
 
 internal class TokenValidationService(IUserTokenService tokensRepoService, ILogger<TokenValidationService> logger) : ITokenValidationService
 {

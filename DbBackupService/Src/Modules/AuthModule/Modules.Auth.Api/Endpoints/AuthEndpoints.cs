@@ -10,7 +10,7 @@ internal static class AuthEndpoints
 {
     public static WebApplication MapAuthEndpoints(this WebApplication app)
     {
-        var api = app.MapGroup("/auth")
+        var api = app.MapGroup("/api/auth")
             .RequireAuthorization();
 
         api.MapAuthGets()

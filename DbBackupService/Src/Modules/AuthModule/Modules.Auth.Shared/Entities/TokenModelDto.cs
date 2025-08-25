@@ -1,4 +1,4 @@
-namespace Modules.Auth.Shared.Entities.Tokens;
+namespace Modules.Auth.Shared.Entities;
 
 public sealed class TokenModelDto
 {

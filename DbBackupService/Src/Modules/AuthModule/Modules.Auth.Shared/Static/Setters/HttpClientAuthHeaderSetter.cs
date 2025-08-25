@@ -2,7 +2,7 @@ using Modules.Auth.Shared.Static.Entities;
 
 namespace Modules.Auth.Shared.Static.Setters;
 
-internal abstract class HttpClientAuthHeaderSetter
+public abstract class HttpClientAuthHeaderSetter
 {
     /// <summary>
     ///     Sets authorization header in http request message, the value is in-app token that is used in controllers to

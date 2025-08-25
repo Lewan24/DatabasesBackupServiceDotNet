@@ -1,4 +1,4 @@
-namespace Modules.Auth.Core.Entities;
+namespace Modules.Auth.Shared.Entities;
 
 public sealed class CurrentUser
 {

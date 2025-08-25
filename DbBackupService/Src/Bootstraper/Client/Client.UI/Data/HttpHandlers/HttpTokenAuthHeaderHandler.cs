@@ -1,7 +1,7 @@
-using Modules.Auth.Shared.Interfaces;
+using Client.UI.Data.Interfaces;
 using Modules.Auth.Shared.Static.Setters;
 
-namespace Modules.Auth.Shared.HttpHandlers;
+namespace Client.UI.Data.HttpHandlers;
 
 public class HttpTokenAuthHeaderHandler(IAuthService authApi) : DelegatingHandler
 {

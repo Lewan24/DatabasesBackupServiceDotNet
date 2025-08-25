@@ -1,9 +1,9 @@
 using Modules.Auth.Infrastructure.DbContexts;
-using Modules.Auth.Shared.Entities.Tokens;
+using Modules.Auth.Shared.Entities;
 
 namespace Modules.Auth.Infrastructure.Repositories;
 
-internal abstract class UserTokenService(AppIdentityDbContext context) : IUserTokenService
+internal class UserTokenService(AppIdentityDbContext context) : IUserTokenService
 {
     public IEnumerable<TokenModelDto> GetUserTokens(Func<TokenModelDto, bool> predicate)
     {

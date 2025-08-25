@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
-using Modules.Auth.Shared.Interfaces.Token;
+using Modules.Auth.Shared.Interfaces;
 using Modules.Auth.Shared.Static.Entities;
 
 namespace Modules.Shared.Attributes;

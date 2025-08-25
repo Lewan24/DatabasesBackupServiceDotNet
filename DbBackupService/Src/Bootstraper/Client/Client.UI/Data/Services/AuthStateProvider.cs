@@ -1,12 +1,12 @@
 using System.Security.Claims;
 using System.Text.Json;
+using Client.UI.Data.Interfaces;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.Extensions.Logging;
-using Modules.Auth.Core.Entities;
 using Modules.Auth.Shared.ActionsRequests;
+using Modules.Auth.Shared.Entities;
 
-namespace Modules.Auth.Shared.Interfaces;
+namespace Client.UI.Data.Services;
 
 public sealed class AuthStateProvider(IAuthService api, NavigationManager nav, ILogger<AuthStateProvider> logger)
     : AuthenticationStateProvider

@@ -2,14 +2,14 @@
 using System.Text.Json;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Modules.Auth.Api.Entities;
 using Modules.Auth.Core.Entities;
 using Modules.Auth.Infrastructure.DbContexts;
 using Modules.Auth.Shared.ActionsRequests;
-using Modules.Auth.Shared.Entities.Tokens;
-using Modules.Auth.Shared.Interfaces.Token;
+using Modules.Auth.Shared.Entities;
+using Modules.Auth.Shared.Interfaces;
 using Modules.Auth.Shared.Static.Entities;
 
 namespace Modules.Auth.Api.Operations;
@@ -25,8 +25,8 @@ internal abstract record AuthOperations
     public static async Task<IResult> Login(
         HttpContext context,
         LoginRequest? request,
-        UserManager<AppUser> userManager,
-        SignInManager<AppUser> signInManager,
+        [FromServices] UserManager<AppUser> userManager,
+        [FromServices] SignInManager<AppUser> signInManager,
         AppIdentityDbContext db,
         ITokenValidationService tokenValidationService,
         IConfiguration config,
@@ -58,7 +58,7 @@ internal abstract record AuthOperations
     public static async Task<IResult> ChangePassword(
         HttpContext context,
         ChangePasswordRequest request,
-        UserManager<AppUser> userManager,
+        [FromServices] UserManager<AppUser> userManager,
         ILogger<AuthOperations> logger)
     {
         logger.LogInformation("Changing password for {UserName}...", context.User.Identity?.Name);
@@ -79,7 +79,7 @@ internal abstract record AuthOperations
     public static async Task<bool> CanLogIn(
         HttpContext context,
         LoginRequest? request,
-        UserManager<AppUser> userManager,
+        [FromServices] UserManager<AppUser> userManager,
         ILogger<AuthOperations> logger)
     {
         if (request == null || string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password))
@@ -95,7 +95,7 @@ internal abstract record AuthOperations
     public static async Task<IResult> Register(
         HttpContext context,
         RegisterRequest request,
-        UserManager<AppUser> userManager,
+        [FromServices] UserManager<AppUser> userManager,
         IConfiguration config,
         ILogger<AuthOperations> logger)
     {
@@ -134,7 +134,7 @@ internal abstract record AuthOperations
 
     public static async Task<IResult> Logout(
         HttpContext context,
-        SignInManager<AppUser> signInManager,
+        [FromServices] SignInManager<AppUser> signInManager,
         AppIdentityDbContext db,
         ILogger<AuthOperations> logger)
     {
@@ -170,7 +170,7 @@ internal abstract record AuthOperations
 
     public static async Task<IResult> ValidateToken(
         TokenValidationRequest request,
-        ITokenValidationService tokenValidationService)
+        [FromServices] ITokenValidationService tokenValidationService)
     {
         var isValid = tokenValidationService.IsValid(request.Token, request.Email);
 
@@ -184,7 +184,7 @@ internal abstract record AuthOperations
         HttpContext context,
         LoginRequest request,
         AppIdentityDbContext db,
-        ITokenValidationService tokenValidationService,
+        [FromServices] ITokenValidationService tokenValidationService,
         ILogger<AuthOperations> logger)
     {
         logger.LogInformation("Fetching Token for User {UserName} ...", request.Email);
@@ -215,9 +215,9 @@ internal abstract record AuthOperations
     public static async Task<TokenModelDto> RefreshToken(
         HttpContext context,
         LoginRequest request,
-        UserManager<AppUser> userManager,
+        [FromServices] UserManager<AppUser> userManager,
         AppIdentityDbContext db,
-        ITokenValidationService tokenValidationService,
+        [FromServices] ITokenValidationService tokenValidationService,
         IConfiguration config,
         ILogger<AuthOperations> logger)
     {

@@ -1,10 +1,9 @@
-using Modules.Auth.Core.Entities;
 using Modules.Auth.Shared.ActionsRequests;
-using Modules.Auth.Shared.Entities.Tokens;
+using Modules.Auth.Shared.Entities;
 using OneOf;
 using OneOf.Types;
 
-namespace Modules.Auth.Shared.Interfaces;
+namespace Client.UI.Data.Interfaces;
 
 public interface IAuthService : ICurrentUserInfo, IUserToken, ILoggingIn, IRegistration
 {

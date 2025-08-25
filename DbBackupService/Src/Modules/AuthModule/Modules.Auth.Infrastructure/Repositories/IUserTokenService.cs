@@ -1,4 +1,4 @@
-using Modules.Auth.Shared.Entities.Tokens;
+using Modules.Auth.Shared.Entities;
 
 namespace Modules.Auth.Infrastructure.Repositories;
 

@@ -1,4 +1,7 @@
 using Blazored.LocalStorage;
+using Client.UI.Data.Interfaces;
+using Client.UI.Data.Services;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using MudBlazor.Services;
 
@@ -14,6 +17,10 @@ builder.Services.AddAuthenticationStateDeserialization();
 
 builder.Services.AddOptions();
 builder.Services.AddAuthorizationCore();
+
+builder.Services.AddSingleton<IAuthService, AuthService>();
+builder.Services.AddScoped<AuthStateProvider>();
+builder.Services.AddScoped<AuthenticationStateProvider>(s => s.GetRequiredService<AuthStateProvider>());
 
 builder.Logging.AddFilter((category, level) 
     => level >= LogLevel.Warning || 
