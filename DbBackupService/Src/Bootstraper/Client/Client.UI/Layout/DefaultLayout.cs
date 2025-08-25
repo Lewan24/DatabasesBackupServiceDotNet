@@ -8,21 +8,21 @@ public static class DefaultLayout
     {
         PaletteDark = new PaletteDark
         {
-            Primary = "#fa892e",
-            PrimaryLighten = "#ffa764",
-            PrimaryDarken = "#f57a00",
+            Primary = "#00d9ff",
+            PrimaryLighten = "#8AE8FF",
+            PrimaryDarken = "#00A2BA",
 
             TextPrimary = "#FFFFFF",
             TextSecondary = "#E3E3E3",
             TextDisabled = "#7D7D7D",
 
-            Dark = "#121212",
-            DarkDarken = "#0A0A0A",
+            Dark = "#171717",
+            DarkDarken = "#121212",
             DarkLighten = "#1C1C1C",
 
-            Background = "#121212",
-            AppbarBackground = "#1C1C1C",
-            DrawerBackground = "#1C1C1C",
+            Background = "#171717",
+            AppbarBackground = "#1F1E1E",
+            DrawerBackground = "#1F1E1E",
 
             Surface = "#1C1C1C"
         }
