@@ -10,9 +10,9 @@ public sealed record BackupSchedule
     public Guid DbConnectionId { get; set; }
 
     /// <summary>
-    /// <see cref="BackupScheduleConfiguration"/>
+    ///     <see cref="BackupScheduleConfiguration" />
     /// </summary>
     public required string ConfigurationJson { get; set; }
-    
+
     public DateTime NextBackupDate { get; set; }
 }

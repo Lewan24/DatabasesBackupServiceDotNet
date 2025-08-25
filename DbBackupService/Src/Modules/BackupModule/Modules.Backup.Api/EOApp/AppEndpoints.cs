@@ -9,9 +9,9 @@ internal static class AppEndpoints
         var api = app.MapGroup("/app");
 
         api.MapGet("HealthCheck", () => "Not implemented");
-        
+
         api.MapGet("ToggleEmailProvider", () => "Not implemented");
-        
+
         return app;
     }
 }

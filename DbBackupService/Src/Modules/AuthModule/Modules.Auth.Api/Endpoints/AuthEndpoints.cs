@@ -24,14 +24,14 @@ internal static class AuthEndpoints
         api.MapGet("Ping", AuthOperations.Ping)
             .WithSummary("Ping Authorization service")
             .AllowAnonymous();
-        
+
         api.MapGet("GetCurrentUser", AuthOperations.GetCurrentUserInfo)
             .WithSummary("Get information about current user")
             .AllowAnonymous();
-        
+
         return api;
     }
-    
+
     private static RouteGroupBuilder MapAuthPosts(this RouteGroupBuilder api)
     {
         api.MapPost("Login", AuthOperations.Login)
@@ -51,7 +51,7 @@ internal static class AuthEndpoints
 
         api.MapPost("Logout", AuthOperations.Logout)
             .WithSummary("Log user out");
-        
+
         api.MapPost("ValidateToken", AuthOperations.ValidateToken)
             .WithSummary("Validate authorization token")
             .AllowAnonymous()
@@ -62,7 +62,7 @@ internal static class AuthEndpoints
 
         api.MapPost("RefreshToken", AuthOperations.RefreshToken)
             .WithSummary("Refresh user's authorization token");
-        
+
         return api;
     }
 }

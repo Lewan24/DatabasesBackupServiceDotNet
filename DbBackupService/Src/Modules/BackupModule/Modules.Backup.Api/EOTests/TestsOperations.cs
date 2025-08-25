@@ -13,7 +13,7 @@ internal abstract record TestsOperations
         logger.LogInformation("Executing GetTestString operation.");
 
         await Task.Delay(500);
-        
+
         return failRequest switch
         {
             true => TypedResults.BadRequest("Got Fail Command. This is a Test BadRequest."),

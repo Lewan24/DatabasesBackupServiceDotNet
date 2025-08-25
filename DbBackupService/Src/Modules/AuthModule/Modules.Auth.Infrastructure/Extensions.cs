@@ -1,5 +1,3 @@
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 using Modules.Auth.Infrastructure.DbContexts;
 using Modules.Auth.Infrastructure.Repositories;

@@ -7,16 +7,16 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.8" />
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.8"/>
         <PackageReference Include="OneOf" Version="3.0.271"/>
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Attributes\" />
+        <Folder Include="Attributes\"/>
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\AuthModule\Modules.Auth.Shared\Modules.Auth.Shared.csproj" />
+        <ProjectReference Include="..\..\AuthModule\Modules.Auth.Shared\Modules.Auth.Shared.csproj"/>
     </ItemGroup>
-    
+
 </Project>

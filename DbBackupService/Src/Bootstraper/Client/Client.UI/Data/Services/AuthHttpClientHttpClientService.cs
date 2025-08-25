@@ -10,10 +10,11 @@ using OneOf.Types;
 
 namespace Client.UI.Data.Services;
 
-internal class AuthService(HttpClient httpClient, IServiceScopeFactory scopeFactory, ILogger<AuthService> logger) : IAuthService
+internal class AuthHttpClientHttpClientService(HttpClient httpClient, IServiceScopeFactory scopeFactory, ILogger<AuthHttpClientHttpClientService> logger)
+    : IAuthHttpClientService
 {
-    public TokenModelDto? UserToken { get; set; } = new();
     private const string StorageTokenKeyName = "TokenKey";
+    public TokenModelDto? UserToken { get; set; } = new();
 
     public async Task<(bool Success, string? Msg)> Login(LoginRequest? loginRequest)
     {
@@ -65,7 +66,8 @@ internal class AuthService(HttpClient httpClient, IServiceScopeFactory scopeFact
         }
     }
 
-    public async Task<((bool Success, string? Msg) Validation, string? UserName)> Register(RegisterRequest? registerRequest)
+    public async Task<((bool Success, string? Msg) Validation, string? UserName)> Register(
+        RegisterRequest? registerRequest)
     {
         try
         {
@@ -144,7 +146,7 @@ internal class AuthService(HttpClient httpClient, IServiceScopeFactory scopeFact
     {
         if (string.IsNullOrWhiteSpace(UserToken?.Token) || string.IsNullOrWhiteSpace(UserToken.Email))
             return new False();
-        
+
         try
         {
             var tokenValidationRequest = new TokenValidationRequest(UserToken.Token, UserToken.Email);
@@ -152,7 +154,7 @@ internal class AuthService(HttpClient httpClient, IServiceScopeFactory scopeFact
 
             if (result.StatusCode != HttpStatusCode.OK)
                 return new False();
-            
+
             return new True();
         }
         catch (Exception ex)
@@ -164,7 +166,8 @@ internal class AuthService(HttpClient httpClient, IServiceScopeFactory scopeFact
 
     private async Task CheckRetrieveSaveStorageToken()
     {
-        UserToken = await GetLocalStorageService().GetItemAsync<TokenModelDto?>(StorageTokenKeyName) ?? new();
+        UserToken = await GetLocalStorageService().GetItemAsync<TokenModelDto?>(StorageTokenKeyName) ??
+                    new TokenModelDto();
         logger.LogDebug("Token retrieved from storage: {HasToken}", UserToken?.Token != null);
     }
 

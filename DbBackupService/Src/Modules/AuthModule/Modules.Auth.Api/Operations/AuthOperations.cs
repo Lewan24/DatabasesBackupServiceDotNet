@@ -32,7 +32,7 @@ internal abstract record AuthOperations
         IConfiguration config,
         ILogger<AuthOperations> logger)
     {
-        var authSettings = config.GetSection("AuthSettings").Get<AuthSettings>() ?? new();
+        var authSettings = config.GetSection("AuthSettings").Get<AuthSettings>() ?? new AuthSettings();
 
         logger.LogInformation("Trying to log {UserName} in...", request?.Email);
         if (!await CanLogIn(context, request, userManager, logger))
@@ -99,9 +99,11 @@ internal abstract record AuthOperations
         IConfiguration config,
         ILogger<AuthOperations> logger)
     {
-        var authSettings = config.GetSection("AuthSettings").Get<AuthSettings>() ?? new();
+        var authSettings = config.GetSection("AuthSettings").Get<AuthSettings>() ?? new AuthSettings();
 
-        var currentUser = context.User.Identity is null ? null : await userManager.FindByEmailAsync(context.User.Identity?.Name!);
+        var currentUser = context.User.Identity is null
+            ? null
+            : await userManager.FindByEmailAsync(context.User.Identity?.Name!);
         var isUserAdmin = currentUser is not null && await userManager.IsInRoleAsync(currentUser, AppRoles.Admin);
 
         if (!isUserAdmin && !authSettings.EnableRegisterModule)
@@ -129,7 +131,7 @@ internal abstract record AuthOperations
             await userManager.ConfirmEmailAsync(newUser, confirmationToken);
         }
 
-        return TypedResults.Created($"/auth/Register", createdUser.Email);
+        return TypedResults.Created("/auth/Register", createdUser.Email);
     }
 
     public static async Task<IResult> Logout(
@@ -190,11 +192,11 @@ internal abstract record AuthOperations
         logger.LogInformation("Fetching Token for User {UserName} ...", request.Email);
 
         if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password))
-            return new();
+            return new TokenModelDto();
 
         var token = db.UsersTokens.FirstOrDefault(t => t.Email == request.Email && t.ExpirationDate > DateTime.UtcNow);
         if (token == null)
-            return new();
+            return new TokenModelDto();
 
         var isValid = tokenValidationService.IsValid(token.Token, request.Email);
         return await isValid.Match<Task<TokenModelDto>>(
@@ -208,7 +210,7 @@ internal abstract record AuthOperations
             {
                 db.UsersTokens.Remove(token);
                 await db.SaveChangesAsync();
-                return new();
+                return new TokenModelDto();
             });
     }
 
@@ -221,11 +223,11 @@ internal abstract record AuthOperations
         IConfiguration config,
         ILogger<AuthOperations> logger)
     {
-        var authSettings = config.GetSection("AuthSettings").Get<AuthSettings>() ?? new();
+        var authSettings = config.GetSection("AuthSettings").Get<AuthSettings>() ?? new AuthSettings();
 
         logger.LogInformation("Refreshing token for {UserName} ...", request.Email);
         if (!await CanLogIn(context, request, userManager, logger))
-            return new() { ExpirationDate = DateTime.UtcNow.AddMinutes(-1) };
+            return new TokenModelDto { ExpirationDate = DateTime.UtcNow.AddMinutes(-1) };
 
         return CheckIfAnyActiveUserTokenExist(db, request.Email!, logger) ??
                await CreateNewUserToken(db, request.Email!, authSettings.DefaultTokenExpirationTimeInMinutes, logger);
@@ -249,13 +251,8 @@ internal abstract record AuthOperations
         if (string.IsNullOrWhiteSpace(request.CurrentPassword) ||
             string.IsNullOrWhiteSpace(request.NewPassword) ||
             string.IsNullOrWhiteSpace(request.ConfirmNewPassword))
-        {
             error = "Nieprawidłowe dane";
-        }
-        else if (request.NewPassword != request.ConfirmNewPassword)
-        {
-            error = "Hasła się nie zgadzają";
-        }
+        else if (request.NewPassword != request.ConfirmNewPassword) error = "Hasła się nie zgadzają";
 
         return string.IsNullOrEmpty(error);
     }
@@ -275,7 +272,8 @@ internal abstract record AuthOperations
         }
     }
 
-    private static TokenModelDto? CheckIfAnyActiveUserTokenExist(AppIdentityDbContext db, string userEmail, ILogger logger)
+    private static TokenModelDto? CheckIfAnyActiveUserTokenExist(AppIdentityDbContext db, string userEmail,
+        ILogger logger)
     {
         logger.LogInformation("Searching DB for token for user {Email}...", userEmail);
 
@@ -295,7 +293,8 @@ internal abstract record AuthOperations
         };
     }
 
-    private static async Task<TokenModelDto> CreateNewUserToken(AppIdentityDbContext db, string userEmail, int expirationTimeInMinutes, ILogger logger)
+    private static async Task<TokenModelDto> CreateNewUserToken(AppIdentityDbContext db, string userEmail,
+        int expirationTimeInMinutes, ILogger logger)
     {
         logger.LogDebug("Generating token for user {Email}...", userEmail);
 

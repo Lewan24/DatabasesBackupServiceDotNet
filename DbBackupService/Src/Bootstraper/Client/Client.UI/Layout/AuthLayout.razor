@@ -3,7 +3,7 @@
 @inject IJSRuntime JsRuntime
 
 <MudThemeProvider IsDarkMode="true" Theme="@DefaultLayout.Theme"/>
-<MudPopoverProvider />
+<MudPopoverProvider/>
 <MudDialogProvider CloseButton="true" CloseOnEscapeKey="true" Position="DialogPosition.Center"
                    BackgroundClass="blurDialogBg"/>
 <MudSnackbarProvider/>
@@ -15,11 +15,13 @@
 </MudLayout>
 
 @code{
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if(firstRender)
+        if (firstRender)
             await JsRuntime.InvokeAsync<object>("hideElementById", "preload");
 
         await base.OnAfterRenderAsync(firstRender);
     }
+
 }

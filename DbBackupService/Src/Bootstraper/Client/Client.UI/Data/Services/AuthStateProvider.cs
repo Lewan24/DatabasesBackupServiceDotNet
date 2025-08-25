@@ -8,7 +8,7 @@ using Modules.Auth.Shared.Entities;
 
 namespace Client.UI.Data.Services;
 
-public sealed class AuthStateProvider(IAuthService api, NavigationManager nav, ILogger<AuthStateProvider> logger)
+public sealed class AuthStateProvider(IAuthHttpClientService api, NavigationManager nav, ILogger<AuthStateProvider> logger)
     : AuthenticationStateProvider
 {
     private readonly ILoggingIn _loginApi = api;
@@ -17,7 +17,7 @@ public sealed class AuthStateProvider(IAuthService api, NavigationManager nav, I
     private readonly ICurrentUserInfo _userInfoApi = api;
 
     private CurrentUser? _currentUser;
-    
+
     public override async Task<AuthenticationState> GetAuthenticationStateAsync()
     {
         var identity = new ClaimsIdentity();
@@ -130,7 +130,8 @@ public sealed class AuthStateProvider(IAuthService api, NavigationManager nav, I
         return await GetCurrentUserToken(userPassword, returnPageAfterValidPasswordAuthorization, rememberMe);
     }
 
-    private async Task<string?> GetCurrentUserToken(string? password = "", string? pageName = "", bool rememberMe = false)
+    private async Task<string?> GetCurrentUserToken(string? password = "", string? pageName = "",
+        bool rememberMe = false)
     {
         if (string.IsNullOrWhiteSpace(password))
         {
@@ -143,11 +144,13 @@ public sealed class AuthStateProvider(IAuthService api, NavigationManager nav, I
         try
         {
             var currentUser = await CurrentUserInfo();
-            await _tokenApi.RefreshToken(new LoginRequest { Password = password, Email = currentUser?.UserName, RememberMe = rememberMe });
+            await _tokenApi.RefreshToken(new LoginRequest
+                { Password = password, Email = currentUser?.UserName, RememberMe = rememberMe });
         }
         catch (Exception ex)
         {
-            logger.LogInformation("Wystąpił błąd podczas odświeżania Tokenu Uwierzytelniającego. Błąd: {Error}", ex.Message);
+            logger.LogInformation("Wystąpił błąd podczas odświeżania Tokenu Uwierzytelniającego. Błąd: {Error}",
+                ex.Message);
         }
 
         return _tokenApi.UserToken?.Token;

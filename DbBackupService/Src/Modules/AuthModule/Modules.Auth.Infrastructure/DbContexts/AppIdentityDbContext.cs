@@ -16,7 +16,7 @@ public sealed class AppIdentityDbContext(DbContextOptions<AppIdentityDbContext> 
     {
         DbCommon.CreateDbDirectoryIfNotExists();
         optionsBuilder.UseSqlite($"Data Source={DbCommon.DbPath}");
-        
+
         Database.Migrate();
     }
 

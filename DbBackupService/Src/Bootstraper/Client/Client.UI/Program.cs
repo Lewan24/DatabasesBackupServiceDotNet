@@ -18,12 +18,12 @@ builder.Services.AddAuthenticationStateDeserialization();
 builder.Services.AddOptions();
 builder.Services.AddAuthorizationCore();
 
-builder.Services.AddSingleton<IAuthService, AuthService>();
+builder.Services.AddSingleton<IAuthHttpClientService, AuthHttpClientHttpClientService>();
 builder.Services.AddScoped<AuthStateProvider>();
 builder.Services.AddScoped<AuthenticationStateProvider>(s => s.GetRequiredService<AuthStateProvider>());
 
-builder.Logging.AddFilter((category, level) 
-    => level >= LogLevel.Warning || 
+builder.Logging.AddFilter((category, level)
+    => level >= LogLevel.Warning ||
        category?.Contains("System.Net.Http.HttpClient") != true);
 
 await builder.Build().RunAsync();

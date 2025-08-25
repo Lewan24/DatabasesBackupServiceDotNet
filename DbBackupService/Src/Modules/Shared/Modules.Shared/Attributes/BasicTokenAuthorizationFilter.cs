@@ -17,21 +17,20 @@ public class BasicTokenAuthorizationFilter : IEndpointFilter
 
         var authToken = context.HttpContext.Request.Headers[AuthHeaderName.Name].FirstOrDefault();
         if (string.IsNullOrWhiteSpace(authToken))
-        {
-            return Results.BadRequest("Pusty token Autoryzacyjny. Nie można wykonać żądania. Zaloguj się ponownie, aby odświeżyć Token.");
-        }
+            return Results.BadRequest(
+                "Pusty token Autoryzacyjny. Nie można wykonać żądania. Zaloguj się ponownie, aby odświeżyć Token.");
 
         var tokenValidationService = context.HttpContext.RequestServices.GetService<ITokenValidationService>();
         if (tokenValidationService is null)
-        {
-            return Results.BadRequest("Nie można uruchomić serwisu do sprawdzenia poprawności tokenu uwierzytelniającego.");
-        }
+            return Results.BadRequest(
+                "Nie można uruchomić serwisu do sprawdzenia poprawności tokenu uwierzytelniającego.");
 
         var isTokenValid = tokenValidationService.IsValid(authToken, context.HttpContext.User.Identity?.Name);
 
-        return await isTokenValid.Match<ValueTask<object?>>(
+        return await isTokenValid.Match(
             _ => next(context), // Token OK → przepuszczamy dalej
-            _ => ValueTask.FromResult<object?>(Results.BadRequest("Nieprawidłowy token uwierzytelniający. Zaloguj się ponownie, aby odświeżyć Token."))
+            _ => ValueTask.FromResult<object?>(
+                Results.BadRequest("Nieprawidłowy token uwierzytelniający. Zaloguj się ponownie, aby odświeżyć Token."))
         );
     }
 }

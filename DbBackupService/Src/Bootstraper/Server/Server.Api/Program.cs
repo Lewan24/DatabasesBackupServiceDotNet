@@ -1,15 +1,13 @@
 using Blazored.LocalStorage;
 using Client.UI;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.ResponseCompression;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Modules.Auth.Api;
-using Scalar.AspNetCore;
 using Modules.Backup.Api;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Logs;
+using Scalar.AspNetCore;
 using Server.Api.Common;
 using Server.Api.Hubs;
 
@@ -18,7 +16,7 @@ const string defaultCorsPolicyName = "Default";
 var builder = WebApplication.CreateBuilder(args);
 
 IConfiguration config = new ConfigurationBuilder()
-    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+    .AddJsonFile("appsettings.json", false, true)
     .Build();
 
 builder.Configuration.AddConfiguration(config);
@@ -40,10 +38,10 @@ builder.Services.AddAuthModule();
 builder.Services.AddLogging(logging =>
 {
     logging.AddConfiguration(config.GetSection("Logging"));
-     
+
     var seqConfig = config.GetSection("SeqConfiguration").Get<SeqConfiguration>();
 
-    if (seqConfig is not null && 
+    if (seqConfig is not null &&
         !string.IsNullOrWhiteSpace(seqConfig.ApiKey) &&
         !string.IsNullOrWhiteSpace(seqConfig.Host))
         logging.AddOpenTelemetry(openTelemetryLoggerOptions =>
@@ -58,11 +56,8 @@ builder.Services.AddLogging(logging =>
                 exporter.Headers = $"X-Seq-ApiKey={seqConfig.ApiKey}";
             });
         });
-            
-    if (builder.Environment.IsDevelopment())
-    {
-        logging.AddConsole();
-    }
+
+    if (builder.Environment.IsDevelopment()) logging.AddConsole();
 });
 
 builder.Services.AddCors(opt =>
@@ -73,14 +68,14 @@ builder.Services.AddCors(opt =>
             policy.AllowAnyHeader()
                 .AllowAnyOrigin()
                 .AllowAnyMethod();
-        
+
         if (builder.Environment.IsProduction())
         {
             var allowedOrigins = config.GetValue<string[]>("AllowedOrigins");
 
             if (allowedOrigins is null || !allowedOrigins.Any())
                 throw new ApplicationException("Production Environment requires to provide allowed origins.");
-                
+
             policy.WithOrigins(allowedOrigins)
                 .AllowAnyHeader()
                 .AllowAnyMethod()

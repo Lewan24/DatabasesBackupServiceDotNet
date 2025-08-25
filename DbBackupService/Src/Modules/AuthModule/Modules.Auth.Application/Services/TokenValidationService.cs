@@ -6,18 +6,19 @@ using OneOf.Types;
 
 namespace Modules.Auth.Application.Services;
 
-internal class TokenValidationService(IUserTokenService tokensRepoService, ILogger<TokenValidationService> logger) : ITokenValidationService
+internal class TokenValidationService(IUserTokenService tokensRepoService, ILogger<TokenValidationService> logger)
+    : ITokenValidationService
 {
     public OneOf<True, False> IsValid(string? token, string? userEmail)
     {
         logger.LogInformation("Validating token {Token} for user {Email}...", token, userEmail);
-        
+
         if (string.IsNullOrWhiteSpace(token) || string.IsNullOrWhiteSpace(userEmail))
         {
             logger.LogInformation("Token or Email is empty.");
             return new False();
         }
-        
+
         logger.LogDebug("Searching DB with passed token...");
         var userToken = tokensRepoService.GetUserTokens(t =>
             t.Token == token &&

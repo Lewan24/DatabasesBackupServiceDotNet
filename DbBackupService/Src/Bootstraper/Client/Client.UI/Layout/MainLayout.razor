@@ -3,21 +3,22 @@
 @inject IJSRuntime JsRuntime
 
 <MudThemeProvider IsDarkMode="true" Theme="@DefaultLayout.Theme"/>
-<MudPopoverProvider />
+<MudPopoverProvider/>
 <MudDialogProvider CloseButton="true" CloseOnEscapeKey="true" Position="DialogPosition.Center"
                    BackgroundClass="blurDialogBg"/>
 <MudSnackbarProvider/>
 
 <MudLayout>
     <MudAppBar Elevation="4" Dense="true">
-        <MudIconButton Class="mr-4" Icon="@Icons.Material.Filled.Menu" Size="Size.Medium" OnClick="@(() => _drawerOpen = !_drawerOpen)" />
-        
+        <MudIconButton Class="mr-4" Icon="@Icons.Material.Filled.Menu" Size="Size.Medium"
+                       OnClick="@(() => _drawerOpen = !_drawerOpen)"/>
+
         <MudSpacer/>
         <AuthorizeView>
             <Authorized>
                 <MudText>Welcome</MudText>
                 <MudText Color="Color.Primary" Class="ml-1">Test</MudText>
-                
+
                 <MudMenu Icon="@Icons.Material.Filled.ArrowDropDown" Color="Color.Primary" Size="Size.Medium">
                     <MudMenuItem>
                         <MudButton Color="Color.Primary" Variant="Variant.Text"
@@ -29,8 +30,8 @@
             </Authorized>
         </AuthorizeView>
     </MudAppBar>
-    
-    <MudDrawer Variant="@DrawerVariant.Temporary" Elevation="5" @bind-Open="_drawerOpen" 
+
+    <MudDrawer Variant="@DrawerVariant.Temporary" Elevation="5" @bind-Open="_drawerOpen"
                ClipMode="DrawerClipMode.Always" OverlayAutoClose="true" Overlay="true">
         <NavMenu/>
     </MudDrawer>
@@ -42,12 +43,13 @@
 
 @code{
     private bool _drawerOpen;
-    
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if(firstRender)
+        if (firstRender)
             await JsRuntime.InvokeAsync<object>("hideElementById", "preload");
 
         await base.OnAfterRenderAsync(firstRender);
     }
+
 }

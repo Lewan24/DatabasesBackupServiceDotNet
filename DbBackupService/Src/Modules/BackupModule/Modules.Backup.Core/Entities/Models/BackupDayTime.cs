@@ -1,8 +1,6 @@
-﻿using Modules.Backup.Core.Entities.DbContext;
+﻿namespace Modules.Backup.Core.Entities.Models;
 
-namespace Modules.Backup.Core.Entities.Models;
-
-public record BackupDayTime (EWeekDay Day)
+public record BackupDayTime(EWeekDay Day)
 {
-    public List<TimeOnly> BackupTime { get; set; }  = new();
+    public List<TimeOnly> BackupTime { get; set; } = new();
 }

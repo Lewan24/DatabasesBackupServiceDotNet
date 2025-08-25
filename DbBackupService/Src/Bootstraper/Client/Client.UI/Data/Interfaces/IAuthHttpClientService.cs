@@ -5,7 +5,7 @@ using OneOf.Types;
 
 namespace Client.UI.Data.Interfaces;
 
-public interface IAuthService : ICurrentUserInfo, IUserToken, ILoggingIn, IRegistration
+public interface IAuthHttpClientService : ICurrentUserInfo, IUserToken, ILoggingIn, IRegistration
 {
 }
 

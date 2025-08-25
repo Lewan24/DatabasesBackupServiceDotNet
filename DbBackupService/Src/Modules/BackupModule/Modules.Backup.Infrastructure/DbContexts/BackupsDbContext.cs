@@ -21,7 +21,7 @@ public sealed class BackupsDbContext : DbContext
     {
         DbCommon.CreateDbDirectoryIfNotExists();
         options.UseSqlite($"Data Source={DbCommon.DbPath}");
-        
+
         Database.Migrate();
     }
 }

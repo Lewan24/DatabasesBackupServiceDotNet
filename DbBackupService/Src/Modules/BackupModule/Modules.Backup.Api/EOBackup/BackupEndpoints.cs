@@ -11,7 +11,7 @@ internal static class BackupEndpoints
         api.MapGet("MakeBackup", () => "Not implemented");
         api.MapGet("GetBackupPath", () => "Not implemented");
         api.MapGet("GetBackupsList", () => "Not implemented");
-        
+
         return app;
     }
 }

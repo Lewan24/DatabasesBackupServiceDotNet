@@ -1,5 +1,4 @@
-﻿using System.Configuration;
-using Modules.Backup.Core.Entities.Databases;
+﻿using Modules.Backup.Core.Entities.Databases;
 
 namespace Modules.Backup.Core.Entities.DbContext;
 
@@ -13,7 +12,7 @@ public sealed record DbServerConnection
     public DatabaseType DbType { get; set; } = DatabaseType.MySql;
     public required string DbUser { get; set; }
     public required string DbPasswd { get; set; }
-    public bool IsTunnelRequired {get; set;}
+    public bool IsTunnelRequired { get; set; }
     public Guid TunnelId { get; set; }
     public string? BackupEncryptionKeyHas { get; set; }
     public Guid AutoTestBackupsConfigId { get; set; }

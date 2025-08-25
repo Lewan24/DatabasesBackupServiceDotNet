@@ -5,7 +5,7 @@ public sealed record UserNotificationsSettings
     public Guid Id { get; init; }
     public Guid UserId { get; set; }
     public bool IsEnabled { get; set; }
-    
+
     public bool NotifyOnSuccessfulBackup { get; set; }
     public bool NotifyOnErrors { get; set; }
     public bool NotifyOnUpdates { get; set; }

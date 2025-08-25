@@ -19,7 +19,7 @@ public static class Extensions
     public static WebApplication MapAuthModuleEndpoints(this WebApplication app)
     {
         app.MapAuthEndpoints();
-        
+
         return app;
     }
 }
