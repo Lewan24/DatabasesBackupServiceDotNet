@@ -1,9 +1,17 @@
 ﻿services:
   server.api:
     image: server.api
+    container_name: octobackup
     build:
       context: .
       dockerfile: Src/Bootstraper/Server/Server.Api/Dockerfile
     ports:
-      - "10443:8080"
-      - "10000:8081"
+      - "10000:80"
+      - "10443:443"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: "https://+;http://+"
+      Kestrel__Certificates__Default__Path: "/app/Certificate/OctoBackupCert.pfx"
+      Kestrel__Certificates__Default__Password: "Password"
+    volumes:
+      - ./certs/:/app/Certificate/

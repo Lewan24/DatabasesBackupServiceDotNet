@@ -1,10 +1,14 @@
 ﻿FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+
+EXPOSE 80
+EXPOSE 443
+
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
 COPY . . 
 
-RUN dotnet restore "DbBackupService.sln"
+RUN dotnet restore "OctoBackup.sln"
 
 WORKDIR /src/Src/Bootstraper/Server/Server.Api
 

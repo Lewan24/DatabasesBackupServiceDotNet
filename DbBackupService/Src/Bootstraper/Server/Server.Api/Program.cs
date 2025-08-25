@@ -64,29 +64,35 @@ builder.Services.AddLogging(logging =>
     if (builder.Environment.IsDevelopment()) logging.AddConsole();
 });
 
-builder.Services.AddCors(opt =>
-{
-    opt.AddPolicy(defaultCorsPolicyName, policy =>
+if (builder.Environment.IsDevelopment())
+    builder.Services.AddCors(opt =>
     {
-        if (builder.Environment.IsDevelopment())
+        opt.AddPolicy(defaultCorsPolicyName, policy =>
+        {
             policy.AllowAnyHeader()
                 .AllowAnyOrigin()
                 .AllowAnyMethod();
+        });
+    });
 
-        if (builder.Environment.IsProduction())
+if (builder.Environment.IsProduction())
+{
+    builder.Services.AddCors(opt =>
+    {
+        opt.AddPolicy(defaultCorsPolicyName, policy =>
         {
-            var allowedOrigins = config.GetValue<string[]>("AllowedOrigins");
+            var allowedOrigins = config.GetValue<string>("AllowedOrigins");
 
-            if (allowedOrigins is null || !allowedOrigins.Any())
+            if (string.IsNullOrWhiteSpace(allowedOrigins))
                 throw new ApplicationException("Production Environment requires to provide allowed origins.");
 
             policy.WithOrigins(allowedOrigins)
                 .AllowAnyHeader()
                 .AllowAnyMethod()
                 .AllowCredentials();
-        }
+        });
     });
-});
+}
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
@@ -146,7 +152,7 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
     app.MapScalarApiReference(opt =>
     {
-        opt.WithTitle("Backup Service Api");
+        opt.WithTitle("OctoBackup Api");
         opt.WithTheme(ScalarTheme.BluePlanet);
         opt.WithDefaultHttpClient(ScalarTarget.Http, ScalarClient.Curl);
         opt.Servers = [];
