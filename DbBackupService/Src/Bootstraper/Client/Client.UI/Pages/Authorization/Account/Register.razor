@@ -14,8 +14,10 @@
 <MudContainer MaxWidth="MaxWidth.ExtraSmall" Class="d-flex flex-column align-center justify-center min-vh-100 pa-4">
     <!-- Logo i nagłówek -->
     <MudPaper Class="d-flex flex-column align-center justify-center pa-6 mud-elevation-6 rounded-2xl" Style="width:100%; max-width:420px;">
-        <MudImage Src="/images/logo.png" Alt="OctoBackup" Width="120" Class="mb-4" />
-        <MudText Typo="Typo.h5" Align="Align.Center" Class="mb-6" Color="Color.Primary">Rejestracja w OctoBackup</MudText>
+        <MudImage Src="@Assets["media/OctoBackupLogo.png"]" Alt="OctoBackup" Width="200" Class="mb-4" />
+        <MudText Typo="Typo.h5" Align="Align.Center" Class="mb-6" Color="Color.Primary">
+            Rejestracja w <MudButton Color="Color.Primary" Variant="Variant.Text" Size="Size.Large" OnClick="@(() => NavigationManager.NavigateTo("/", false))">OctoBackup</MudButton>
+        </MudText>
 
         <!-- Formularz -->
         <EditForm Model="@RegisterRequest" OnValidSubmit="OnSubmit">
