@@ -80,9 +80,11 @@ internal sealed class AuthService(
 
     public async Task<IResult> Register(HttpContext context, RegisterRequest request)
     {
-        var currentUser = context.User.Identity is null
+        var userName = context.User?.Identity?.Name;
+
+        var currentUser = userName is null
             ? null
-            : await userManager.FindByEmailAsync(context.User.Identity?.Name!);
+            : await userManager.FindByNameAsync(userName);
 
         var isUserAdmin = currentUser is not null && await userManager.IsInRoleAsync(currentUser, AppRoles.Admin);
 

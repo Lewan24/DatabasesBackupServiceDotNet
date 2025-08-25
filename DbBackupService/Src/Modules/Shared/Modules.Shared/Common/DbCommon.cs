@@ -2,9 +2,9 @@
 
 public static class DbCommon
 {
-    private static readonly string DbFolder = Path.Combine("/app", "db");
+    private static readonly string DbFolder = Path.Combine(Path.GetDirectoryName(Environment.ProcessPath)!, "db");
 
-    public static readonly string DbPath = Path.Join(DbFolder, "BackupsConfiguration.db");
+    public static readonly string DbPath = Path.Join(DbFolder, "OctoBackup.db");
 
     public static void CreateDbDirectoryIfNotExists()
     {

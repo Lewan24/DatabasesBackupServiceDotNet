@@ -17,25 +17,25 @@ internal abstract record AuthOperations
 
     public static Task<IResult> Login(
         HttpContext context,
-        LoginRequest? request,
+        [FromBody] LoginRequest? request,
         [FromServices] IAuthService authService)
         => authService.Login(context, request);
 
     public static Task<IResult> ChangePassword(
         HttpContext context,
-        ChangePasswordRequest request,
+        [FromBody] ChangePasswordRequest request,
         [FromServices] IAuthService authService)
         => authService.ChangePassword(context, request);
 
     public static Task<bool> CanLogIn(
         HttpContext context,
-        LoginRequest? request,
+        [FromBody] LoginRequest? request,
         [FromServices] IAuthService authService)
         => authService.CanLogIn(context, request);
 
     public static Task<IResult> Register(
         HttpContext context,
-        RegisterRequest request,
+        [FromBody] RegisterRequest request,
         [FromServices] IAuthService authService)
         => authService.Register(context, request);
 
@@ -50,19 +50,19 @@ internal abstract record AuthOperations
         => authService.GetCurrentUserInfo(context);
 
     public static Task<IResult> ValidateToken(
-        TokenValidationRequest request,
+        [FromBody] TokenValidationRequest request,
         [FromServices] IAuthService authService)
         => authService.ValidateToken(request);
 
     public static Task<TokenModelDto> GetUserToken(
         HttpContext context,
-        LoginRequest request,
+        [FromBody] LoginRequest request,
         [FromServices] IAuthService authService)
         => authService.GetUserToken(context, request);
 
     public static Task<TokenModelDto> RefreshToken(
         HttpContext context,
-        LoginRequest request,
+        [FromBody] LoginRequest request,
         [FromServices] IAuthService authService)
         => authService.RefreshToken(context, request);
 }

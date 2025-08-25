@@ -1,0 +1,73 @@
+﻿@page "/"
+
+@inject NavigationManager NavManager
+
+<PageTitle>OctoBackup - News</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="pa-4 mt-6">
+    <!-- Nagłówek -->
+    <MudText Typo="Typo.h4" Color="Color.Primary" Class="mb-4">Witaj w OctoBackup</MudText>
+    <MudText Typo="Typo.body1" Style="@($"color: {DefaultLayout.Theme.PaletteDark.TextSecondary}")" Class="mb-6">
+        Tutaj znajdziesz najnowsze informacje, aktualizacje i linki do dokumentacji systemu.
+    </MudText>
+
+    <!-- Sekcja Nowości -->
+    <MudText Typo="Typo.h6" Color="Color.Primary" Class="mb-2">Nowości</MudText>
+    <MudPaper Class="pa-4 mb-6 mud-elevation-2 rounded-2xl">
+        <MudList Dense="true" T="string">
+            <MudListItem>
+                <MudText>Dodano obsługę wielu baz danych w jednym backupie.</MudText>
+                <MudText Typo="Typo.caption" Style="@($"color: {DefaultLayout.Theme.PaletteDark.TextSecondary}")">2025-08-25</MudText>
+            </MudListItem>
+            <MudListItem>
+                <MudText>Usprawniono autoryzację użytkowników i system powiadomień.</MudText>
+                <MudText Typo="Typo.caption" Style="@($"color: {DefaultLayout.Theme.PaletteDark.TextSecondary}")">2025-08-20</MudText>
+            </MudListItem>
+        </MudList>
+    </MudPaper>
+
+    <!-- Sekcja Dokumentacja -->
+    <MudText Typo="Typo.h6" Color="Color.Primary" Class="mb-2">Dokumentacja i zasoby</MudText>
+    <MudGrid GutterSize="3">
+        <MudItem xs="12" sm="6" md="4">
+            <MudCard Class="pa-4 mud-elevation-2 rounded-2xl hover-elevation-6">
+                <MudCardContent>
+                    <MudText Typo="Typo.subtitle1" Color="Color.Primary">API Documentation</MudText>
+                    <MudText Typo="Typo.body2" Style="@($"color: {DefaultLayout.Theme.PaletteDark.TextSecondary}")" Class="mb-2">
+                        Pełna dokumentacja API do integracji z systemem OctoBackup.
+                    </MudText>
+                </MudCardContent>
+                <MudCardActions>
+                    <MudButton Href="@_apiUrl" Target="_blank" Variant="Variant.Filled" Color="Color.Primary">
+                        Otwórz dokumentację
+                    </MudButton>
+                </MudCardActions>
+            </MudCard>
+        </MudItem>
+
+        <MudItem xs="12" sm="6" md="4">
+            <MudCard Class="pa-4 mud-elevation-2 rounded-2xl hover-elevation-6">
+                <MudCardContent>
+                    <MudText Typo="Typo.subtitle1" Color="Color.Primary">Wiki / Instrukcje</MudText>
+                    <MudText Typo="Typo.body2" Style="@($"color: {DefaultLayout.Theme.PaletteDark.TextSecondary}")" Class="mb-2">
+                        Szybki dostęp do poradników i instrukcji użytkowania.
+                    </MudText>
+                </MudCardContent>
+                <MudCardActions>
+                    <MudButton Href="https://your-wiki-link.com" Target="_blank" Variant="Variant.Filled" Color="Color.Primary">
+                        Otwórz Wiki
+                    </MudButton>
+                </MudCardActions>
+            </MudCard>
+        </MudItem>
+    </MudGrid>
+</MudContainer>
+
+@code {
+    private string _apiUrl = "";
+
+    protected override void OnInitialized()
+    {
+        _apiUrl = $"{NavManager.BaseUri}scalar/v1";
+    }
+}

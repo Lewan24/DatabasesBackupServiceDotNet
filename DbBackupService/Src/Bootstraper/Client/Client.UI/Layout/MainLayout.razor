@@ -1,6 +1,14 @@
 ﻿@inherits LayoutComponentBase
 
+@using Client.UI.Data.Services
+@using Client.UI.Pages.Components
+
+@inject NavigationManager NavigationManager
+@inject AuthStateProvider AuthStateProvider
+@inject TokenHttpClientService Http
 @inject IJSRuntime JsRuntime
+
+@implements IDisposable
 
 <MudThemeProvider IsDarkMode="true" Theme="@DefaultLayout.Theme"/>
 <MudPopoverProvider/>
@@ -9,47 +17,116 @@
 <MudSnackbarProvider/>
 
 <MudLayout>
-    <MudAppBar Elevation="4" Dense="true">
-        <MudIconButton Class="mr-4" Icon="@Icons.Material.Filled.Menu" Size="Size.Medium"
-                       OnClick="@(() => _drawerOpen = !_drawerOpen)"/>
+    @if (!_isPageRdy)
+    {
+        <MudMainContent>
+            <AuthorizingUserInfoComponent/>
+        </MudMainContent>
+    }
+    else
+    {
+        <MudAppBar Elevation="4" Dense="true">
+            <MudIconButton Class="mr-4" Icon="@Icons.Material.Filled.Menu" Size="Size.Medium"
+                           OnClick="@(() => _isDrawerOpen = !_isDrawerOpen)"/>
 
-        <MudSpacer/>
-        <AuthorizeView>
-            <Authorized>
-                <MudText>Welcome</MudText>
-                <MudText Color="Color.Primary" Class="ml-1">Test</MudText>
+            <MudButton Color="Color.Primary" Variant="Variant.Text" OnClick="@(() => NavigationManager.NavigateTo("/", false))">OctoBackup</MudButton>
 
-                <MudMenu Icon="@Icons.Material.Filled.ArrowDropDown" Color="Color.Primary" Size="Size.Medium">
-                    <MudMenuItem>
-                        <MudButton Color="Color.Primary" Variant="Variant.Text"
-                                   Size="Size.Small" StartIcon="@Icons.Material.Filled.ArrowRight">
-                            Logout
-                        </MudButton>
-                    </MudMenuItem>
-                </MudMenu>
-            </Authorized>
-        </AuthorizeView>
-    </MudAppBar>
+            <MudSpacer/>
 
-    <MudDrawer Variant="@DrawerVariant.Temporary" Elevation="5" @bind-Open="_drawerOpen"
-               ClipMode="DrawerClipMode.Always" OverlayAutoClose="true" Overlay="true">
-        <NavMenu/>
-    </MudDrawer>
+            <AuthorizeView>
+                <Authorized>
+                    <MudText>Welcome</MudText>
+                    <MudText Color="Color.Primary" Class="ml-1">@context.User.Identity?.Name</MudText>
 
-    <MudMainContent>
-        @Body
-    </MudMainContent>
+                    <MudMenu Icon="@Icons.Material.Filled.ArrowDropDown" Color="Color.Primary" Size="Size.Medium">
+                        <MudMenuItem>
+                            <MudButton Color="Color.Primary" Variant="Variant.Text"
+                                       Size="Size.Small" StartIcon="@Icons.Material.Filled.ArrowRight"
+                                       OnClick="LogoutClick">
+                                Logout
+                            </MudButton>
+                        </MudMenuItem>
+                    </MudMenu>
+                </Authorized>
+            </AuthorizeView>
+        </MudAppBar>
+
+        <MudDrawer Variant="@DrawerVariant.Temporary" Elevation="5" @bind-Open="_isDrawerOpen"
+                   ClipMode="DrawerClipMode.Always" OverlayAutoClose="true" Overlay="true">
+            <AuthorizeView>
+                <Authorized>
+                    <AuthorizedNavMenu/>
+                </Authorized>
+                
+                <NotAuthorized>
+                    <NotAuthorizedNavMenu/>
+                </NotAuthorized>
+            </AuthorizeView>
+        </MudDrawer>
+
+        <MudMainContent>
+            @Body
+        </MudMainContent>
+    }
 </MudLayout>
 
 @code{
-    private bool _drawerOpen;
+    bool _isPageRdy;
+    bool _isDrawerOpen;
+
+    private CancellationTokenSource _cts = new();
+    
+    protected override async Task OnInitializedAsync()
+    {
+        var currentUriPrefix = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+
+        if (string.IsNullOrWhiteSpace(currentUriPrefix))
+        {
+            _isPageRdy = true;
+            return;
+        }
+        
+        var isAuthenticated = await AuthStateProvider.IsUserAuthenticated();
+
+        if (!isAuthenticated)
+        {
+            NavigationManager.NavigateTo("/account/login", false);
+            return;
+        }
+        
+        _isPageRdy = true;
+        
+        var timer = new PeriodicTimer(TimeSpan.FromMinutes(5));
+        _ = Ping(timer);
+    }
+
+    private async Task Ping(PeriodicTimer timer)
+    {
+        try
+        {
+            while (await timer.WaitForNextTickAsync(_cts.Token))
+            {
+                await Http.GetAsync<string>("api/Auth/Ping");
+            }
+        }
+        catch (OperationCanceledException)
+        {
+        }
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender)
+        if(firstRender)
             await JsRuntime.InvokeAsync<object>("hideElementById", "preload");
 
         await base.OnAfterRenderAsync(firstRender);
     }
+    
+    async Task LogoutClick()
+    {
+        await AuthStateProvider.Logout();
+        NavigationManager.NavigateTo("/", true);
+    }
 
+    public void Dispose() => _cts.Cancel();
 }

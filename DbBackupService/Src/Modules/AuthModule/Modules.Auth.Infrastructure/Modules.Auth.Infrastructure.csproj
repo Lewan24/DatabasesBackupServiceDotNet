@@ -26,4 +26,8 @@
         <ProjectReference Include="..\Modules.Auth.Shared\Modules.Auth.Shared.csproj"/>
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="DbContexts\Migrations\" />
+    </ItemGroup>
+
 </Project>

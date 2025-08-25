@@ -12,25 +12,19 @@ public sealed class AppIdentityDbContext(DbContextOptions<AppIdentityDbContext> 
 {
     public DbSet<TokenModel> UsersTokens { get; set; }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        DbCommon.CreateDbDirectoryIfNotExists();
-        optionsBuilder.UseSqlite($"Data Source={DbCommon.DbPath}");
-
-        Database.Migrate();
-    }
-
     protected override void OnModelCreating(ModelBuilder builder)
     {
         builder.Entity<IdentityRole>().HasData(
             new IdentityRole
             {
-                Id = Guid.CreateVersion7().ToString(), Name = AppRoles.User,
+                Id = "D52B5C07-A797-42D7-A2ED-324D0F71AB2F", 
+                Name = AppRoles.User,
                 NormalizedName = AppRoles.User.ToUpper()
             },
             new IdentityRole
             {
-                Id = Guid.CreateVersion7().ToString(), Name = AppRoles.Admin,
+                Id = "E21CEFB4-4B40-458C-B7F1-1F9DDBFAA3F9", 
+                Name = AppRoles.Admin,
                 NormalizedName = AppRoles.Admin.ToUpper()
             });
 

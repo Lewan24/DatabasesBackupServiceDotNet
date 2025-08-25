@@ -3,8 +3,13 @@ using Client.UI;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.ResponseCompression;
+using Microsoft.EntityFrameworkCore;
 using Modules.Auth.Api;
+using Modules.Auth.Core.Entities;
+using Modules.Auth.Infrastructure.DbContexts;
 using Modules.Backup.Api;
+using Modules.Backup.Infrastructure.DbContexts;
+using Modules.Shared.Common;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Logs;
 using Scalar.AspNetCore;
@@ -33,7 +38,6 @@ if (builder.Environment.IsDevelopment())
     builder.Services.AddOpenApi();
 
 builder.Services.AddBackupModule();
-builder.Services.AddAuthModule();
 
 builder.Services.AddLogging(logging =>
 {
@@ -106,12 +110,6 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.ExpireTimeSpan = TimeSpan.FromMinutes(20);
     });
 
-// TODO: Implement Auth Module
-// builder.Services.AddAuthModule()
-//     .AddIdentity<AppUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
-//     .AddEntityFrameworkStores<AppIdentityDbContext>()
-//     .AddTokenProvider<DataProtectorTokenProvider<AppUser>>(TokenOptions.DefaultProvider);
-
 builder.Services.Configure<IdentityOptions>(options =>
 {
     // Default Password settings.
@@ -122,6 +120,11 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.Password.RequiredLength = 5;
     options.Password.RequiredUniqueChars = 1;
 });
+
+builder.Services.AddAuthModule()
+    .AddIdentity<AppUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
+    .AddEntityFrameworkStores<AppIdentityDbContext>()
+    .AddTokenProvider<DataProtectorTokenProvider<AppUser>>(TokenOptions.DefaultProvider);
 
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddSignalR();
@@ -176,5 +179,15 @@ app.UseAuthorization();
 app.UseAntiforgery();
 
 app.MapHub<BackupHub>("/backuphub");
+
+DbCommon.CreateDbDirectoryIfNotExists();
+
+using var scope = app.Services.CreateScope();
+
+var authDb = scope.ServiceProvider.GetRequiredService<AppIdentityDbContext>();
+authDb.Database.Migrate();
+
+var backupsDb = scope.ServiceProvider.GetRequiredService<BackupsDbContext>();
+backupsDb.Database.Migrate();
 
 app.Run();

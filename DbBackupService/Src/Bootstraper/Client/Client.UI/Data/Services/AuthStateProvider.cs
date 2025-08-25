@@ -18,6 +18,16 @@ public sealed class AuthStateProvider(IAuthHttpClientService api, NavigationMana
 
     private CurrentUser? _currentUser;
 
+    private async Task<CurrentUser?> CurrentUserInfo()
+    {
+        if (_currentUser is not null && _currentUser.IsAuthenticated)
+            return _currentUser;
+
+        _currentUser = await _userInfoApi.GetCurrentUserInfo();
+
+        return _currentUser;
+    }
+
     public override async Task<AuthenticationState> GetAuthenticationStateAsync()
     {
         var identity = new ClaimsIdentity();
@@ -54,17 +64,7 @@ public sealed class AuthStateProvider(IAuthHttpClientService api, NavigationMana
 
         return (await CurrentUserInfo())!.IsAuthenticated;
     }
-
-    private async Task<CurrentUser?> CurrentUserInfo()
-    {
-        if (_currentUser is not null && _currentUser.IsAuthenticated)
-            return _currentUser;
-
-        _currentUser = await _userInfoApi.GetCurrentUserInfo();
-
-        return _currentUser;
-    }
-
+    
     public async Task<(bool Success, string? Msg)> Login(LoginRequest? loginRequest)
     {
         var loginResult = await _loginApi.Login(loginRequest);
@@ -80,7 +80,7 @@ public sealed class AuthStateProvider(IAuthHttpClientService api, NavigationMana
         try
         {
             var result = await _loginApi.TryLogin(new LoginRequest
-                { Password = password, Email = _currentUser!.UserName });
+                { Password = password!, Email = _currentUser?.UserName! });
             return result;
         }
         catch (Exception ex)
@@ -145,7 +145,7 @@ public sealed class AuthStateProvider(IAuthHttpClientService api, NavigationMana
         {
             var currentUser = await CurrentUserInfo();
             await _tokenApi.RefreshToken(new LoginRequest
-                { Password = password, Email = currentUser?.UserName, RememberMe = rememberMe });
+                { Password = password, Email = currentUser?.UserName!, RememberMe = rememberMe });
         }
         catch (Exception ex)
         {

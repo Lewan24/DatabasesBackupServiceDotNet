@@ -17,11 +17,11 @@ public sealed class BackupsDbContext : DbContext
     public DbSet<UsersPermissionsSets> UsersPermissions { get; set; }
     public DbSet<UserNotificationsSettings> UsersNotificationsSettings { get; set; }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder options)
-    {
-        DbCommon.CreateDbDirectoryIfNotExists();
-        options.UseSqlite($"Data Source={DbCommon.DbPath}");
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        => optionsBuilder.UseSqlite($"Data Source={DbCommon.DbPath}");
 
-        Database.Migrate();
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<UsersPermissionsSets>().HasNoKey();
     }
 }
