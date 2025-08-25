@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Modules.Backup.Core.Entities.DbContext;
+using Modules.Shared.Common;
 
 namespace Modules.Backup.Infrastructure.DbContexts;
 
@@ -15,21 +16,12 @@ public sealed class BackupsDbContext : DbContext
     public DbSet<PermissionsSet> PermissionsSets { get; set; }
     public DbSet<UsersPermissionsSets> UsersPermissions { get; set; }
     public DbSet<UserNotificationsSettings> UsersNotificationsSettings { get; set; }
-    
-    private string DbPath { get; }
-
-    public BackupsDbContext()
-    {
-        var dbFolder = Path.Combine("/app", "db");
-
-        if (!Directory.Exists(dbFolder))
-            Directory.CreateDirectory(dbFolder);
-
-        DbPath = Path.Join(dbFolder, "BackupsConfiguration.db");
-
-        Database.Migrate();
-    }
 
     protected override void OnConfiguring(DbContextOptionsBuilder options)
-        => options.UseSqlite($"Data Source={DbPath}");
+    {
+        DbCommon.CreateDbDirectoryIfNotExists();
+        options.UseSqlite($"Data Source={DbCommon.DbPath}");
+        
+        Database.Migrate();
+    }
 }

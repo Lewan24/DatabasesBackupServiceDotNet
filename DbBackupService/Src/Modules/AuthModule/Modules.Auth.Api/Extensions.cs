@@ -8,9 +8,9 @@ namespace Modules.Auth.Api;
 
 public static class Extensions
 {
-    public static IServiceCollection AddAuthModule(this IServiceCollection services, string connectionString)
+    public static IServiceCollection AddAuthModule(this IServiceCollection services)
     {
-        services.AddInfrastructureLayer(connectionString);
+        services.AddInfrastructureLayer();
         services.AddApplicationLayer();
 
         return services;

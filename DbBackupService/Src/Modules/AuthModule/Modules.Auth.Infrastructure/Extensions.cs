@@ -8,15 +8,9 @@ namespace Modules.Auth.Infrastructure;
 
 public static class Extensions
 {
-    public static IServiceCollection AddInfrastructureLayer(this IServiceCollection services, string connectionString)
+    public static IServiceCollection AddInfrastructureLayer(this IServiceCollection services)
     {
-        services.AddDbContext<AppIdentityDbContext>(opt =>
-        {
-            opt.UseSqlServer(connectionString);
-            opt.ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));
-            opt.ConfigureWarnings(w => w.Ignore(RelationalEventId.MigrationsUserTransactionWarning));
-        });
-
+        services.AddDbContext<AppIdentityDbContext>();
         services.AddTransient<IUserTokenService, UserTokenService>();
 
         return services;

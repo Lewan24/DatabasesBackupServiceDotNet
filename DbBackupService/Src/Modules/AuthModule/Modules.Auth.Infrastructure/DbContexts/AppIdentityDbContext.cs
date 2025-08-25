@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Modules.Auth.Core.Entities;
 using Modules.Auth.Shared.Static.Entities;
+using Modules.Shared.Common;
 
 namespace Modules.Auth.Infrastructure.DbContexts;
 
@@ -10,6 +11,14 @@ public sealed class AppIdentityDbContext(DbContextOptions<AppIdentityDbContext> 
     : IdentityDbContext<AppUser>(options)
 {
     public DbSet<TokenModel> UsersTokens { get; set; }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        DbCommon.CreateDbDirectoryIfNotExists();
+        optionsBuilder.UseSqlite($"Data Source={DbCommon.DbPath}");
+        
+        Database.Migrate();
+    }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

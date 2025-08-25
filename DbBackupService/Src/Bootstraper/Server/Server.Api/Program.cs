@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Modules.Auth.Api;
 using Scalar.AspNetCore;
 using Modules.Backup.Api;
 using OpenTelemetry.Exporter;
@@ -34,6 +35,7 @@ if (builder.Environment.IsDevelopment())
     builder.Services.AddOpenApi();
 
 builder.Services.AddBackupModule();
+builder.Services.AddAuthModule();
 
 builder.Services.AddLogging(logging =>
 {
@@ -169,6 +171,7 @@ app.MapRazorComponents<App>()
 app.UseRouting();
 
 app.MapBackupModuleEndpoints();
+app.MapAuthModuleEndpoints();
 
 app.UseCors(defaultCorsPolicyName);
 
