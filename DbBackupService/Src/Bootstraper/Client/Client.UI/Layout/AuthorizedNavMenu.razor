@@ -1,4 +1,5 @@
-﻿<MudContainer MaxWidth="MaxWidth.ExtraSmall"
+﻿@using Modules.Auth.Shared.Static.Entities
+<MudContainer MaxWidth="MaxWidth.ExtraSmall"
               Class="d-flex flex-column align-center justify-center">
     <MudImage Src="@Assets["media/OctoBackupLogo.png"]" Alt="OctoBackup" Width="180" Class="mb-5" />
 </MudContainer>
@@ -8,25 +9,48 @@
                 Icon="@Icons.Material.Filled.Dashboard">Dashboard
     </MudNavLink>
 
-    <MudNavGroup Title="Configuration" Expanded="true" Icon="@Icons.Material.Filled.SettingsInputComponent">
+    <MudNavGroup Title="Personal Navigation" Expanded="true" Icon="@Icons.Material.Filled.Menu">
+        <MudNavLink Href="/backups" Match="NavLinkMatch.Prefix"
+                    Icon="@Icons.Material.Filled.BackupTable">See Backups
+        </MudNavLink>
         <MudNavLink Href="/servers" Match="NavLinkMatch.Prefix"
-                    Icon="@Icons.Custom.Brands.MicrosoftAzureDevOps">Servers
+                    Icon="@Icons.Custom.Brands.Linux">My Servers
+        </MudNavLink>
+        <MudNavLink Href="/tunnels" Match="NavLinkMatch.Prefix"
+                    Icon="@Icons.Custom.Brands.MicrosoftAzureDevOps">My Tunnels
         </MudNavLink>
         <MudNavLink Href="/schedules" Match="NavLinkMatch.Prefix"
-                    Icon="@Icons.Material.Filled.Schedule">Schedules
+                    Icon="@Icons.Material.Filled.Schedule">My Schedules
+        </MudNavLink>
+
+        <MudNavLink Class="mt-4" Href="/account/profile" Match="NavLinkMatch.Prefix"
+                    Icon="@Icons.Material.Filled.Person">My Profile
         </MudNavLink>
     </MudNavGroup>
 
-    <MudNavGroup Title="Settings" Expanded="true" Icon="@Icons.Material.Filled.Settings">
-        <MudNavLink Href="/users" Match="NavLinkMatch.Prefix"
-                    Icon="@Icons.Material.Filled.People">Users
-        </MudNavLink>
-        <MudNavLink Href="/security" Match="NavLinkMatch.Prefix"
-                    Icon="@Icons.Material.Filled.Security">Security
-        </MudNavLink>
-    </MudNavGroup>
+    <AuthorizeView Roles="@AppRoles.Admin">
+        <Authorized>
+            <MudNavGroup Title="Administrative settings" Icon="@Icons.Material.Filled.AdminPanelSettings">
+                <MudNavLink Href="/administration/dashboard" Match="NavLinkMatch.All"
+                            Icon="@Icons.Material.Filled.Dashboard">Admin Dashboard
+                </MudNavLink>
 
-    <MudNavLink Href="/about" Match="NavLinkMatch.Prefix"
+                <MudNavGroup Title="Users & Permissions" Icon="@Icons.Material.Filled.SettingsAccessibility">
+                    <MudNavLink Href="/administration/users" Match="NavLinkMatch.Prefix"
+                                Icon="@Icons.Material.Filled.People">Users
+                    </MudNavLink>
+                    <MudNavLink Href="/administration/permissions" Match="NavLinkMatch.Prefix"
+                                Icon="@Icons.Material.Filled.PeopleAlt">Groups Permissions
+                    </MudNavLink>
+                </MudNavGroup>
+                <MudNavLink Href="/administration/security" Match="NavLinkMatch.Prefix"
+                            Icon="@Icons.Material.Filled.Settings">Configuration
+                </MudNavLink>
+            </MudNavGroup>
+        </Authorized>
+    </AuthorizeView>
+
+    <MudNavLink Class="mt-5" Href="/about" Match="NavLinkMatch.Prefix"
                 Icon="@Icons.Material.Filled.Info">About
     </MudNavLink>
 </MudNavMenu>

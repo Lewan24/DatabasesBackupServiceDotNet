@@ -4,6 +4,7 @@ namespace Client.UI.Layout;
 
 public static class DefaultLayout
 {
+    public static PaletteDark ThemePalette => Theme.PaletteDark;
     public static readonly MudTheme Theme = new()
     {
         PaletteDark = new PaletteDark

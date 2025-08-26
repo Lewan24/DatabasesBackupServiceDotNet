@@ -1,0 +1,69 @@
+﻿@page "/administration/permissions"
+
+<PageTitle>Manage Permissions</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="pa-6">
+    <MudText Typo="Typo.h4" Color="Color.Primary" Class="mb-6">Zarządzanie grupami uprawnień</MudText>
+
+    <MudPaper Class="pa-4 mud-elevation-2 rounded-2xl">
+        <MudStack Row="true" JustifyContent="SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
+            <MudText Typo="Typo.h6">Grupy uprawnień</MudText>
+            <MudButton Variant="Variant.Filled" Color="Color.Success" StartIcon="@Icons.Material.Filled.GroupAdd">
+                Dodaj grupę
+            </MudButton>
+        </MudStack>
+
+        <!-- Tabela grup -->
+        <MudTable Items="@groups" Hover="true" Bordered="false" Dense="true">
+            <HeaderContent>
+                <MudTh>Nazwa grupy</MudTh>
+                <MudTh>Serwer</MudTh>
+                <MudTh>Liczba użytkowników</MudTh>
+                <MudTh>Uprawnienia Grupy</MudTh>
+                <MudTh>Akcje</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Nazwa">@context.Name</MudTd>
+                <MudTd DataLabel="Serwer">@context.Server</MudTd>
+                <MudTd DataLabel="Users">@context.Users.Count()</MudTd>
+                <MudTd DataLabel="Permissions">@string.Join(", ", context.Permissions)</MudTd>
+                <MudTd>
+                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Warning" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" />
+                    <MudTooltip Delay="100" Text="Manage users in group">
+                        <MudIconButton Icon="@Icons.Material.Filled.People" Color="Color.Primary" />
+                    </MudTooltip>
+                </MudTd>
+            </RowTemplate>
+
+            <PagerContent>
+                <MudTablePager PageSizeOptions="@([10, 25, 50, 100])" />
+            </PagerContent>
+        </MudTable>
+    </MudPaper>
+</MudContainer>
+
+@code {
+    private List<GroupVm> groups = new()
+    {
+        new GroupVm { Name = "Localhost", Server = "localhost:1002", Users = new[]{"admin@octobackup.com"}, Permissions = [GroupPermissions.Edit, GroupPermissions.Test]},
+        new GroupVm { Name = "Domain", Server = "domain.com:3306", Users = new[]{"user1@firma.pl","user2@firma.pl"}, Permissions = [GroupPermissions.Edit, GroupPermissions.Download, GroupPermissions.Share]}
+    };
+
+    private class GroupVm
+    {
+        public string Name { get; set; } = "";
+        public string Server { get; set; } = "";
+        public string[] Users { get; set; } = [];
+        public GroupPermissions[] Permissions { get; set; } = [];
+    }
+
+    enum GroupPermissions
+    {
+        Write,
+        Edit,
+        Share,
+        Download,
+        Test
+    }
+}

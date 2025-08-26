@@ -37,7 +37,11 @@
                 <Authorized>
                     <MudHidden Breakpoint="Breakpoint.SmAndUp" Invert="true">
                         <MudText>Welcome</MudText>
-                        <MudText Color="Color.Primary" Class="ml-1">@context.User.Identity?.Name</MudText>
+                        <MudText Color="Color.Primary" Class="ml-1">
+                            <MudButton Color="Color.Primary" Variant="Variant.Text" OnClick="@(() => NavigationManager.NavigateTo("/account/profile", false))">
+                                @context.User.Identity?.Name
+                            </MudButton>
+                        </MudText>
                     </MudHidden>
 
                     <MudMenu Icon="@Icons.Material.Filled.ArrowDropDown" Color="Color.Primary" Size="Size.Medium">

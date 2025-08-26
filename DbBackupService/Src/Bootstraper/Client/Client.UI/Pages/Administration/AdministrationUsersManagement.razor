@@ -1,0 +1,85 @@
+﻿@page "/administration/users"
+@using Modules.Auth.Shared.Dtos
+@using Modules.Auth.Shared.Static.Entities
+
+<PageTitle>Manage Users</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="pa-6">
+    <MudText Typo="Typo.h4" Color="Color.Primary" Class="mb-6">Zarządzanie użytkownikami</MudText>
+
+    <MudPaper Class="pa-4 mud-elevation-2 rounded-2xl">
+        <MudStack Row="true" JustifyContent="SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
+            <MudText Typo="Typo.h6">Lista użytkowników</MudText>
+            <MudButton Variant="Variant.Filled" Color="Color.Success" StartIcon="@Icons.Material.Filled.PersonAdd">
+                Dodaj użytkownika
+            </MudButton>
+        </MudStack>
+
+        <!-- Tabela użytkowników -->
+        <MudTable Items="@_users" Hover="true" Bordered="false" Dense="true">
+            <HeaderContent>
+                <MudTh>Email</MudTh>
+                <MudTh>Blocked</MudTh>
+                <MudTh>Role</MudTh>
+                <MudTh>Akcje</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Email">@context.Email</MudTd>
+                <MudTd DataLabel="Blocked">
+                    @if (context.IsEmailConfirmed)
+                    {
+                        <MudButton Variant="Variant.Filled" Color="Color.Error" Size="Size.Small"
+                                   StartIcon="@Icons.Material.Filled.Block"
+                                   OnClick="@(() => ToggleBlock(context))">
+                            Zablokuj
+                        </MudButton>
+                    }
+                    else
+                    {
+                        <MudButton Variant="Variant.Filled" Color="Color.Success" Size="Size.Small"
+                                   StartIcon="@Icons.Material.Filled.LockOpen"
+                                   OnClick="@(() => ToggleBlock(context))">
+                            Odblokuj
+                        </MudButton>
+                    }
+                </MudTd>
+
+                <MudTd DataLabel="Role">@string.Join(", ", context.Roles!)</MudTd>
+                <MudTd>
+                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Warning" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" />
+                </MudTd>
+            </RowTemplate>
+            
+            <PagerContent>
+                <MudTablePager PageSizeOptions="@([10, 25, 50, 100])" />
+            </PagerContent>
+        </MudTable>
+    </MudPaper>
+</MudContainer>
+
+@code {
+    private List<UserDto> _users = new()
+    {
+        new UserDto { Email = "admin@octo.com", IsEmailConfirmed = true, Roles = [AppRoles.Admin, AppRoles.User] },
+        new UserDto { Email = "user1@firma.pl", IsEmailConfirmed = false, Roles = [AppRoles.User] },
+        new UserDto { Email = "user1@firma.pl", IsEmailConfirmed = false, Roles = [AppRoles.User] },
+        new UserDto { Email = "user1@firma.pl", IsEmailConfirmed = false, Roles = [AppRoles.User] },
+        new UserDto { Email = "user1@firma.pl", IsEmailConfirmed = false, Roles = [AppRoles.User] },
+        new UserDto { Email = "user1@firma.pl", IsEmailConfirmed = false, Roles = [AppRoles.User] },
+        new UserDto { Email = "user1@firma.pl", IsEmailConfirmed = false, Roles = [AppRoles.User] },
+        new UserDto { Email = "user1@firma.pl", IsEmailConfirmed = false, Roles = [AppRoles.User] },
+        new UserDto { Email = "user1@firma.pl", IsEmailConfirmed = false, Roles = [AppRoles.User] },
+        new UserDto { Email = "user1@firma.pl", IsEmailConfirmed = false, Roles = [AppRoles.User] },
+        new UserDto { Email = "user1@firma.pl", IsEmailConfirmed = false, Roles = [AppRoles.User] },
+        new UserDto { Email = "user1@firma.pl", IsEmailConfirmed = false, Roles = [AppRoles.User] },
+        new UserDto { Email = "user1@firma.pl", IsEmailConfirmed = false, Roles = [AppRoles.User] },
+        new UserDto { Email = "user1@firma.pl", IsEmailConfirmed = false, Roles = [AppRoles.User] }
+    };
+    
+    private void ToggleBlock(UserDto user)
+    {
+        user.IsEmailConfirmed = !user.IsEmailConfirmed;
+    }
+
+}

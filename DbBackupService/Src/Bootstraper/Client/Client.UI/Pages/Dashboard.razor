@@ -11,6 +11,6 @@
 @code{
     protected override async Task OnInitializedAsync()
     {
-        await Auth.AuthorizeUser();
+        await Auth.AuthorizeUser(returnPageAfterValidPasswordAuthorization: "dashboard");
     }
 }
