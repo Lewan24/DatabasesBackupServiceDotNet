@@ -1,0 +1,92 @@
+﻿@page "/backups"
+
+@using Modules.Backup.Core.Entities.DbContext
+
+<PageTitle>Backups</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="pa-6">
+    <MudText Typo="Typo.h4" Color="Color.Primary" Class="mb-6">Podgląd backupów</MudText>
+
+    <MudPaper Class="pa-4 mud-elevation-2 rounded-2xl">
+        <MudStack Row="true" JustifyContent="SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
+            <MudText Typo="Typo.h6">Lista wykonanych backupów</MudText>
+            <MudButton Variant="Variant.Filled" Color="Color.Success" StartIcon="@Icons.Material.Filled.Add">
+                Nowy backup
+            </MudButton>
+        </MudStack>
+
+        <MudTable Items="@_backups" Hover="true" Dense="true">
+            <HeaderContent>
+                <MudTh>Nazwa</MudTh>
+                <MudTh>Utworzono</MudTh>
+                <MudTh>Plik</MudTh>
+                <MudTh>Status testu</MudTh>
+                <MudTh>Akcje</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd>@context.Name</MudTd>
+                <MudTd>@context.CreatedOn.ToString("g")</MudTd>
+                <MudTd>@context.FilePath</MudTd>
+                @{
+                    var test = _tests.FirstOrDefault(t => t.BackupId == context.Id);
+                    <MudTd>
+                        @if (test is not null)
+                        {
+                            if (test.IsSuccess)
+                            {
+                                <MudChip T="string" Color="Color.Success" Variant="Variant.Filled">OK</MudChip>
+                            }
+                            else
+                            {
+                                <MudTooltip Text="@test.ErrorMessage" Delay="100">
+                                    <MudChip T="string" Color="Color.Error" Variant="Variant.Filled">Błąd</MudChip>
+                                </MudTooltip>
+                            }
+                        }
+                        else
+                        {
+                            <MudChip T="string" Color="Color.Info" Variant="Variant.Outlined">Nie testowano</MudChip>
+                        }
+                    </MudTd>
+                    
+                    <MudTd>
+                        <MudButton Size="Size.Small" Variant="Variant.Filled" Color="Color.Primary"
+                                   StartIcon="@Icons.Material.Filled.PlayArrow" Disabled="@((test?.IsSuccess ?? true) && test is not null)">
+                            @switch (test?.IsSuccess)
+                            {
+                                case true:
+                                    <span>Poprawnie przetestowano</span>
+                                    break;
+                                    
+                                    case false:
+                                    <span>Ponów test</span>
+                                    break;
+                                    
+                                    default:
+                                    <span>Testuj backup</span>
+                                    break;
+                            }
+                        </MudButton>
+                    </MudTd>
+                }
+            </RowTemplate>
+        </MudTable>
+    </MudPaper>
+</MudContainer>
+
+@code {
+    private List<PerformedBackup> _backups = new()
+    {
+        new() { Id = Guid.Parse("7E2E27F1-1083-43E4-A606-19ED946E9EFE"), Name = "Daily app backup", CreatedOn = DateTime.Now.AddDays(-1), FilePath = "/backups/db1.sql" },
+        new() { Id = Guid.Parse("C3C53060-4705-4348-968F-8616B98FB0BE"), Name = "Daily localhost", CreatedOn = DateTime.Now.AddDays(-4), FilePath = "/backups/db2.sql" },
+        new() { Id = Guid.Parse("C916A6F7-A452-4F55-B14C-255A3BDF55C3"), Name = "Daily Domain", CreatedOn = DateTime.Now.AddDays(-12), FilePath = "/backups/db3.sql" },
+        new() { Id = Guid.CreateVersion7(), Name = "Daily Test", CreatedOn = DateTime.Now.AddDays(-12), FilePath = "/backups/db4.sql" }
+    };
+
+    private List<BackupTest> _tests = new()
+    {
+        new() { Id = Guid.CreateVersion7(), BackupId = Guid.Parse("7E2E27F1-1083-43E4-A606-19ED946E9EFE"), TestedOn = DateTime.Now, IsSuccess = true },
+        new() { Id = Guid.CreateVersion7(), BackupId = Guid.Parse("C3C53060-4705-4348-968F-8616B98FB0BE"), TestedOn = DateTime.Now.AddDays(-2), IsSuccess = false, ErrorMessage = "Brak odpowiedzi od utworzonych tabel"},
+        new() { Id = Guid.CreateVersion7(), BackupId = Guid.Parse("C916A6F7-A452-4F55-B14C-255A3BDF55C3"), TestedOn = DateTime.Now.AddDays(-9), IsSuccess = true }
+    };
+}

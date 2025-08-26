@@ -22,6 +22,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\..\..\Modules\AuthModule\Modules.Auth.Shared\Modules.Auth.Shared.csproj"/>
+        <ProjectReference Include="..\..\..\Modules\BackupModule\Modules.Backup.Core\Modules.Backup.Core.csproj" />
     </ItemGroup>
 
 </Project>
