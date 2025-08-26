@@ -2,6 +2,7 @@
   server.api:
     image: server.api
     container_name: octobackup
+    restart: always
     build:
       context: .
       dockerfile: Src/Bootstraper/Server/Server.Api/Dockerfile
