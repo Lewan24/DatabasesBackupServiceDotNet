@@ -29,6 +29,8 @@ builder.Services.AddScoped<AuthenticationStateProvider>(s => s.GetRequiredServic
 builder.Services.AddHttpClient("", client => { client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress); });
 
 builder.Services.AddScoped<TokenHttpClientService>();
+builder.Services.AddScoped<AdministrationHttpService>();
+builder.Services.AddScoped<UserHttpService>();
 
 builder.Logging.AddFilter((category, level)
     => level >= LogLevel.Warning ||

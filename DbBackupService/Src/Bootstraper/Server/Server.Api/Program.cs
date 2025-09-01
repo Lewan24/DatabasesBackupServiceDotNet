@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
+using Modules.Administration.Api;
 using Modules.Auth.Api;
 using Modules.Auth.Core.Entities;
 using Modules.Auth.Infrastructure.DbContexts;
@@ -132,6 +133,8 @@ builder.Services.AddAuthModule()
     .AddEntityFrameworkStores<AppIdentityDbContext>()
     .AddTokenProvider<DataProtectorTokenProvider<AppUser>>(TokenOptions.DefaultProvider);
 
+builder.Services.AddAdministrationModule();
+
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddSignalR();
 
@@ -176,6 +179,7 @@ app.UseRouting();
 
 app.MapBackupModuleEndpoints();
 app.MapAuthModuleEndpoints();
+app.MapAdministrationModuleEndpoints();
 
 app.UseCors(defaultCorsPolicyName);
 

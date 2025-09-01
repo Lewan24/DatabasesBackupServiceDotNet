@@ -38,7 +38,9 @@ public sealed class TokenHttpClientService(IHttpClientFactory factory)
         {
             var response = await httpCall();
 
-            if (response.StatusCode == HttpStatusCode.BadRequest)
+            if (response.StatusCode is HttpStatusCode.BadRequest 
+                                    or HttpStatusCode.NotFound 
+                                    or HttpStatusCode.Forbidden)
                 return await response.Content.ReadAsStringAsync();
 
             if (response.StatusCode == HttpStatusCode.Unauthorized)

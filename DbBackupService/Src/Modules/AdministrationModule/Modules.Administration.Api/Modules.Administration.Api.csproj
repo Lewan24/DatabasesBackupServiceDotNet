@@ -8,16 +8,12 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.8"/>
-        <PackageReference Include="OneOf" Version="3.0.271"/>
+      <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.8" />
     </ItemGroup>
 
     <ItemGroup>
-        <Folder Include="Attributes\"/>
-    </ItemGroup>
-
-    <ItemGroup>
-        <ProjectReference Include="..\..\AdministrationModule\Modules.Administration.Shared\Modules.Administration.Shared.csproj" />
-        <ProjectReference Include="..\..\AuthModule\Modules.Auth.Shared\Modules.Auth.Shared.csproj"/>
+      <ProjectReference Include="..\..\Shared\Modules.Shared\Modules.Shared.csproj" />
+      <ProjectReference Include="..\Modules.Administration.Application\Modules.Administration.Application.csproj" />
     </ItemGroup>
 
 </Project>
