@@ -5,27 +5,36 @@ namespace Client.UI.Layout;
 public static class DefaultLayout
 {
     public static PaletteDark ThemePalette => Theme.PaletteDark;
+
+    private const string DarkColor = "#181126"; // Background
+    private const string SurfaceColor = "#1D1229";
+    
     public static readonly MudTheme Theme = new()
     {
         PaletteDark = new PaletteDark
         {
-            Primary = "#00d9ff",
-            PrimaryLighten = "#8AE8FF",
-            PrimaryDarken = "#00A2BA",
+            Primary = "#F24236",
+            PrimaryLighten = "#F06056",
+            PrimaryDarken = "#AD1B13",
 
-            TextPrimary = "#FFFFFF",
-            TextSecondary = "#E3E3E3",
-            TextDisabled = "#7D7D7D",
+            Secondary = "#6C8EAD",
+            SecondaryDarken = "#3A5D85",
+            SecondaryLighten = "#91C9FF",
+            SecondaryContrastText = "#000",
+            
+            TextPrimary = "#F7F7F7",
+            TextSecondary = "#B0B0B0",
+            TextDisabled = "#474747",
 
-            Dark = "#171717",
-            DarkDarken = "#121212",
-            DarkLighten = "#1C1C1C",
+            Dark = DarkColor,
+            DarkDarken = "#000",
+            DarkLighten = "#303030",
 
-            Background = "#171717",
-            AppbarBackground = "#1F1E1E",
-            DrawerBackground = "#1F1E1E",
+            Background = DarkColor,
+            AppbarBackground = SurfaceColor,
+            DrawerBackground = SurfaceColor,
 
-            Surface = "#1C1C1C"
+            Surface = SurfaceColor
         }
     };
 }
