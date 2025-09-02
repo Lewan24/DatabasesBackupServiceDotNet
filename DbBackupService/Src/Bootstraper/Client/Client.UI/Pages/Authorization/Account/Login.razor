@@ -93,7 +93,7 @@
             return;
         }
 
-        LoginRequest.Email = (await LocalStorage.GetItemAsync<string>("User"))!;
+        LoginRequest.Email = (await LocalStorage.GetItemAsync<string>("User"))?.Trim('\"')!;
         await LocalStorage.RemoveItemAsync("User");
     }
 

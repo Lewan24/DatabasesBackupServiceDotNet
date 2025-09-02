@@ -30,7 +30,7 @@
             <RowTemplate>
                 <MudTd DataLabel="Email">@context.Email</MudTd>
                 <MudTd DataLabel="Blocked">
-                    @if (context.IsEmailConfirmed)
+                    @if (!context.IsBlocked)
                     {
                         <MudButton Variant="Variant.Filled" Color="Color.Error" Size="Size.Small"
                                    StartIcon="@Icons.Material.Filled.Block"

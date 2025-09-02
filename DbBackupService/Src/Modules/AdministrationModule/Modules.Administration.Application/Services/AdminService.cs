@@ -39,7 +39,7 @@ public class AdminService (
         {
             Id = Guid.Parse(x.Id),
             Email = x.Email!,
-            IsEmailConfirmed = x.EmailConfirmed,
+            IsBlocked = x.IsBlocked,
             Roles = userManager.GetRolesAsync(x).Result
         }).ToList();
         
@@ -48,24 +48,27 @@ public class AdminService (
 
     public async Task<OneOf<Success, string>> ToggleUserBlockade(string userId)
     {
+        logger.LogInformation("Trying to toggle user blockade...");
+        
         if (string.IsNullOrWhiteSpace(userId))
             return "User Id cannot be null or empty.";
 
-        var user = await userManager.FindByIdAsync(userId);
+        logger.LogInformation("Finding user...");
+        var user = context.Users.AsTracking().SingleOrDefault(u => u.Id == userId);
 
         if (user is null)
             return "Can't find specified user";
-
+        
+        logger.LogInformation("User's blockade status: {BlockadeStatus}",  user.IsBlocked);
         var isAdmin = await IsUserAdmin(user.UserName);
         if (isAdmin is not null && isAdmin.Value)
             return "Can't change blockade for admin user";
         
-        // TODO: Updating doesnt work // need to check why
-        user.EmailConfirmed = !user.EmailConfirmed;
-        var updateResult = await userManager.UpdateAsync(user);
-        
-        if (updateResult.Errors.Any())
-            return updateResult.Errors.First().Description;
+        logger.LogInformation("Changing IsBlocked status...");
+        user.IsBlocked = !user.IsBlocked;
+        var rowsAffected = await context.SaveChangesAsync();
+        logger.LogInformation("Rows affected: {RowsAffected}",  rowsAffected);
+        logger.LogInformation("User's new blockade status: {BlockadeStatus}",  user.IsBlocked);
         
         return new Success();
     }

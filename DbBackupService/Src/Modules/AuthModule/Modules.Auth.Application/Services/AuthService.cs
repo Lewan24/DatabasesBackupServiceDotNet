@@ -30,15 +30,12 @@ internal sealed class AuthService(
         logger.LogInformation("Trying to log {UserName} in...", request?.Email);
 
         if (!await CanLogIn(context, request))
-            return Results.BadRequest("Nie można zalogować. Sprawdź poprawność danych.");
+            return Results.BadRequest("Can't log in. User is blocked or email is not confirmed.");
 
         var user = await userManager.FindByEmailAsync(request!.Email!);
         if (user is null)
             return Results.NotFound("Taki użytkownik nie istnieje.");
-
-        if (!user.EmailConfirmed)
-            return Results.BadRequest("Konto zablokowane.");
-
+        
         await signInManager.SignInAsync(user, request.RememberMe);
 
         logger.LogInformation("User {UserName} successfully logged in. Generating token...", user.Email);
@@ -75,7 +72,11 @@ internal sealed class AuthService(
         }
 
         var user = await userManager.FindByEmailAsync(request.Email);
-        return user is { EmailConfirmed: true } && await userManager.CheckPasswordAsync(user, request.Password);
+
+        if (user is { EmailConfirmed: true, IsBlocked: false })
+            return await userManager.CheckPasswordAsync(user, request.Password);
+
+        return false;
     }
 
     public async Task<IResult> Register(HttpContext context, RegisterRequest request)
