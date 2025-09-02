@@ -39,11 +39,11 @@ public sealed class TokenHttpClientService(IHttpClientFactory factory)
             var response = await httpCall();
 
             if (response.StatusCode is HttpStatusCode.BadRequest 
-                                    or HttpStatusCode.NotFound 
-                                    or HttpStatusCode.Forbidden)
+                                    or HttpStatusCode.NotFound)
                 return await response.Content.ReadAsStringAsync();
 
-            if (response.StatusCode == HttpStatusCode.Unauthorized)
+            if (response.StatusCode is HttpStatusCode.Unauthorized 
+                                    or HttpStatusCode.Forbidden)
                 return "Dostęp zabroniony. Skontaktuj się z Administratorem";
 
             response.EnsureSuccessStatusCode();

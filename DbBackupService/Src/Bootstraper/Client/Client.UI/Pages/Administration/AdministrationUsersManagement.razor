@@ -1,6 +1,10 @@
 ﻿@page "/administration/users"
+
+@using Client.UI.Data.Services
 @using Modules.Auth.Shared.Dtos
-@using Modules.Auth.Shared.Static.Entities
+
+@inject AdministrationHttpService Service
+@inject ISnackbar Snackbar
 
 <PageTitle>Manage Users</PageTitle>
 
@@ -10,7 +14,7 @@
     <MudPaper Class="pa-4 mud-elevation-2 rounded-2xl">
         <MudStack Row="true" JustifyContent="SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
             <MudText Typo="Typo.h6">Lista użytkowników</MudText>
-            <MudButton Variant="Variant.Filled" Color="Color.Success" StartIcon="@Icons.Material.Filled.PersonAdd">
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.PersonAdd">
                 Dodaj użytkownika
             </MudButton>
         </MudStack>
@@ -30,7 +34,7 @@
                     {
                         <MudButton Variant="Variant.Filled" Color="Color.Error" Size="Size.Small"
                                    StartIcon="@Icons.Material.Filled.Block"
-                                   OnClick="@(() => ToggleBlock(context))">
+                                   OnClick="@(() => ToggleBlock(context.Id.ToString()))">
                             Zablokuj
                         </MudButton>
                     }
@@ -38,7 +42,7 @@
                     {
                         <MudButton Variant="Variant.Filled" Color="Color.Success" Size="Size.Small"
                                    StartIcon="@Icons.Material.Filled.LockOpen"
-                                   OnClick="@(() => ToggleBlock(context))">
+                                   OnClick="@(() => ToggleBlock(context.Id.ToString()))">
                             Odblokuj
                         </MudButton>
                     }
@@ -46,8 +50,7 @@
 
                 <MudTd DataLabel="Role">@string.Join(", ", context.Roles!)</MudTd>
                 <MudTd>
-                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Warning" />
-                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Variant="Variant.Filled" OnClick="@(() => OpenEditUserDialog(context))" Color="Color.Warning"/>
                 </MudTd>
             </RowTemplate>
             
@@ -59,27 +62,38 @@
 </MudContainer>
 
 @code {
-    private List<UserDto> _users = new()
+    private List<UserDto> _users = new();
+
+    protected override async Task OnInitializedAsync()
     {
-        new UserDto { Email = "admin@octo.com", IsEmailConfirmed = true, Roles = [AppRoles.Admin, AppRoles.User] },
-        new UserDto { Email = "user1@firma.pl", IsEmailConfirmed = false, Roles = [AppRoles.User] },
-        new UserDto { Email = "user1@firma.pl", IsEmailConfirmed = false, Roles = [AppRoles.User] },
-        new UserDto { Email = "user1@firma.pl", IsEmailConfirmed = false, Roles = [AppRoles.User] },
-        new UserDto { Email = "user1@firma.pl", IsEmailConfirmed = false, Roles = [AppRoles.User] },
-        new UserDto { Email = "user1@firma.pl", IsEmailConfirmed = false, Roles = [AppRoles.User] },
-        new UserDto { Email = "user1@firma.pl", IsEmailConfirmed = false, Roles = [AppRoles.User] },
-        new UserDto { Email = "user1@firma.pl", IsEmailConfirmed = false, Roles = [AppRoles.User] },
-        new UserDto { Email = "user1@firma.pl", IsEmailConfirmed = false, Roles = [AppRoles.User] },
-        new UserDto { Email = "user1@firma.pl", IsEmailConfirmed = false, Roles = [AppRoles.User] },
-        new UserDto { Email = "user1@firma.pl", IsEmailConfirmed = false, Roles = [AppRoles.User] },
-        new UserDto { Email = "user1@firma.pl", IsEmailConfirmed = false, Roles = [AppRoles.User] },
-        new UserDto { Email = "user1@firma.pl", IsEmailConfirmed = false, Roles = [AppRoles.User] },
-        new UserDto { Email = "user1@firma.pl", IsEmailConfirmed = false, Roles = [AppRoles.User] }
-    };
-    
-    private void ToggleBlock(UserDto user)
+        await FetchUsers();
+    }
+
+    private async Task FetchUsers()
     {
-        user.IsEmailConfirmed = !user.IsEmailConfirmed;
+        var getUsersResult = await Service.GetUsersList();
+
+        getUsersResult.Switch(
+            users => _users = users,
+            error => Snackbar.Add(error, Severity.Error)
+        );
+        
+        StateHasChanged();
+    }
+
+    private async Task ToggleBlock(string userId)
+    {
+        var result = await Service.ToggleUserBlockade(userId);
+        
+        result.Switch(
+            async void (_) => await FetchUsers(),
+            error => Snackbar.Add(error, Severity.Error)
+        );
+    }
+
+    private async Task OpenEditUserDialog(UserDto user)
+    {
+        throw new NotImplementedException();
     }
 
 }

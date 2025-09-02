@@ -25,4 +25,22 @@ internal abstract class AdministrationOperations
         HttpContext context,
         [FromServices] IAdminModuleApi api)
         => TypedResults.Ok(await api.AmIAdmin(context.User.Identity?.Name));
+
+    public static async Task<IResult> GetUsersList(
+        HttpContext context,
+        [FromServices] AdminService api)
+        => TypedResults.Ok(await api.GetUsersList());
+
+    public static async Task<IResult> ToggleUserBlockade(
+        HttpContext context,
+        [FromServices] AdminService api,
+        [FromBody] string userId)
+    {
+        var result = await api.ToggleUserBlockade(userId);
+        
+        return result.Match<IResult>(
+            _ => TypedResults.Ok(),
+            error => TypedResults.BadRequest(error)
+        );
+    }
 }

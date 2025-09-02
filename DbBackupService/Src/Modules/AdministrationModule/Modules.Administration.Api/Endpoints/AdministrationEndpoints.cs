@@ -19,6 +19,12 @@ internal static class AdministrationEndpoints
 
         api.MapPost("IsUserAdmin", AdministrationOperations.IsUserAdmin)
             .WithSummary("Check if the specified user is admin");
+
+        api.MapGet("GetUsers", AdministrationOperations.GetUsersList)
+            .WithSummary("Get all users");
+        
+        api.MapPost("ToggleUserBlockade", AdministrationOperations.ToggleUserBlockade)
+            .WithSummary("Toggle user blockade");
         
         return app;
     }
