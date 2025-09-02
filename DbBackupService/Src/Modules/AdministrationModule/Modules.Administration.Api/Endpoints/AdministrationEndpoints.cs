@@ -26,6 +26,9 @@ internal static class AdministrationEndpoints
         api.MapPost("ToggleUserBlockade", AdministrationOperations.ToggleUserBlockade)
             .WithSummary("Toggle user blockade");
         
+        api.MapPost("EditUser", AdministrationOperations.EditUser)
+            .WithSummary("Edit existing user");
+        
         return app;
     }
 }

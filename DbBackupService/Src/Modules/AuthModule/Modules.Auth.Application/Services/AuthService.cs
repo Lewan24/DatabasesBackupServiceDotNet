@@ -96,7 +96,7 @@ internal sealed class AuthService(
             return Results.BadRequest(error);
 
         var newUser = new AppUser { UserName = request.Email, Email = request.Email };
-        var result = await userManager.CreateAsync(newUser, request.Password);
+        var result = await userManager.CreateAsync(newUser, request.Password!);
         if (!result.Succeeded)
             return Results.BadRequest(result.Errors.First().Description);
 

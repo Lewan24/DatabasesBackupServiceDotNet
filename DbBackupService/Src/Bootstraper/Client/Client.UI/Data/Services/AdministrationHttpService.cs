@@ -1,4 +1,5 @@
-﻿using Modules.Auth.Shared.Dtos;
+﻿using Modules.Auth.Shared.ActionsRequests;
+using Modules.Auth.Shared.Dtos;
 using OneOf;
 using OneOf.Types;
 
@@ -11,4 +12,7 @@ public class AdministrationHttpService(TokenHttpClientService api)
     
     public async Task<OneOf<Success, string>> ToggleUserBlockade(string userId)
         => await api.PostAsync("/api/administration/ToggleUserBlockade", userId);
+
+    public async Task<OneOf<Success, string>> EditUserAsync(EditUserRequest request)
+        => await api.PostAsync("/api/administration/EditUser", request);
 }

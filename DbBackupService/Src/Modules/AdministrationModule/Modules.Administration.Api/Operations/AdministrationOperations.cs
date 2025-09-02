@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Modules.Administration.Application.Services;
 using Modules.Administration.Shared.Interfaces;
+using Modules.Auth.Shared.ActionsRequests;
 
 namespace Modules.Administration.Api.Operations;
 
@@ -37,6 +38,19 @@ internal abstract class AdministrationOperations
         [FromBody] string userId)
     {
         var result = await api.ToggleUserBlockade(userId);
+        
+        return result.Match<IResult>(
+            _ => TypedResults.Ok(),
+            error => TypedResults.BadRequest(error)
+        );
+    }
+
+    public static async Task<IResult> EditUser(
+        HttpContext context,
+        [FromServices] AdminService api,
+        [FromBody] EditUserRequest request)
+    {
+        var result = await api.EditUser(request);
         
         return result.Match<IResult>(
             _ => TypedResults.Ok(),

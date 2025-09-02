@@ -1,9 +1,9 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Modules.Auth.Core.Entities;
 using Modules.Auth.Infrastructure.DbContexts;
+using Modules.Auth.Shared.ActionsRequests;
 using Modules.Auth.Shared.Dtos;
 using Modules.Auth.Shared.Static.Entities;
 using OneOf;
@@ -40,6 +40,7 @@ public class AdminService (
             Id = Guid.Parse(x.Id),
             Email = x.Email!,
             IsBlocked = x.IsBlocked,
+            IsEmailConfirmed = x.EmailConfirmed,
             Roles = userManager.GetRolesAsync(x).Result
         }).ToList();
         
@@ -48,28 +49,56 @@ public class AdminService (
 
     public async Task<OneOf<Success, string>> ToggleUserBlockade(string userId)
     {
-        logger.LogInformation("Trying to toggle user blockade...");
-        
         if (string.IsNullOrWhiteSpace(userId))
             return "User Id cannot be null or empty.";
 
-        logger.LogInformation("Finding user...");
         var user = context.Users.AsTracking().SingleOrDefault(u => u.Id == userId);
 
         if (user is null)
             return "Can't find specified user";
         
-        logger.LogInformation("User's blockade status: {BlockadeStatus}",  user.IsBlocked);
         var isAdmin = await IsUserAdmin(user.UserName);
         if (isAdmin is not null && isAdmin.Value)
             return "Can't change blockade for admin user";
         
-        logger.LogInformation("Changing IsBlocked status...");
         user.IsBlocked = !user.IsBlocked;
-        var rowsAffected = await context.SaveChangesAsync();
-        logger.LogInformation("Rows affected: {RowsAffected}",  rowsAffected);
-        logger.LogInformation("User's new blockade status: {BlockadeStatus}",  user.IsBlocked);
+        await context.SaveChangesAsync();
         
+        return new Success();
+    }
+
+    public async Task<OneOf<Success, string>> EditUser(EditUserRequest request)
+    {
+        if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Id))
+            return "Invalid Request. Check data and try again.";
+
+        var user = await userManager.FindByIdAsync(request.Id);
+
+        if (user is null)
+            return "Can't find specified user";
+        
+        await userManager.SetEmailAsync(user, request.Email);
+        await userManager.SetUserNameAsync(user, request.Email);
+
+        if (!await userManager.IsEmailConfirmedAsync(user))
+        {
+            var confirmEmailToken = await userManager.GenerateEmailConfirmationTokenAsync(user);
+            await userManager.ConfirmEmailAsync(user, confirmEmailToken);
+        }
+        
+        if (string.IsNullOrWhiteSpace(request.Password))
+            return new Success();
+
+        if (string.IsNullOrWhiteSpace(request.ConfirmPassword) ||
+            request.ConfirmPassword != request.Password)
+            return "Password do not match";
+        
+        var resetPassToken = await userManager.GeneratePasswordResetTokenAsync(user);
+        var resetPassResult = await userManager.ResetPasswordAsync(user, resetPassToken, request.Password);
+
+        if (resetPassResult.Errors.Any())
+            return resetPassResult.Errors.First().Description;
+
         return new Success();
     }
 }
