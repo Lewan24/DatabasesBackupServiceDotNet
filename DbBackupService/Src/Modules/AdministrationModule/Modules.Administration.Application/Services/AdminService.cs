@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Logging;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Modules.Auth.Core.Entities;
 using Modules.Auth.Infrastructure.DbContexts;
@@ -12,18 +11,18 @@ public class AdminService (
     AppIdentityDbContext context,
     UserManager<AppUser> userManager)
 {
-    public async Task<IResult> IsUserAdmin(string? identityName)
+    public async Task<bool?> IsUserAdmin(string? identityName)
     {
         if (string.IsNullOrWhiteSpace(identityName))
-            return TypedResults.BadRequest("Invalid user name");
-        
+            return null;
+                
         var user = context.Users.SingleOrDefault(u => u.UserName == identityName);
         
         if  (user is null) 
-            return TypedResults.NotFound("User not found");
+            return null;
 
         var isUserAdmin = await userManager.IsInRoleAsync(user, AppRoles.Admin);
         
-        return TypedResults.Ok(isUserAdmin);
+        return isUserAdmin;
     }
 }

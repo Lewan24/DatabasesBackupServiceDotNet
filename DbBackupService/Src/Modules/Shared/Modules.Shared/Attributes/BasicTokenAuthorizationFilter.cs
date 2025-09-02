@@ -1,28 +1,31 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Modules.Auth.Shared.Interfaces;
 using Modules.Auth.Shared.Static.Entities;
 
 namespace Modules.Shared.Attributes;
 
-public class BasicTokenAuthorizationFilter : IEndpointFilter
+public class BasicTokenAuthorizationFilter(ILogger<BasicTokenAuthorizationFilter> logger) : IEndpointFilter
 {
     public async ValueTask<object?> InvokeAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
     {
+        logger.LogInformation("Checking if bypass token validation is enabled");
+        var allowWithoutValidation = context.HttpContext.GetEndpoint()?
+            .Metadata.GetMetadata<AllowWithoutTokenValidationAttribute>() != null;
+
+        if (allowWithoutValidation)
+            return await next(context);
+        
+        logger.LogInformation("Validating token...");
         return await ValidateTokenAndContinue(context, next);
     }
 
     /// <summary>
     /// Wspólna logika walidacji tokenu do ponownego użycia w klasach dziedziczących.
     /// </summary>
-    protected async ValueTask<object?> ValidateTokenAndContinue(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
+    public static async ValueTask<object?> ValidateTokenAndContinue(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
     {
-        var allowWithoutValidation = context.HttpContext.GetEndpoint()?
-            .Metadata.GetMetadata<AllowWithoutTokenValidationAttribute>() != null;
-
-        if (allowWithoutValidation)
-            return await next(context);
-
         var authToken = context.HttpContext.Request.Headers[AuthHeaderName.Name].FirstOrDefault();
         if (string.IsNullOrWhiteSpace(authToken))
             return Results.BadRequest(

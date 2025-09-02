@@ -11,13 +11,13 @@ internal static class AdministrationEndpoints
     {
         var api = app.MapGroup("/api/administration")
             .RequireAuthorization()
-            .AddEndpointFilter(new AdminTokenAuthorizationFilter());
+            .AddEndpointFilter<AdminTokenAuthorizationFilter>();
 
         api.MapGet("AmIAdmin", AdministrationOperations.AmIAdmin)
             .WithSummary("Check if the user is admin")
             .WithMetadata(new AllowWithoutTokenValidationAttribute());
 
-        api.MapGet("IsUserAdmin", AdministrationOperations.IsUserAdmin)
+        api.MapPost("IsUserAdmin", AdministrationOperations.IsUserAdmin)
             .WithSummary("Check if the specified user is admin");
         
         return app;
