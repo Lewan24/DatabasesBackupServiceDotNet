@@ -6,7 +6,6 @@ namespace Modules.Backup.Infrastructure.DbContexts;
 
 public sealed class BackupsDbContext : DbContext
 {
-    // TODO: Check all properties and available FK
     public DbSet<DbServerConnection> DbConnections { get; set; }
     public DbSet<DbServerTunnel> DbServerTunnels { get; set; }
     public DbSet<BackupSchedule> Schedules { get; set; }

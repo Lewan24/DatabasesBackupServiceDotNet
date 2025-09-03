@@ -1,10 +1,12 @@
 ﻿@page "/servers"
 
+@using Client.UI.Data.Services
 @using Client.UI.Pages.BackupsModule.Dialogs.Servers
 @using Modules.Backup.Shared.Dtos
 
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
+@inject BackupsHttpClientService Service
 
 <PageTitle>Servers</PageTitle>
 
@@ -54,14 +56,23 @@
 </MudContainer>
 
 @code {
-    private List<ServerConnectionDto> _servers = new()
+    private List<ServerConnectionDto> _servers = new();
+
+    protected override async Task OnInitializedAsync()
     {
-        new() { Id = Guid.NewGuid(), ConnectionName = "Main DB", ServerHost="localhost", ServerPort=3306, DbName="octo", DbUser="root", DbPasswd="***" }
-    };
-    
+        await FetchServers();
+    }
+
     private async Task FetchServers()
     {
-        Snackbar.Add("Needs Implementation", Severity.Info);
+        var result = await Service.GetServersAsync();
+        
+        result.Switch(
+            servers => _servers = servers,
+            error => Snackbar.Add(error, Severity.Error)
+        );
+        
+        StateHasChanged();
     }
     
     private async Task OpenEditServerDialog(ServerConnectionDto server)
