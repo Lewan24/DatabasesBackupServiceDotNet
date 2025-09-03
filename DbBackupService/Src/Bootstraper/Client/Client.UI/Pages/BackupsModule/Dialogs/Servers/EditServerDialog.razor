@@ -1,0 +1,153 @@
+﻿@using Modules.Backup.Core.Entities.Databases
+@using Modules.Backup.Core.Entities.DbContext
+
+@inject ISnackbar SnackBar
+
+<MudDialog>
+    <DialogContent>
+        <EditForm Model="Server" OnValidSubmit="Save"
+                  OnInvalidSubmit="@(() => SnackBar.Add("Please check entered data", Severity.Warning))">
+            <DataAnnotationsValidator />
+
+            <MudCard Elevation="3" Class="pa-4 rounded-2xl mb-5">
+                <MudCardContent>
+                    <MudGrid Spacing="3">
+                        <MudItem xs="12">
+                            <MudTextField Label="Connection Name"
+                                          Adornment="Adornment.Start"
+                                          AdornmentIcon="@Icons.Material.Filled.Title"
+                                          @bind-Value="Server.ConnectionName" />
+                        </MudItem>
+
+                        <MudItem xs="12" sm="8">
+                            <MudTextField Label="Server Host"
+                                          Adornment="Adornment.Start"
+                                          AdornmentIcon="@Icons.Material.Filled.Dns"
+                                          @bind-Value="Server.ServerHost" />
+                        </MudItem>
+                        <MudItem xs="12" sm="4">
+                            <MudNumericField T="short"
+                                             Label="Port"
+                                             Adornment="Adornment.Start"
+                                             AdornmentIcon="@Icons.Material.Filled.Router"
+                                             @bind-Value="Server.ServerPort" />
+                        </MudItem>
+
+                        <MudItem xs="12" sm="6">
+                            <MudTextField Label="Database Name"
+                                          Adornment="Adornment.Start"
+                                          AdornmentIcon="@Icons.Material.Filled.DataObject"
+                                          @bind-Value="Server.DbName" />
+                        </MudItem>
+
+                        <MudItem xs="12" sm="6">
+                            <MudSelect @bind-Value="Server.DbType" Label="Database Type">
+                                <MudSelectItem Value="DatabaseType.MySql">MySQL</MudSelectItem>
+                                <MudSelectItem Value="DatabaseType.PostgreSql">PostgreSQL</MudSelectItem>
+                                <MudSelectItem Value="DatabaseType.SqlServer">SQL Server</MudSelectItem>
+                            </MudSelect>
+                        </MudItem>
+
+                        <MudItem xs="12" sm="6">
+                            <MudTextField Label="DB User"
+                                          Adornment="Adornment.Start"
+                                          AdornmentIcon="@Icons.Material.Filled.Person"
+                                          @bind-Value="Server.DbUser" />
+                        </MudItem>
+                        <MudItem xs="12" sm="6">
+                            <MudTextField Label="Password"
+                                          InputType="InputType.Password"
+                                          Adornment="Adornment.Start"
+                                          AdornmentIcon="@Icons.Material.Filled.Lock"
+                                          @bind-Value="Server.DbPasswd" />
+                        </MudItem>
+
+                        <MudItem xs="12">
+                            <MudSwitch T="bool" @bind-Value="Server.IsTunnelRequired"
+                                       Label="Use SSH Tunnel?" Color="Color.Primary" />
+                        </MudItem>
+
+                        @if (Server.IsTunnelRequired)
+                        {
+                            <MudItem xs="12">
+                                <MudPaper Class="pa-4 rounded-xl mud-elevation-1">
+                                    <MudText Typo="Typo.subtitle1" Color="Color.Primary" Class="mb-3">
+                                        Tunnel configuration
+                                    </MudText>
+                                    <MudGrid Spacing="3">
+                                        <MudItem xs="12" sm="6">
+                                            <MudTextField Label="Tunnel Host"
+                                                          Adornment="Adornment.Start"
+                                                          AdornmentIcon="@Icons.Material.Filled.Dns"
+                                                          @bind-Value="Tunnel.ServerHost" />
+                                        </MudItem>
+                                        <MudItem xs="12" sm="6">
+                                            <MudTextField Label="Tunnel Username"
+                                                          Adornment="Adornment.Start"
+                                                          AdornmentIcon="@Icons.Material.Filled.Person"
+                                                          @bind-Value="Tunnel.Username" />
+                                        </MudItem>
+                                        <MudItem xs="12" sm="6">
+                                            <MudTextField Label="Tunnel Password"
+                                                          InputType="InputType.Password"
+                                                          Adornment="Adornment.Start"
+                                                          AdornmentIcon="@Icons.Material.Filled.Lock"
+                                                          @bind-Value="Tunnel.Password" />
+                                        </MudItem>
+                                        <MudItem xs="12" sm="6">
+                                            <MudTextField Label="Private Key (PEM)"
+                                                          Lines="4"
+                                                          Placeholder="Paste private key here..."
+                                                          @bind-Value="Tunnel.PrivateKeyContent" />
+                                        </MudItem>
+                                        <MudItem xs="12" sm="6">
+                                            <MudNumericField T="int"
+                                                             Label="SSH Port"
+                                                             @bind-Value="Tunnel.SshPort" />
+                                        </MudItem>
+                                        <MudItem xs="12" sm="6">
+                                            <MudNumericField T="int"
+                                                             Label="Local Forward Port"
+                                                             @bind-Value="Tunnel.LocalPort" />
+                                        </MudItem>
+                                    </MudGrid>
+                                </MudPaper>
+                            </MudItem>
+                        }
+
+                        <MudItem xs="12">
+                            <MudSwitch T="bool" @bind-Value="Server.IsDisabled"
+                                       Label="Disabled" Color="Color.Error" />
+                        </MudItem>
+                    </MudGrid>
+                </MudCardContent>
+            </MudCard>
+
+            <MudContainer Class="d-flex justify-between pa-4">
+                <MudButton OnClick="Cancel" Variant="Variant.Text" Color="Color.Default">Cancel</MudButton>
+                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Success">Save</MudButton>
+            </MudContainer>
+        </EditForm>
+    </DialogContent>
+</MudDialog>
+
+@code {
+    [Parameter] public required DbServerConnection Server { get; set; }
+    [Parameter] public DbServerTunnel? Tunnel { get; set; }
+
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = null!;
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private void Save()
+    {
+        if (Server.IsTunnelRequired && Tunnel != null)
+        {
+            // Wiążemy tunel z serwerem
+            Server.TunnelId = Tunnel.Id;
+        }
+
+        SnackBar.Add("Server changes saved", Severity.Success);
+        MudDialog.Close(DialogResult.Ok((Server, Tunnel)));
+    }
+}

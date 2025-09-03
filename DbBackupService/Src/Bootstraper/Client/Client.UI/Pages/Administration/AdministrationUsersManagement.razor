@@ -120,7 +120,7 @@
             }
         };
         
-        var dialog = await DialogService.ShowAsync<EditUserDialog>("Create new User", parameters: dialogParameters);
+        var dialog = await DialogService.ShowAsync<EditUserDialog>($"Edit user {user.Email}", parameters: dialogParameters);
         
         var dialogResult = await dialog.Result;
 

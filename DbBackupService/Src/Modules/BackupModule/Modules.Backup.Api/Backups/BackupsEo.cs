@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Builder;
 
-namespace Modules.Backup.Api.EOBackup;
+namespace Modules.Backup.Api.Backups;
 
-internal static class BackupEndpoints
+internal static class BackupsEndpoints
 {
     public static WebApplication MapBackupEndpoints(this WebApplication app)
     {
@@ -14,4 +14,8 @@ internal static class BackupEndpoints
 
         return app;
     }
+}
+
+internal abstract record BackupsOperations
+{
 }

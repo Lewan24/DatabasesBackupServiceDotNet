@@ -6,8 +6,8 @@ public static class DefaultLayout
 {
     public static PaletteDark ThemePalette => Theme.PaletteDark;
 
-    private const string DarkColor = "#181126"; // Background
-    private const string SurfaceColor = "#1D1229";
+    private const string DarkColor = "#0D0D0D"; // Background
+    private const string SurfaceColor = "#141414";
     
     public static readonly MudTheme Theme = new()
     {
