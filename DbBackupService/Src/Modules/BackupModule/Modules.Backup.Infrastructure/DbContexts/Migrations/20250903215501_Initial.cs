@@ -86,8 +86,16 @@ namespace Modules.Backup.Infrastructure.DbContexts.Migrations
                 {
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
                     ServerHost = table.Column<string>(type: "TEXT", nullable: false),
+                    SshPort = table.Column<int>(type: "INTEGER", nullable: false),
                     Username = table.Column<string>(type: "TEXT", nullable: false),
-                    Password = table.Column<string>(type: "TEXT", nullable: false)
+                    UsePasswordAuth = table.Column<bool>(type: "INTEGER", nullable: false),
+                    Password = table.Column<string>(type: "TEXT", nullable: true),
+                    PrivateKeyContent = table.Column<string>(type: "TEXT", nullable: true),
+                    LocalPort = table.Column<int>(type: "INTEGER", nullable: false),
+                    RemoteHost = table.Column<string>(type: "TEXT", nullable: false),
+                    RemotePort = table.Column<int>(type: "INTEGER", nullable: false),
+                    Description = table.Column<string>(type: "TEXT", nullable: true),
+                    IsActive = table.Column<bool>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {

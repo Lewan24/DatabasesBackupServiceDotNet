@@ -25,4 +25,8 @@
         <ProjectReference Include="..\Modules.Backup.Core\Modules.Backup.Core.csproj"/>
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="DbContexts\Migrations\" />
+    </ItemGroup>
+
 </Project>

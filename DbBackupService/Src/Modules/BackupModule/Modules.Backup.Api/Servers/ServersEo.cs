@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Modules.Backup.Application.Services;
+using Modules.Backup.Shared.Dtos;
 using Modules.Shared.Attributes;
 
 namespace Modules.Backup.Api.Servers;
@@ -14,17 +16,59 @@ internal static class ServersEndpoints
             .RequireAuthorization()
             .AddEndpointFilter<BasicTokenAuthorizationFilter>();
 
+        //TODO: Doesnt work properly
         api.MapGet("GetMyServers", ServersOperations.GetUserServers)
             .WithSummary("Get user's enabled servers");
+        
+        api.MapPost("CreateServer", ServersOperations.CreateServer)
+            .WithSummary("Create a new server");
+        
+        api.MapPost("EditServer", ServersOperations.EditServer)
+            .WithSummary("Edit existing server");
+        
+        //TODO: implement managing users access to servers
         
         return app;
     }
 }
 
-internal abstract record ServersOperations
+internal abstract class ServersOperations
 {
-    public static async Task GetUserServers(
+    public static async Task<IResult> GetUserServers(
         HttpContext context,
         [FromServices] ServersService service)
-    => await service.GetServers(context.User.Identity?.Name);
+    {
+        var result = await service.GetServers(context.User.Identity?.Name);
+
+        return result.Match<IResult>(
+            servers => TypedResults.Ok(servers),
+            error => TypedResults.Problem(error)
+        );
+    }
+
+    public static async Task<IResult> CreateServer(
+        HttpContext context,
+        [FromServices] ServersService service,
+        [FromBody] ServerConnectionDto newServer)
+    {
+        var result = await service.CreateServer(newServer, context.User.Identity?.Name);
+
+        return result.Match<IResult>(
+            _ => TypedResults.Created(),
+            error => TypedResults.Problem(error)
+        );
+    }
+
+    public static async Task<IResult> EditServer(
+        HttpContext context,
+        [FromServices] ServersService service,
+        [FromBody] ServerConnectionDto server)
+    {
+        var result = await service.EditServer(server);
+
+        return result.Match<IResult>(
+            _ => TypedResults.Ok(),
+            error => TypedResults.Problem(error)
+        );
+    }
 }

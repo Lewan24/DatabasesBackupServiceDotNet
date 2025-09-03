@@ -11,8 +11,8 @@ using Modules.Backup.Infrastructure.DbContexts;
 namespace Modules.Backup.Infrastructure.DbContexts.Migrations
 {
     [DbContext(typeof(BackupsDbContext))]
-    [Migration("20250903185711_UpdateTunnelEntity")]
-    partial class UpdateTunnelEntity
+    [Migration("20250903215501_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

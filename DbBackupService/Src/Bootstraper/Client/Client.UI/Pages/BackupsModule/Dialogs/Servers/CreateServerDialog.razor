@@ -1,7 +1,9 @@
-﻿@using Modules.Backup.Shared.Dtos
+﻿@using Client.UI.Data.Services
+@using Modules.Backup.Shared.Dtos
 @using Modules.Backup.Shared.Enums
 
 @inject ISnackbar SnackBar
+@inject BackupsHttpClientService Service
 
 <MudDialog>
     <DialogContent>
@@ -13,20 +15,20 @@
                 <MudCardContent>
                     <MudGrid Spacing="3">
                         <MudItem xs="12">
-                            <MudTextField Label="Connection Name"
+                            <MudTextField Label="Connection Name" Disabled="@_isCreating"
                                           Adornment="Adornment.Start"
                                           AdornmentIcon="@Icons.Material.Filled.Title"
                                           @bind-Value="_server.ConnectionName" />
                         </MudItem>
 
                         <MudItem xs="12" sm="8">
-                            <MudTextField Label="Server Host"
+                            <MudTextField Label="Server Host" Disabled="@_isCreating"
                                           Adornment="Adornment.Start"
                                           AdornmentIcon="@Icons.Material.Filled.Dns"
                                           @bind-Value="_server.ServerHost" />
                         </MudItem>
                         <MudItem xs="12" sm="4">
-                            <MudNumericField T="short"
+                            <MudNumericField T="short" Disabled="@_isCreating"
                                              Label="Port"
                                              Adornment="Adornment.Start"
                                              AdornmentIcon="@Icons.Material.Filled.Router"
@@ -34,14 +36,14 @@
                         </MudItem>
 
                         <MudItem xs="12" sm="6">
-                            <MudTextField Label="Database Name"
+                            <MudTextField Label="Database Name" Disabled="@_isCreating"
                                           Adornment="Adornment.Start"
                                           AdornmentIcon="@Icons.Material.Filled.DataObject"
                                           @bind-Value="_server.DbName" />
                         </MudItem>
 
                         <MudItem xs="12" sm="6">
-                            <MudSelect @bind-Value="_server.DbType" Label="Database Type">
+                            <MudSelect @bind-Value="_server.DbType" Label="Database Type" Disabled="@_isCreating">
                                 <MudSelectItem Value="DatabaseType.MySql">MySQL</MudSelectItem>
                                 <MudSelectItem Value="DatabaseType.PostgreSql">PostgreSQL</MudSelectItem>
                                 <MudSelectItem Value="DatabaseType.SqlServer">SQL Server</MudSelectItem>
@@ -49,13 +51,13 @@
                         </MudItem>
 
                         <MudItem xs="12" sm="6">
-                            <MudTextField Label="DB User"
+                            <MudTextField Label="DB User" Disabled="@_isCreating"
                                           Adornment="Adornment.Start"
                                           AdornmentIcon="@Icons.Material.Filled.Person"
                                           @bind-Value="_server.DbUser" />
                         </MudItem>
                         <MudItem xs="12" sm="6">
-                            <MudTextField Label="Password"
+                            <MudTextField Label="Password" Disabled="@_isCreating"
                                           InputType="InputType.Password"
                                           Adornment="Adornment.Start"
                                           AdornmentIcon="@Icons.Material.Filled.Lock"
@@ -63,7 +65,7 @@
                         </MudItem>
 
                         <MudItem xs="12">
-                            <MudSwitch T="bool" @bind-Value="_server.IsTunnelRequired"
+                            <MudSwitch T="bool" @bind-Value="_server.IsTunnelRequired" Disabled="@_isCreating"
                                        Label="Use SSH Tunnel?" Color="Color.Primary" />
                         </MudItem>
 
@@ -76,39 +78,39 @@
                                     </MudText>
                                     <MudGrid Spacing="3">
                                         <MudItem xs="12" sm="6">
-                                            <MudTextField Label="Tunnel Host"
+                                            <MudTextField Label="Tunnel Host" Disabled="@_isCreating"
                                                           Adornment="Adornment.Start"
                                                           AdornmentIcon="@Icons.Material.Filled.Dns"
-                                                          @bind-Value="_tunnel.ServerHost" />
+                                                          @bind-Value="_server.Tunnel!.ServerHost" />
                                         </MudItem>
                                         <MudItem xs="12" sm="6">
-                                            <MudTextField Label="Tunnel Username"
+                                            <MudTextField Label="Tunnel Username" Disabled="@_isCreating"
                                                           Adornment="Adornment.Start"
                                                           AdornmentIcon="@Icons.Material.Filled.Person"
-                                                          @bind-Value="_tunnel.Username" />
+                                                          @bind-Value="_server.Tunnel!.Username" />
                                         </MudItem>
                                         <MudItem xs="12" sm="6">
-                                            <MudTextField Label="Tunnel Password"
+                                            <MudTextField Label="Tunnel Password" Disabled="@_isCreating"
                                                           InputType="InputType.Password"
                                                           Adornment="Adornment.Start"
                                                           AdornmentIcon="@Icons.Material.Filled.Lock"
-                                                          @bind-Value="_tunnel.Password" />
+                                                          @bind-Value="_server.Tunnel!.Password" />
                                         </MudItem>
                                         <MudItem xs="12" sm="6">
                                             <MudTextField Label="Private Key (PEM)"
-                                                          Lines="4"
+                                                          Lines="4" Disabled="@_isCreating"
                                                           Placeholder="Paste private key here..."
-                                                          @bind-Value="_tunnel.PrivateKeyContent" />
+                                                          @bind-Value="_server.Tunnel!.PrivateKeyContent" />
                                         </MudItem>
                                         <MudItem xs="12" sm="6">
-                                            <MudNumericField T="int"
+                                            <MudNumericField T="int" Disabled="@_isCreating"
                                                              Label="SSH Port"
-                                                             @bind-Value="_tunnel.SshPort" />
+                                                             @bind-Value="_server.Tunnel!.SshPort" />
                                         </MudItem>
                                         <MudItem xs="12" sm="6">
-                                            <MudNumericField T="int"
-                                                             Label="Local Forward Port"
-                                                             @bind-Value="_tunnel.LocalPort" />
+                                            <MudNumericField T="int" Disabled="@_isCreating"
+                                                             Label="Local Forward Port" 
+                                                             @bind-Value="_server.Tunnel!.LocalPort" />
                                         </MudItem>
                                     </MudGrid>
                                 </MudPaper>
@@ -119,8 +121,8 @@
             </MudCard>
 
             <MudContainer Class="d-flex justify-between pa-4">
-                <MudButton OnClick="Cancel" Variant="Variant.Text" Color="Color.Default">Cancel</MudButton>
-                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Success">Save</MudButton>
+                <MudButton OnClick="Cancel" Variant="Variant.Text" Color="Color.Default" Disabled="@_isCreating">Cancel</MudButton>
+                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Success" Disabled="@_isCreating">Save</MudButton>
             </MudContainer>
         </EditForm>
     </DialogContent>
@@ -135,28 +137,30 @@
         ServerPort = 3306,
         DbName = "",
         DbUser = "",
-        DbPasswd = ""
-    };
-
-    private ServerTunnelDto _tunnel = new()
-    {
-        Id = Guid.CreateVersion7(),
-        ServerHost = "",
-        Username = "",
-        Password = "",
-        PrivateKeyContent = "",
-        SshPort = 22,
-        LocalPort = 5433,
-        RemoteHost = "example.com"
+        DbPasswd = "",
+        Tunnel = new()
     };
 
     [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = null!;
-
+    private bool _isCreating;
+    
     private void Cancel() => MudDialog.Cancel();
 
-    private void Save()
+    private async Task Save()
     {
-        SnackBar.Add("Server created successfully", Severity.Success);
-        MudDialog.Close(DialogResult.Ok(_server));
+        _isCreating = true;
+        
+        var result = await Service.CreateServerAsync(_server);
+        
+        result.Switch(
+            success =>
+            {
+                SnackBar.Add("Server created successfully", Severity.Success);
+                MudDialog.Close(DialogResult.Ok(true));
+            },
+            error => SnackBar.Add(error, Severity.Error)
+        );
+
+        _isCreating = false;
     }
 }

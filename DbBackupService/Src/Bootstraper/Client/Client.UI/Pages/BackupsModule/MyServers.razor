@@ -79,9 +79,7 @@
     {
         var dialogParameters = new DialogParameters<EditServerDialog>
         {
-            {
-                x => x.Server, server
-            },
+            { x => x.Server, server }
         };
         
         var dialog = await DialogService.ShowAsync<EditServerDialog>($"Edit server {server.ConnectionName}", parameters: dialogParameters);
