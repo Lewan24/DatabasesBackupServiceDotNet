@@ -1,5 +1,6 @@
-﻿@using Modules.Backup.Core.Entities.Databases
-@using Modules.Backup.Core.Entities.DbContext
+﻿@using Modules.Backup.Core.Entities.DbContext
+@using Modules.Backup.Shared.Dtos
+@using Modules.Backup.Shared.Enums
 
 @inject ISnackbar SnackBar
 
@@ -79,46 +80,41 @@
                                             <MudTextField Label="Tunnel Host"
                                                           Adornment="Adornment.Start"
                                                           AdornmentIcon="@Icons.Material.Filled.Dns"
-                                                          @bind-Value="Tunnel.ServerHost" />
+                                                          @bind-Value="Server.Tunnel.ServerHost" />
                                         </MudItem>
                                         <MudItem xs="12" sm="6">
                                             <MudTextField Label="Tunnel Username"
                                                           Adornment="Adornment.Start"
                                                           AdornmentIcon="@Icons.Material.Filled.Person"
-                                                          @bind-Value="Tunnel.Username" />
+                                                          @bind-Value="Server.Tunnel.Username" />
                                         </MudItem>
                                         <MudItem xs="12" sm="6">
                                             <MudTextField Label="Tunnel Password"
                                                           InputType="InputType.Password"
                                                           Adornment="Adornment.Start"
                                                           AdornmentIcon="@Icons.Material.Filled.Lock"
-                                                          @bind-Value="Tunnel.Password" />
+                                                          @bind-Value="Server.Tunnel.Password" />
                                         </MudItem>
                                         <MudItem xs="12" sm="6">
                                             <MudTextField Label="Private Key (PEM)"
                                                           Lines="4"
                                                           Placeholder="Paste private key here..."
-                                                          @bind-Value="Tunnel.PrivateKeyContent" />
+                                                          @bind-Value="Server.Tunnel.PrivateKeyContent" />
                                         </MudItem>
                                         <MudItem xs="12" sm="6">
                                             <MudNumericField T="int"
                                                              Label="SSH Port"
-                                                             @bind-Value="Tunnel.SshPort" />
+                                                             @bind-Value="Server.Tunnel.SshPort" />
                                         </MudItem>
                                         <MudItem xs="12" sm="6">
                                             <MudNumericField T="int"
                                                              Label="Local Forward Port"
-                                                             @bind-Value="Tunnel.LocalPort" />
+                                                             @bind-Value="Server.Tunnel.LocalPort" />
                                         </MudItem>
                                     </MudGrid>
                                 </MudPaper>
                             </MudItem>
                         }
-
-                        <MudItem xs="12">
-                            <MudSwitch T="bool" @bind-Value="Server.IsDisabled"
-                                       Label="Disabled" Color="Color.Error" />
-                        </MudItem>
                     </MudGrid>
                 </MudCardContent>
             </MudCard>
@@ -132,22 +128,21 @@
 </MudDialog>
 
 @code {
-    [Parameter] public required DbServerConnection Server { get; set; }
-    [Parameter] public DbServerTunnel? Tunnel { get; set; }
+    [Parameter] public required ServerConnectionDto Server { get; set; }
 
     [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = null!;
+
+    protected override void OnInitialized()
+    {
+        if (Server.Tunnel is null)
+            Server.Tunnel = new();
+    }
 
     private void Cancel() => MudDialog.Cancel();
 
     private void Save()
     {
-        if (Server.IsTunnelRequired && Tunnel != null)
-        {
-            // Wiążemy tunel z serwerem
-            Server.TunnelId = Tunnel.Id;
-        }
-
         SnackBar.Add("Server changes saved", Severity.Success);
-        MudDialog.Close(DialogResult.Ok((Server, Tunnel)));
+        MudDialog.Close(DialogResult.Ok(Server));
     }
 }

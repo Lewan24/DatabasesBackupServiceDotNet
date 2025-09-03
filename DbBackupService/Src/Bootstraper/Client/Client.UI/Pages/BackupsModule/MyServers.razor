@@ -1,7 +1,7 @@
 ﻿@page "/servers"
 
 @using Client.UI.Pages.BackupsModule.Dialogs.Servers
-@using Modules.Backup.Core.Entities.DbContext
+@using Modules.Backup.Shared.Dtos
 
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
@@ -32,7 +32,7 @@
                 <MudTd DataLabel="Host">@context.ServerHost:@context.ServerPort</MudTd>
                 <MudTd DataLabel="Database">@context.DbName</MudTd>
                 <MudTd DataLabel="Tunnel Status">
-                    @if (context.IsTunnelRequired && context.TunnelId != Guid.Empty)
+                    @if (context.IsTunnelRequired)
                     {
                         <MudChip T="string" Variant="Variant.Text" Color="Color.Success">Enabled</MudChip>
                     }
@@ -54,7 +54,7 @@
 </MudContainer>
 
 @code {
-    private List<DbServerConnection> _servers = new()
+    private List<ServerConnectionDto> _servers = new()
     {
         new() { Id = Guid.NewGuid(), ConnectionName = "Main DB", ServerHost="localhost", ServerPort=3306, DbName="octo", DbUser="root", DbPasswd="***" }
     };
@@ -64,21 +64,13 @@
         Snackbar.Add("Needs Implementation", Severity.Info);
     }
     
-    private async Task OpenEditServerDialog(DbServerConnection server)
+    private async Task OpenEditServerDialog(ServerConnectionDto server)
     {
         var dialogParameters = new DialogParameters<EditServerDialog>
         {
             {
                 x => x.Server, server
             },
-            {
-                x => x.Tunnel, new DbServerTunnel
-                {
-                    ServerHost = "domain.com",
-                    Username = "root",
-                    RemoteHost = "pgsqldomain.com"
-                }
-            }
         };
         
         var dialog = await DialogService.ShowAsync<EditServerDialog>($"Edit server {server.ConnectionName}", parameters: dialogParameters);

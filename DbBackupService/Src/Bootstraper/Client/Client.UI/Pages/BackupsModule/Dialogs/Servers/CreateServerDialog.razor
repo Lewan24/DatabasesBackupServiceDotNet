@@ -1,5 +1,5 @@
-﻿@using Modules.Backup.Core.Entities.Databases
-@using Modules.Backup.Core.Entities.DbContext
+﻿@using Modules.Backup.Shared.Dtos
+@using Modules.Backup.Shared.Enums
 
 @inject ISnackbar SnackBar
 
@@ -114,11 +114,6 @@
                                 </MudPaper>
                             </MudItem>
                         }
-
-                        <MudItem xs="12">
-                            <MudSwitch T="bool" @bind-Value="_server.IsDisabled"
-                                       Label="Disabled" Color="Color.Error" />
-                        </MudItem>
                     </MudGrid>
                 </MudCardContent>
             </MudCard>
@@ -132,7 +127,7 @@
 </MudDialog>
 
 @code {
-    private DbServerConnection _server = new()
+    private ServerConnectionDto _server = new()
     {
         Id = Guid.CreateVersion7(),
         ConnectionName = "",
@@ -143,7 +138,7 @@
         DbPasswd = ""
     };
 
-    private DbServerTunnel _tunnel = new()
+    private ServerTunnelDto _tunnel = new()
     {
         Id = Guid.CreateVersion7(),
         ServerHost = "",
@@ -161,12 +156,6 @@
 
     private void Save()
     {
-        if (_server.IsTunnelRequired)
-        {
-            // powiąż tunel z serwerem
-            _server.TunnelId = _tunnel.Id;
-        }
-
         SnackBar.Add("Server created successfully", Severity.Success);
         MudDialog.Close(DialogResult.Ok(_server));
     }

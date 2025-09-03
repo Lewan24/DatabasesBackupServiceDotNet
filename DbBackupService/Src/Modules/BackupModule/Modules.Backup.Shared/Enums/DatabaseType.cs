@@ -1,4 +1,4 @@
-﻿namespace Modules.Backup.Core.Entities.Databases;
+﻿namespace Modules.Backup.Shared.Enums;
 
 public enum DatabaseType
 {

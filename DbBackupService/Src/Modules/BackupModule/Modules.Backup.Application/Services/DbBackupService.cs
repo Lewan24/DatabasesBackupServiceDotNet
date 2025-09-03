@@ -4,6 +4,7 @@ using Modules.Backup.Core.Entities.DbContext;
 using Modules.Backup.Core.Entities.Models;
 using Modules.Backup.Core.Interfaces;
 using Modules.Backup.Core.StaticClasses;
+using Modules.Backup.Shared.Enums;
 using NLog;
 
 namespace Modules.Backup.Application.Services;

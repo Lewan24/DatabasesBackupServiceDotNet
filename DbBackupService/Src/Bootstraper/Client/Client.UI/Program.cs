@@ -30,7 +30,7 @@ builder.Services.AddHttpClient("", client => { client.BaseAddress = new Uri(buil
 
 builder.Services.AddScoped<TokenHttpClientService>();
 builder.Services.AddScoped<AdministrationHttpService>();
-builder.Services.AddScoped<UserHttpService>();
+builder.Services.AddScoped<BackupsService>();
 
 builder.Logging.AddFilter((category, level)
     => level >= LogLevel.Warning ||
