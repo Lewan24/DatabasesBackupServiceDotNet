@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Modules.Backup.Api.Backups;
+using Modules.Backup.Api.Servers;
 using Modules.Backup.Application;
 using Modules.Backup.Infrastructure;
 
@@ -19,6 +20,7 @@ public static class Extensions
     public static WebApplication MapBackupModuleEndpoints(this WebApplication app)
     {
         app.MapBackupEndpoints();
+        app.MapServersEndpoints();
 
         return app;
     }
