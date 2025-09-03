@@ -62,6 +62,7 @@ namespace Modules.Backup.Infrastructure.DbContexts.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    IsDisabled = table.Column<bool>(type: "INTEGER", nullable: false),
                     ConnectionName = table.Column<string>(type: "TEXT", nullable: false),
                     ServerHost = table.Column<string>(type: "TEXT", nullable: false),
                     ServerPort = table.Column<short>(type: "INTEGER", nullable: false),
@@ -91,23 +92,6 @@ namespace Modules.Backup.Infrastructure.DbContexts.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_DbServerTunnels", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "PermissionsSets",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    ServerId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    CanPerformBackup = table.Column<bool>(type: "INTEGER", nullable: false),
-                    CanDownloadBackup = table.Column<bool>(type: "INTEGER", nullable: false),
-                    CanTestBackup = table.Column<bool>(type: "INTEGER", nullable: false),
-                    CanEditConn = table.Column<bool>(type: "INTEGER", nullable: false),
-                    CanEditTunnels = table.Column<bool>(type: "INTEGER", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_PermissionsSets", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -146,11 +130,11 @@ namespace Modules.Backup.Infrastructure.DbContexts.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "UsersPermissions",
+                name: "UsersServers",
                 columns: table => new
                 {
                     UserId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    PermissionSetId = table.Column<Guid>(type: "TEXT", nullable: false)
+                    ServerId = table.Column<Guid>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -176,16 +160,13 @@ namespace Modules.Backup.Infrastructure.DbContexts.Migrations
                 name: "DbServerTunnels");
 
             migrationBuilder.DropTable(
-                name: "PermissionsSets");
-
-            migrationBuilder.DropTable(
                 name: "Schedules");
 
             migrationBuilder.DropTable(
                 name: "UsersNotificationsSettings");
 
             migrationBuilder.DropTable(
-                name: "UsersPermissions");
+                name: "UsersServers");
         }
     }
 }

@@ -123,6 +123,9 @@ namespace Modules.Backup.Infrastructure.DbContexts.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<bool>("IsDisabled")
+                        .HasColumnType("INTEGER");
+
                     b.Property<bool>("IsTunnelRequired")
                         .HasColumnType("INTEGER");
 
@@ -192,33 +195,15 @@ namespace Modules.Backup.Infrastructure.DbContexts.Migrations
                     b.ToTable("Backups");
                 });
 
-            modelBuilder.Entity("Modules.Backup.Core.Entities.DbContext.PermissionsSet", b =>
+            modelBuilder.Entity("Modules.Backup.Core.Entities.DbContext.ServersUsers", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("CanDownloadBackup")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("CanEditConn")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("CanEditTunnels")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("CanPerformBackup")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("CanTestBackup")
-                        .HasColumnType("INTEGER");
-
                     b.Property<Guid>("ServerId")
                         .HasColumnType("TEXT");
 
-                    b.HasKey("Id");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("TEXT");
 
-                    b.ToTable("PermissionsSets");
+                    b.ToTable("UsersServers");
                 });
 
             modelBuilder.Entity("Modules.Backup.Core.Entities.DbContext.UserNotificationsSettings", b =>
@@ -254,17 +239,6 @@ namespace Modules.Backup.Infrastructure.DbContexts.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("UsersNotificationsSettings");
-                });
-
-            modelBuilder.Entity("Modules.Backup.Core.Entities.DbContext.UsersPermissionsSets", b =>
-                {
-                    b.Property<Guid>("PermissionSetId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("TEXT");
-
-                    b.ToTable("UsersPermissions");
                 });
 #pragma warning restore 612, 618
         }

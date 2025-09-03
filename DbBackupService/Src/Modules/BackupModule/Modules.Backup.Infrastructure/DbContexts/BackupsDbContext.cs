@@ -13,8 +13,7 @@ public sealed class BackupsDbContext : DbContext
     public DbSet<PerformedBackup> Backups { get; set; }
     public DbSet<BackupTest> BackupsTests { get; set; }
     public DbSet<AutomaticBackupTestConfig> AutomaticBackupTestConfigs { get; set; }
-    public DbSet<PermissionsSet> PermissionsSets { get; set; }
-    public DbSet<UsersPermissionsSets> UsersPermissions { get; set; }
+    public DbSet<ServersUsers> UsersServers { get; set; }
     public DbSet<UserNotificationsSettings> UsersNotificationsSettings { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -22,6 +21,6 @@ public sealed class BackupsDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<UsersPermissionsSets>().HasNoKey();
+        modelBuilder.Entity<ServersUsers>().HasNoKey();
     }
 }

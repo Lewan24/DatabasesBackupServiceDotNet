@@ -54,6 +54,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Modules.Administration.Appl
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Modules.Administration.Shared", "Src\Modules\AdministrationModule\Modules.Administration.Shared\Modules.Administration.Shared.csproj", "{1241BE6A-464B-4A4D-AC96-955F89DCB264}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Modules.Backup.Shared", "Src\Modules\BackupModule\Modules.Backup.Shared\Modules.Backup.Shared.csproj", "{B3DAFDD6-2BBA-48B4-92AE-C90A745D558F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -120,6 +122,10 @@ Global
 		{1241BE6A-464B-4A4D-AC96-955F89DCB264}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1241BE6A-464B-4A4D-AC96-955F89DCB264}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1241BE6A-464B-4A4D-AC96-955F89DCB264}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B3DAFDD6-2BBA-48B4-92AE-C90A745D558F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B3DAFDD6-2BBA-48B4-92AE-C90A745D558F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B3DAFDD6-2BBA-48B4-92AE-C90A745D558F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B3DAFDD6-2BBA-48B4-92AE-C90A745D558F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -147,6 +153,7 @@ Global
 		{9C5A40E4-801C-44D3-A8F1-4374D1D5A50D} = {5B617756-AA30-4DA9-8B38-5A2C0D32C12D}
 		{A13D3D7C-CF54-488B-9063-E8CF930703BD} = {5B617756-AA30-4DA9-8B38-5A2C0D32C12D}
 		{1241BE6A-464B-4A4D-AC96-955F89DCB264} = {5B617756-AA30-4DA9-8B38-5A2C0D32C12D}
+		{B3DAFDD6-2BBA-48B4-92AE-C90A745D558F} = {748DDBC5-AEE4-4872-8B8B-3EB1ADC2F816}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {05F3A4BF-6277-46FD-9537-F78E8FABE0DA}
