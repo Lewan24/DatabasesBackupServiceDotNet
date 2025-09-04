@@ -5,7 +5,7 @@ using Modules.Administration.Shared.Interfaces;
 
 namespace Modules.Shared.Attributes;
 
-public class AdminTokenAuthorizationFilter(ILogger<AdminTokenAuthorizationFilter> logger) : IEndpointFilter
+public class AdminTokenAuthorizationFilter : IEndpointFilter
 {
     public async ValueTask<object?> InvokeAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
     {

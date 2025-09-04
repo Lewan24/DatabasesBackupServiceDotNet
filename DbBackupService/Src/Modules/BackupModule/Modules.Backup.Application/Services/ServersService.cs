@@ -6,6 +6,7 @@ using Modules.Auth.Shared.Static.Entities;
 using Modules.Backup.Core.Entities.DbContext;
 using Modules.Backup.Infrastructure.DbContexts;
 using Modules.Backup.Shared.Dtos;
+using Modules.Backup.Shared.Requests;
 using OneOf;
 using OneOf.Types;
 
@@ -340,5 +341,25 @@ public class ServersService (
         }
 
         return Task.FromResult(servers);
+    }
+
+    public async Task<OneOf<List<string>, string>> GetUsersThatAccessServer(Guid serverId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<OneOf<List<string>, string>> GetAllUsersThatDoesNotHaveAccessToServer(Guid serverId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<OneOf<Success, string>> RemoveUserAccessFromServer(ModifyServerAccessRequest request)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<OneOf<Success, string>> GiveUserAccessToServer(ModifyServerAccessRequest request)
+    {
+        throw new NotImplementedException();
     }
 }

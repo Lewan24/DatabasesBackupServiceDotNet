@@ -1,9 +1,12 @@
-﻿@inject IDialogService DialogService
+﻿@using Client.UI.Data.Services
+@using Modules.Backup.Shared.Requests
+
+@inject IDialogService DialogService
+@inject AdministrationHttpService Service
+@inject ISnackbar Snackbar
 
 <MudDialog>
     <DialogContent>
-        <MudText Typo="Typo.h5" Class="mb-4">Manage users for server</MudText>
-
         <MudPaper Class="pa-4 rounded-2xl mud-elevation-1">
             <MudTable Items="@_usersWithAccess" Hover="true" Dense="true" Bordered="false">
                 <HeaderContent>
@@ -40,28 +43,53 @@
 
     [Parameter] public Guid ServerId { get; set; }
 
-    private List<string> _usersWithAccess = new() { "alice", "bob", "charlie" };
+    private List<string> _usersWithAccess = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await FetchUsers();
+    }
+
+    private async Task FetchUsers()
+    {
+        var result = await Service.GetUsersThatAccessServer(ServerId);
+        
+        result.Switch(
+            list => _usersWithAccess = list,
+            error => Snackbar.Add(error, Severity.Error)
+        );
+        
+        StateHasChanged();
+    }
 
     private void Cancel() => MudDialog.Cancel();
 
-    private void RemoveUserFromServer(string username)
+    private async Task RemoveUserFromServer(string email)
     {
-        _usersWithAccess.Remove(username);
-        StateHasChanged();
+        var result = await Service.RemoveUserAccessFromServer(new ModifyServerAccessRequest(ServerId, email));
+        
+        result.Switch(
+            success => _ = FetchUsers(),
+            error => Snackbar.Add(error, Severity.Error)
+        );
     }
 
     private async Task OpenAddUserDialog()
     {
-        var parameters = new DialogParameters { ["ServerId"] = ServerId };
+        var parameters = new DialogParameters<AddUserToServerDialog> { {x => x.ServerId, ServerId} };
         var options = new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true };
 
-        var dialog = await DialogService.ShowAsync<AddUserToServerDialog>("Add user to server", parameters, options);
+        var dialog = await DialogService.ShowAsync<AddUserToServerDialog>("Give access to server for user", parameters, options);
         var result = await dialog.Result;
 
         if (!result!.Canceled && result.Data is string addedUser)
         {
-            _usersWithAccess.Add(addedUser);
-            StateHasChanged();
+            var giveAccessResult = await Service.GiveUserAccessToServer(new ModifyServerAccessRequest(ServerId, addedUser));
+            
+            giveAccessResult.Switch(
+                success => _ = FetchUsers(),
+                error => Snackbar.Add(error, Severity.Error)
+            );
         }
     }
 }

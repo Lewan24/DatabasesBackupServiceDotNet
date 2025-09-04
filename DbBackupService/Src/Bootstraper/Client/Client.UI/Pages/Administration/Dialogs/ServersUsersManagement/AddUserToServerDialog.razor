@@ -1,7 +1,10 @@
-﻿<MudDialog>
-    <DialogContent>
-        <MudText Typo="Typo.h6" Class="mb-4">Add user to server</MudText>
+﻿@using Client.UI.Data.Services
 
+@inject AdministrationHttpService Service
+@inject ISnackbar Snackbar
+
+<MudDialog>
+    <DialogContent>
         <MudPaper Class="pa-4 rounded-2xl mud-elevation-1">
             <MudTable Items="@_allUsers" Hover="true" Dense="true" Bordered="false">
                 <HeaderContent>
@@ -33,12 +36,22 @@
     [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = null!;
     [Parameter] public Guid ServerId { get; set; }
 
-    private List<string> _allUsers = new() { "alice", "bob", "charlie", "david", "emma" };
+    private List<string> _allUsers = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var result = await Service.GetAllUsersThatDoesNotHaveAccessToServer(ServerId);
+
+        result.Switch(
+            list => _allUsers = list,
+            error => Snackbar.Add(error, Severity.Error)
+        );
+    }
 
     private void Cancel() => MudDialog.Cancel();
 
-    private void AddUser(string username)
+    private void AddUser(string email)
     {
-        MudDialog.Close(DialogResult.Ok(username));
+        MudDialog.Close(DialogResult.Ok(email));
     }
 }

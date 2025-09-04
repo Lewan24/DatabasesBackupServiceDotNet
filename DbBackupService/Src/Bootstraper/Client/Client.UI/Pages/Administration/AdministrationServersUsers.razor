@@ -50,7 +50,7 @@
                         <MudIconButton Icon="@Icons.Material.Filled.ChangeCircle" Color="Color.Secondary" OnClick="@(() => ToggleServerStatus(context.ServerId))" />
                     </MudTooltip>
                     <MudTooltip Delay="100" Text="Manage users that access this server">
-                        <MudIconButton Icon="@Icons.Material.Filled.People" Color="Color.Primary" OnClick="@(() => OpenManageUsersDialog(context.ServerId))"/>
+                        <MudIconButton Icon="@Icons.Material.Filled.People" Color="Color.Primary" OnClick="@(() => OpenManageUsersDialog(context))"/>
                     </MudTooltip>
                 </MudTd>
             </RowTemplate>
@@ -92,11 +92,11 @@
         StateHasChanged();
     }
     
-    private async Task OpenManageUsersDialog(Guid serverId)
+    private async Task OpenManageUsersDialog(ServersUsersListDto server)
     {
-        var parameters = new DialogParameters { ["ServerId"] = serverId };
+        var parameters = new DialogParameters<ManageUsersInServerDialog> { {x => x.ServerId, server.ServerId} };
         var options = new DialogOptions { MaxWidth = MaxWidth.Medium, FullWidth = true };
 
-        await DialogService.ShowAsync<ManageUsersInServerDialog>("Manage users", parameters, options);
+        await DialogService.ShowAsync<ManageUsersInServerDialog>($"Manage users access to server {server.ServerConnectionName}", parameters, options);
     }
 }
