@@ -180,6 +180,7 @@ public class ServersService (
 
     public async Task<OneOf<Success, string>> EditServer(ServerConnectionDto server)
     {
+        // TODO: Implement checking if user has access to server or is admin
         List<string> errors = new();
         
         if (string.IsNullOrWhiteSpace(server.ConnectionName))
@@ -280,5 +281,64 @@ public class ServersService (
         await db.SaveChangesAsync();
 
         return new Success();
+    }
+
+    public async Task<OneOf<Success, string>> ToggleDisabledStatus(Guid serverId, string? username)
+    {
+        if (serverId == Guid.Empty)
+            return "Id can't be empty";
+
+        var server = await db.DbConnections.FirstOrDefaultAsync(x => x.Id == serverId);
+
+        if (server is null)
+            return "Can't find specified server";
+
+        if (string.IsNullOrWhiteSpace(username))
+            return "Can't access username";
+        
+        var user = await userManager.FindByNameAsync(username);
+        if (user is null)
+            return "Can't find user";
+        
+        var isAdmin = await userManager.IsInRoleAsync(user, AppRoles.Admin);
+        if (isAdmin)
+            server.IsDisabled = !server.IsDisabled;
+        else
+        {
+            var access = await db.UsersServers
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.UserId == Guid.Parse(user.Id) && x.ServerId == serverId);
+
+            if (access is null)
+                return "User does not have required access to this server";
+            
+            server.IsDisabled = true;
+        }
+        
+        await db.SaveChangesAsync();
+        
+        return new Success();
+    }
+
+    public Task<List<ServersUsersListDto>> GetServersUsers()
+    {
+        var servers = db.DbConnections
+            .AsNoTracking()
+            .Select(x => new ServersUsersListDto
+            {
+                ServerId = x.Id, 
+                IsServerDisabled = x.IsDisabled, 
+                ServerConnectionName = x.ConnectionName
+            }).ToList();
+
+        foreach (var server in servers)
+        {
+            var usersWithAccess = db.UsersServers
+                .Count(x => x.ServerId == server.ServerId);
+            
+            server.UsersWithAccess = usersWithAccess;
+        }
+
+        return Task.FromResult(servers);
     }
 }

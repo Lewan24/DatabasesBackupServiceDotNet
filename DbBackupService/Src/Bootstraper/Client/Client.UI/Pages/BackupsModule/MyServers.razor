@@ -47,7 +47,7 @@
                 <MudTd DataLabel="Operations">
                     <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Warning" OnClick="@(() => OpenEditServerDialog(context))" />
                     <MudTooltip Delay="100" Text="Disable server">
-                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" />
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="@(() => DisableServer(context.Id))" />
                     </MudTooltip>
                 </MudTd>
             </RowTemplate>
@@ -73,6 +73,16 @@
         );
         
         StateHasChanged();
+    }
+
+    private async Task DisableServer(Guid id)
+    {
+        var result = await Service.ToggleDisabledStatus(id);
+        
+        result.Switch(
+            success => _ = FetchServers(),
+            error => Snackbar.Add(error, Severity.Error)
+        );
     }
     
     private async Task OpenEditServerDialog(ServerConnectionDto server)

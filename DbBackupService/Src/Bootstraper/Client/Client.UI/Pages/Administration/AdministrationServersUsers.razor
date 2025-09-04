@@ -1,6 +1,13 @@
 ﻿@page "/administration/serversusers"
 
+@using Client.UI.Data.Services
+@using Client.UI.Pages.Administration.Dialogs.ServersUsersManagement
 @using Modules.Backup.Shared.Dtos
+
+@inject AdministrationHttpService AdminService
+@inject BackupsHttpClientService BackupService
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
 
 <PageTitle>Manage Users in Servers</PageTitle>
 
@@ -12,7 +19,7 @@
             <MudText Typo="Typo.h6">Servers</MudText>
         </MudStack>
 
-        <MudTable Items="@serversUsers" Hover="true" Bordered="false" Dense="true">
+        <MudTable Items="@_serversUsers" Hover="true" Bordered="false" Dense="true">
             <HeaderContent>
                 <MudTh>Server Id</MudTh>
                 <MudTh>Server Name</MudTh>
@@ -23,7 +30,7 @@
             <RowTemplate>
                 <MudTd DataLabel="Id">
                     <MudTooltip Delay="100" Text="@context.ServerId.ToString()">
-                        @context.ServerId.ToString()[..8]...
+                        @context.ServerId.ToString()[..12]...
                     </MudTooltip>
                 </MudTd>
                 <MudTd DataLabel="Name">@context.ServerConnectionName</MudTd>
@@ -40,10 +47,10 @@
                 <MudTd DataLabel="Access">@context.UsersWithAccess users</MudTd>
                 <MudTd>
                     <MudTooltip Delay="100" Text="Toggle server status">
-                        <MudIconButton Icon="@Icons.Material.Filled.ChangeCircle" Color="Color.Secondary" />
+                        <MudIconButton Icon="@Icons.Material.Filled.ChangeCircle" Color="Color.Secondary" OnClick="@(() => ToggleServerStatus(context.ServerId))" />
                     </MudTooltip>
                     <MudTooltip Delay="100" Text="Manage users that access this server">
-                        <MudIconButton Icon="@Icons.Material.Filled.People" Color="Color.Primary"/>
+                        <MudIconButton Icon="@Icons.Material.Filled.People" Color="Color.Primary" OnClick="@(() => OpenManageUsersDialog(context.ServerId))"/>
                     </MudTooltip>
                 </MudTd>
             </RowTemplate>
@@ -56,10 +63,40 @@
 </MudContainer>
 
 @code {
-    private List<ServersUsersListDto> serversUsers = new()
+    private List<ServersUsersListDto> _serversUsers = new();
+
+    protected override async Task OnInitializedAsync()
     {
-        new ServersUsersListDto(Guid.CreateVersion7(), true, "Localhost", 2),
-        new ServersUsersListDto(Guid.CreateVersion7(), false, "Domain", 1),
-        new ServersUsersListDto(Guid.CreateVersion7(), false, "Sql Important Server", 1)
-    };
+        await FetchServersUsers();
+    }
+
+    private async Task ToggleServerStatus(Guid serverId)
+    {
+        var result = await BackupService.ToggleDisabledStatus(serverId);
+        
+        result.Switch(
+            success => _ = FetchServersUsers(),
+            error => Snackbar.Add(error, Severity.Error)
+        );
+    }
+
+    private async Task FetchServersUsers()
+    {
+        var result = await AdminService.FetchServersUsers();
+        
+        result.Switch(
+            serversUsers => _serversUsers = serversUsers,
+            error => Snackbar.Add(error, Severity.Error)
+        );
+        
+        StateHasChanged();
+    }
+    
+    private async Task OpenManageUsersDialog(Guid serverId)
+    {
+        var parameters = new DialogParameters { ["ServerId"] = serverId };
+        var options = new DialogOptions { MaxWidth = MaxWidth.Medium, FullWidth = true };
+
+        await DialogService.ShowAsync<ManageUsersInServerDialog>("Manage users", parameters, options);
+    }
 }

@@ -1,0 +1,44 @@
+﻿<MudDialog>
+    <DialogContent>
+        <MudText Typo="Typo.h6" Class="mb-4">Add user to server</MudText>
+
+        <MudPaper Class="pa-4 rounded-2xl mud-elevation-1">
+            <MudTable Items="@_allUsers" Hover="true" Dense="true" Bordered="false">
+                <HeaderContent>
+                    <MudTh>User</MudTh>
+                    <MudTh>Actions</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="User">@context</MudTd>
+                    <MudTd DataLabel="Actions">
+                        <MudTooltip Text="Grant access to this server">
+                            <MudButton Variant="Variant.Outlined"
+                                       Color="Color.Success"
+                                       OnClick="@(() => AddUser(context))">
+                                Add
+                            </MudButton>
+                        </MudTooltip>
+                    </MudTd>
+                </RowTemplate>
+            </MudTable>
+        </MudPaper>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton Variant="Variant.Text" Color="Color.Default" OnClick="Cancel">Cancel</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = null!;
+    [Parameter] public Guid ServerId { get; set; }
+
+    private List<string> _allUsers = new() { "alice", "bob", "charlie", "david", "emma" };
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private void AddUser(string username)
+    {
+        MudDialog.Close(DialogResult.Ok(username));
+    }
+}

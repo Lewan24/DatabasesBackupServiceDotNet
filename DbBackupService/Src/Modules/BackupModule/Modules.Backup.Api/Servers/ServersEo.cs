@@ -24,8 +24,13 @@ internal static class ServersEndpoints
         
         api.MapPost("EditServer", ServersOperations.EditServer)
             .WithSummary("Edit existing server");
-        
-        //TODO: implement managing users access to servers
+
+        api.MapPost("ToggleServerDisabledStatus", ServersOperations.ToggleServerDisabledStatus)
+            .WithSummary("Toggle server's disabled status");
+
+        api.MapGet("GetServersUsers", ServersOperations.GetServersUsers)
+            .WithSummary("Get servers and users that access server")
+            .AddEndpointFilter<AdminTokenAuthorizationFilter>();
         
         return app;
     }
@@ -70,4 +75,22 @@ internal abstract class ServersOperations
             error => TypedResults.BadRequest(error)
         );
     }
+
+    public static async Task<IResult> ToggleServerDisabledStatus(
+        HttpContext context,
+        [FromServices] ServersService service,
+        [FromBody] Guid serverId)
+    {
+        var result = await service.ToggleDisabledStatus(serverId, context.User.Identity!.Name);
+        
+        return result.Match<IResult>(
+            _ => TypedResults.Ok(),
+            error => TypedResults.BadRequest(error)
+        );
+    }
+
+    public static async Task<IResult> GetServersUsers(
+        HttpContext context,
+        [FromServices] ServersService service)
+        => TypedResults.Ok(await service.GetServersUsers());
 }

@@ -1,5 +1,6 @@
 ﻿using Modules.Auth.Shared.ActionsRequests;
 using Modules.Auth.Shared.Dtos;
+using Modules.Backup.Shared.Dtos;
 using OneOf;
 using OneOf.Types;
 
@@ -15,4 +16,7 @@ public class AdministrationHttpService(TokenHttpClientService api)
 
     public async Task<OneOf<Success, string>> EditUserAsync(EditUserRequest request)
         => await api.PostAsync("/api/administration/EditUser", request);
+
+    public async Task<OneOf<List<ServersUsersListDto>, string>> FetchServersUsers()
+        => await api.GetAsync<List<ServersUsersListDto>>("/api/servers/GetServersUsers");
 }

@@ -1,0 +1,67 @@
+﻿@inject IDialogService DialogService
+
+<MudDialog>
+    <DialogContent>
+        <MudText Typo="Typo.h5" Class="mb-4">Manage users for server</MudText>
+
+        <MudPaper Class="pa-4 rounded-2xl mud-elevation-1">
+            <MudTable Items="@_usersWithAccess" Hover="true" Dense="true" Bordered="false">
+                <HeaderContent>
+                    <MudTh>User</MudTh>
+                    <MudTh>Actions</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="User">@context</MudTd>
+                    <MudTd DataLabel="Actions">
+                        <MudTooltip Text="Remove user access">
+                            <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                           Color="Color.Error"
+                                           OnClick="@(() => RemoveUserFromServer(context))" />
+                        </MudTooltip>
+                    </MudTd>
+                </RowTemplate>
+            </MudTable>
+        </MudPaper>
+
+        <MudContainer Class="d-flex justify-end mt-4">
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OpenAddUserDialog">
+                Add User
+            </MudButton>
+        </MudContainer>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton Variant="Variant.Text" Color="Color.Default" OnClick="Cancel">Close</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = null!;
+
+    [Parameter] public Guid ServerId { get; set; }
+
+    private List<string> _usersWithAccess = new() { "alice", "bob", "charlie" };
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private void RemoveUserFromServer(string username)
+    {
+        _usersWithAccess.Remove(username);
+        StateHasChanged();
+    }
+
+    private async Task OpenAddUserDialog()
+    {
+        var parameters = new DialogParameters { ["ServerId"] = ServerId };
+        var options = new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true };
+
+        var dialog = await DialogService.ShowAsync<AddUserToServerDialog>("Add user to server", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result!.Canceled && result.Data is string addedUser)
+        {
+            _usersWithAccess.Add(addedUser);
+            StateHasChanged();
+        }
+    }
+}

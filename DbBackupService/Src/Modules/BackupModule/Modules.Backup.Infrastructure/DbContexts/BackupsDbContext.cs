@@ -17,9 +17,4 @@ public sealed class BackupsDbContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseSqlite($"Data Source={DbCommon.DbPath}");
-
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<ServersUsers>().HasNoKey();
-    }
 }

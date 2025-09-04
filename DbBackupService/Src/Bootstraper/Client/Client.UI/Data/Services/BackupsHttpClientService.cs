@@ -14,4 +14,7 @@ public class BackupsHttpClientService(TokenHttpClientService api)
     
     public async Task<OneOf<Success, string>> EditServerAsync(ServerConnectionDto server)
         => await api.PostAsync("/api/servers/EditServer", server);
+    
+    public async Task<OneOf<Success, string>> ToggleDisabledStatus(Guid serverId)
+        => await api.PostAsync("/api/servers/ToggleServerDisabledStatus", serverId);
 }

@@ -1,5 +1,9 @@
-﻿using System.Security.Cryptography.X509Certificates;
+﻿namespace Modules.Backup.Shared.Dtos;
 
-namespace Modules.Backup.Shared.Dtos;
-
-public record ServersUsersListDto(Guid ServerId, bool IsServerDisabled, string ServerConnectionName, int UsersWithAccess);
+public record ServersUsersListDto
+{
+    public Guid ServerId { get; set; }
+    public bool IsServerDisabled { get; set; }
+    public string? ServerConnectionName { get; set; }
+    public int UsersWithAccess { get; set; }
+}
