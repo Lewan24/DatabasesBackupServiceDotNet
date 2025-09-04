@@ -18,32 +18,37 @@
                             <MudTextField Label="Connection Name" Disabled="@_isCreating"
                                           Adornment="Adornment.Start"
                                           AdornmentIcon="@Icons.Material.Filled.Title"
-                                          @bind-Value="_server.ConnectionName" />
+                                          @bind-Value="_server.ConnectionName" 
+                                          For="@(() => _server.ConnectionName)"/>
                         </MudItem>
 
                         <MudItem xs="12" sm="8">
                             <MudTextField Label="Server Host" Disabled="@_isCreating"
                                           Adornment="Adornment.Start"
                                           AdornmentIcon="@Icons.Material.Filled.Dns"
-                                          @bind-Value="_server.ServerHost" />
+                                          @bind-Value="_server.ServerHost"
+                                          For="@(() => _server.ServerHost)"/>
                         </MudItem>
                         <MudItem xs="12" sm="4">
                             <MudNumericField T="short" Disabled="@_isCreating"
                                              Label="Port"
                                              Adornment="Adornment.Start"
                                              AdornmentIcon="@Icons.Material.Filled.Router"
-                                             @bind-Value="_server.ServerPort" />
+                                             @bind-Value="_server.ServerPort"
+                                             For="@(() => _server.ServerPort)"/>
                         </MudItem>
 
                         <MudItem xs="12" sm="6">
                             <MudTextField Label="Database Name" Disabled="@_isCreating"
                                           Adornment="Adornment.Start"
                                           AdornmentIcon="@Icons.Material.Filled.DataObject"
-                                          @bind-Value="_server.DbName" />
+                                          @bind-Value="_server.DbName"
+                                          For="@(() => _server.DbName)"/>
                         </MudItem>
 
                         <MudItem xs="12" sm="6">
-                            <MudSelect @bind-Value="_server.DbType" Label="Database Type" Disabled="@_isCreating">
+                            <MudSelect @bind-Value="_server.DbType" Label="Database Type" Disabled="@_isCreating"
+                                       For="@(() => _server.DbType)">
                                 <MudSelectItem Value="DatabaseType.MySql">MySQL</MudSelectItem>
                                 <MudSelectItem Value="DatabaseType.PostgreSql">PostgreSQL</MudSelectItem>
                                 <MudSelectItem Value="DatabaseType.SqlServer">SQL Server</MudSelectItem>
@@ -54,14 +59,16 @@
                             <MudTextField Label="DB User" Disabled="@_isCreating"
                                           Adornment="Adornment.Start"
                                           AdornmentIcon="@Icons.Material.Filled.Person"
-                                          @bind-Value="_server.DbUser" />
+                                          @bind-Value="_server.DbUser"
+                                          For="@(() => _server.DbUser)"/>
                         </MudItem>
                         <MudItem xs="12" sm="6">
                             <MudTextField Label="Password" Disabled="@_isCreating"
                                           InputType="InputType.Password"
                                           Adornment="Adornment.Start"
                                           AdornmentIcon="@Icons.Material.Filled.Lock"
-                                          @bind-Value="_server.DbPasswd" />
+                                          @bind-Value="_server.DbPasswd"
+                                          For="@(() => _server.DbPasswd)"/>
                         </MudItem>
 
                         <MudItem xs="12">
@@ -84,7 +91,8 @@
                                                               AdornmentIcon="@Icons.Material.Filled.Dns"
                                                               AdornmentColor="Color.Primary"
                                                               HelperText="Enter SSH server address"
-                                                              @bind-Value="_server.Tunnel!.ServerHost"/>
+                                                              @bind-Value="_server.Tunnel!.ServerHost"
+                                                              For="@(() => _server.Tunnel!.ServerHost)"/>
                                             </MudTooltip>
                                         </MudItem>
 
@@ -94,7 +102,8 @@
                                                               Adornment="Adornment.Start"
                                                               AdornmentIcon="@Icons.Material.Filled.Person"
                                                               HelperText="Enter SSH login username"
-                                                              @bind-Value="_server.Tunnel!.Username"/>
+                                                              @bind-Value="_server.Tunnel!.Username"
+                                                              For="@(() => _server.Tunnel!.Username)"/>
                                             </MudTooltip>
                                         </MudItem>
 
@@ -123,7 +132,8 @@
                                                 <MudNumericField T="int" Disabled="@_isCreating"
                                                                  Label="SSH Port"
                                                                  HelperText="Default: 22"
-                                                                 @bind-Value="_server.Tunnel!.SshPort"/>
+                                                                 @bind-Value="_server.Tunnel!.SshPort"
+                                                                 For="@(() => _server.Tunnel!.SshPort)"/>
                                             </MudTooltip>
                                         </MudItem>
 
@@ -132,7 +142,8 @@
                                                 <MudNumericField T="int" Disabled="@_isCreating"
                                                                  Label="Local Forward Port"
                                                                  HelperText="Local port for DB access"
-                                                                 @bind-Value="_server.Tunnel!.LocalPort"/>
+                                                                 @bind-Value="_server.Tunnel!.LocalPort"
+                                                                 For="@(() => _server.Tunnel!.LocalPort)"/>
                                             </MudTooltip>
                                         </MudItem>
 
@@ -141,7 +152,8 @@
                                                 <MudTextField Disabled="@_isCreating"
                                                               Label="Remote Host"
                                                               HelperText="Database host accessible via SSH"
-                                                              @bind-Value="_server.Tunnel!.RemoteHost"/>
+                                                              @bind-Value="_server.Tunnel!.RemoteHost"
+                                                              For="@(() => _server.Tunnel!.RemoteHost)"/>
                                             </MudTooltip>
                                         </MudItem>
 
@@ -150,7 +162,8 @@
                                                 <MudNumericField T="int" Disabled="@_isCreating"
                                                                  Label="Remote Port"
                                                                  HelperText="Port of the database server"
-                                                                 @bind-Value="_server.Tunnel!.RemotePort"/>
+                                                                 @bind-Value="_server.Tunnel!.RemotePort"
+                                                                 For="@(() => _server.Tunnel!.RemotePort)"/>
                                             </MudTooltip>
                                         </MudItem>
 
