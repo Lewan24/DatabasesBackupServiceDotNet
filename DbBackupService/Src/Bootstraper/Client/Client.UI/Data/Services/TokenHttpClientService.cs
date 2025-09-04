@@ -38,8 +38,8 @@ public sealed class TokenHttpClientService(IHttpClientFactory factory)
         {
             var response = await httpCall();
 
-            if (response.StatusCode is HttpStatusCode.BadRequest 
-                                    or HttpStatusCode.NotFound)
+            if (response.StatusCode is HttpStatusCode.BadRequest
+                or HttpStatusCode.NotFound)
                 return await response.Content.ReadAsStringAsync();
 
             if (response.StatusCode is HttpStatusCode.Unauthorized 
@@ -47,10 +47,10 @@ public sealed class TokenHttpClientService(IHttpClientFactory factory)
                 return "Dostęp zabroniony. Skontaktuj się z Administratorem";
 
             response.EnsureSuccessStatusCode();
-
+            
             var stream = await response.Content.ReadAsStreamAsync();
             var result = await JsonSerializer.DeserializeAsync<T>(stream, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
+            
             return result!;
         }
         catch (Exception ex)

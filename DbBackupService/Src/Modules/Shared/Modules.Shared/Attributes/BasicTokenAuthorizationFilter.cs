@@ -18,10 +18,11 @@ public class BasicTokenAuthorizationFilter(ILogger<BasicTokenAuthorizationFilter
         if (allowWithoutValidation)
             return await next(context);
         
-        var validationResult = await ValidateTokenAndContinue(context, next);
-        return validationResult.Match(
-            _ => next(context),
-            error => new ValueTask<object?>(Results.BadRequest(error)));
+        var tokenValidationResult = await ValidateTokenAndContinue(context, next);
+        if (tokenValidationResult.IsT1)
+            return new ValueTask<object?>(Results.BadRequest(tokenValidationResult.AsT1));
+        
+        return await next(context);
     }
 
     /// <summary>

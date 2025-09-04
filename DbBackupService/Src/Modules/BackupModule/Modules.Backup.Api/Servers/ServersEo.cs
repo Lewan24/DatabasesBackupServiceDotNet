@@ -16,7 +16,6 @@ internal static class ServersEndpoints
             .RequireAuthorization()
             .AddEndpointFilter<BasicTokenAuthorizationFilter>();
 
-        //TODO: Doesnt work properly
         api.MapGet("GetMyServers", ServersOperations.GetUserServers)
             .WithSummary("Get user's enabled servers");
         
@@ -42,7 +41,7 @@ internal abstract class ServersOperations
 
         return result.Match<IResult>(
             servers => TypedResults.Ok(servers),
-            error => TypedResults.Problem(error)
+            error => TypedResults.BadRequest(error)
         );
     }
 
@@ -55,7 +54,7 @@ internal abstract class ServersOperations
 
         return result.Match<IResult>(
             _ => TypedResults.Created(),
-            error => TypedResults.Problem(error)
+            error => TypedResults.BadRequest(error)
         );
     }
 
@@ -68,7 +67,7 @@ internal abstract class ServersOperations
 
         return result.Match<IResult>(
             _ => TypedResults.Ok(),
-            error => TypedResults.Problem(error)
+            error => TypedResults.BadRequest(error)
         );
     }
 }
