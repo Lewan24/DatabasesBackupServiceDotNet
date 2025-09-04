@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Modules.Auth.Core.Entities;
+using Modules.Auth.Infrastructure.DbContexts;
 using Modules.Auth.Shared.Static.Entities;
 using Modules.Backup.Core.Entities.DbContext;
 using Modules.Backup.Infrastructure.DbContexts;
@@ -14,6 +15,7 @@ namespace Modules.Backup.Application.Services;
 
 public class ServersService (
     BackupsDbContext db,
+    AppIdentityDbContext appIdentityDbContext,
     UserManager<AppUser> userManager,
     ILogger<ServersService> logger)
 {
@@ -343,23 +345,98 @@ public class ServersService (
         return Task.FromResult(servers);
     }
 
-    public async Task<OneOf<List<string>, string>> GetUsersThatAccessServer(Guid serverId)
+    public Task<OneOf<List<string>, string>> GetUsersThatAccessServer(Guid serverId)
     {
-        throw new NotImplementedException();
+        if (serverId == Guid.Empty)
+            return Task.FromResult<OneOf<List<string>, string>>("Id cant be empty");
+        
+        try
+        {
+            var serversUsersIds = db.UsersServers
+                .AsNoTracking()
+                .Where(x => x.ServerId == serverId)
+                .Select(x => x.UserId)
+                .ToList();
+
+            var usersEmails = new List<string>();
+            
+            foreach (var userId in serversUsersIds)
+                usersEmails.Add(appIdentityDbContext.Users.FirstOrDefaultAsync(x => x.Id == userId.ToString()).Result?.Email!);
+            
+            return Task.FromResult<OneOf<List<string>, string>>(usersEmails!);
+        }
+        catch (Exception e)
+        {
+            return Task.FromResult<OneOf<List<string>, string>>(e.Message);
+        }
     }
 
-    public async Task<OneOf<List<string>, string>> GetAllUsersThatDoesNotHaveAccessToServer(Guid serverId)
+    public Task<OneOf<List<string>, string>> GetAllUsersThatDoesNotHaveAccessToServer(Guid serverId)
     {
-        throw new NotImplementedException();
+        if (serverId == Guid.Empty)
+            return Task.FromResult<OneOf<List<string>, string>>("Id cant be empty");
+        
+        try
+        {
+            // TODO: Refactor to show only available users
+            var serversUsersIds = db.UsersServers
+                .AsNoTracking()
+                .Where(x => x.ServerId == serverId)
+                .Select(x => x.UserId)
+                .ToList();
+
+            var usersEmails = new List<string>();
+            
+            foreach (var userId in serversUsersIds)
+                usersEmails.Add(appIdentityDbContext.Users.FirstOrDefaultAsync(x => x.Id == userId.ToString()).Result?.Email!);
+
+            return Task.FromResult<OneOf<List<string>, string>>(usersEmails);
+        }
+        catch (Exception e)
+        {
+            return Task.FromResult<OneOf<List<string>, string>>(e.Message);
+        }
     }
 
     public async Task<OneOf<Success, string>> RemoveUserAccessFromServer(ModifyServerAccessRequest request)
     {
-        throw new NotImplementedException();
+        if (request.ServerId == Guid.Empty || string.IsNullOrWhiteSpace(request.UserEmail))
+            return "Invalid request";
+        
+        var user = await userManager.FindByEmailAsync(request.UserEmail);
+        if (user is null)
+            return "Can't find user";
+
+        var serverUserAccess = await db.UsersServers
+            .FirstOrDefaultAsync(x => x.ServerId == request.ServerId && x.UserId == Guid.Parse(user.Id));
+
+        if (serverUserAccess is null)
+            return "Can't find specified user access";
+
+        db.UsersServers.Remove(serverUserAccess);
+        await db.SaveChangesAsync();
+
+        return new Success();
     }
 
     public async Task<OneOf<Success, string>> GiveUserAccessToServer(ModifyServerAccessRequest request)
     {
-        throw new NotImplementedException();
+        if (request.ServerId == Guid.Empty || string.IsNullOrWhiteSpace(request.UserEmail))
+            return "Invalid request";
+        
+        var user = await userManager.FindByEmailAsync(request.UserEmail);
+        if (user is null)
+            return "Can't find user";
+
+        var newServerUser = new ServersUsers
+        {
+            ServerId = request.ServerId,
+            UserId = Guid.Parse(user.Id)
+        };
+
+        db.UsersServers.Add(newServerUser);
+        await db.SaveChangesAsync();
+
+        return new Success();
     }
 }

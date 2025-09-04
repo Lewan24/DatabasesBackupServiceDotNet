@@ -14,6 +14,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\..\AuthModule\Modules.Auth.Core\Modules.Auth.Core.csproj" />
+        <ProjectReference Include="..\..\AuthModule\Modules.Auth.Infrastructure\Modules.Auth.Infrastructure.csproj" />
         <ProjectReference Include="..\Modules.Backup.Core\Modules.Backup.Core.csproj"/>
         <ProjectReference Include="..\Modules.Backup.Infrastructure\Modules.Backup.Infrastructure.csproj"/>
     </ItemGroup>
