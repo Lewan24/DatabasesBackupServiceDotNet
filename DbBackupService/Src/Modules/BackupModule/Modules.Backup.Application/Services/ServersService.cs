@@ -86,8 +86,6 @@ public class ServersService (
         if (string.IsNullOrWhiteSpace(newServer.DbPasswd))
             errors.Add("Database password is required");
 
-        // TODO: check ui and forms validation, fields etc for tunnel creation and editing.
-        // not all fields are fullfiled and prepared in ui
         if (newServer.IsTunnelRequired)
         {
             if (newServer.Tunnel is null)
@@ -99,6 +97,11 @@ public class ServersService (
                     errors.Add("Tunnel host is required");
                 if (string.IsNullOrWhiteSpace(newServer.Tunnel.Username))
                     errors.Add("Tunnel username is required");
+
+                if (string.IsNullOrWhiteSpace(newServer.Tunnel.PrivateKeyContent))
+                    if (string.IsNullOrWhiteSpace(newServer.Tunnel.Password))
+                        errors.Add("Tunnel password is required");
+                
                 if (newServer.Tunnel.LocalPort is <= 0 or > 65535)
                     errors.Add("Invalid tunnel local port");
                 if (string.IsNullOrWhiteSpace(newServer.Tunnel.RemoteHost))
@@ -135,7 +138,7 @@ public class ServersService (
                 ServerHost = newServer.Tunnel!.ServerHost!,
                 SshPort = newServer.Tunnel.SshPort,
                 Username = newServer.Tunnel.Username!,
-                UsePasswordAuth = newServer.Tunnel.UsePasswordAuth,
+                UsePasswordAuth = string.IsNullOrWhiteSpace(newServer.Tunnel.PrivateKeyContent),
                 Password = newServer.Tunnel.Password,
                 PrivateKeyContent = newServer.Tunnel.PrivateKeyContent,
                 LocalPort = newServer.Tunnel.LocalPort,
@@ -201,6 +204,11 @@ public class ServersService (
                     errors.Add("Tunnel host is required");
                 if (string.IsNullOrWhiteSpace(server.Tunnel.Username))
                     errors.Add("Tunnel username is required");
+                
+                if (string.IsNullOrWhiteSpace(server.Tunnel.PrivateKeyContent))
+                    if (string.IsNullOrWhiteSpace(server.Tunnel.Password))
+                        errors.Add("Tunnel password is required");
+                
                 if (server.Tunnel.LocalPort is <= 0 or > 65535)
                     errors.Add("Invalid tunnel local port");
                 if (string.IsNullOrWhiteSpace(server.Tunnel.RemoteHost))
@@ -258,7 +266,7 @@ public class ServersService (
             dbTunnel.ServerHost = server.Tunnel!.ServerHost!;
             dbTunnel.SshPort = server.Tunnel.SshPort;
             dbTunnel.Username = server.Tunnel.Username!;
-            dbTunnel.UsePasswordAuth = server.Tunnel.UsePasswordAuth;
+            dbTunnel.UsePasswordAuth = string.IsNullOrWhiteSpace(server.Tunnel.PrivateKeyContent);
             dbTunnel.Password = server.Tunnel.Password;
             dbTunnel.PrivateKeyContent = server.Tunnel.PrivateKeyContent;
             dbTunnel.LocalPort = server.Tunnel.LocalPort;

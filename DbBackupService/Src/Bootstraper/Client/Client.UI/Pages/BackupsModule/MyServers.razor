@@ -32,7 +32,7 @@
             <RowTemplate>
                 <MudTd DataLabel="Name">@context.ConnectionName</MudTd>
                 <MudTd DataLabel="Host">@context.ServerHost:@context.ServerPort</MudTd>
-                <MudTd DataLabel="Database">@context.DbName</MudTd>
+                <MudTd DataLabel="Database">@context.DbName:@context.DbUser</MudTd>
                 <MudTd DataLabel="Tunnel Status">
                     @if (context.IsTunnelRequired)
                     {
@@ -79,7 +79,7 @@
     {
         var dialogParameters = new DialogParameters<EditServerDialog>
         {
-            { x => x.Server, server }
+            { x => x.Server, server with{} }
         };
         
         var dialog = await DialogService.ShowAsync<EditServerDialog>($"Edit server {server.ConnectionName}", parameters: dialogParameters);
