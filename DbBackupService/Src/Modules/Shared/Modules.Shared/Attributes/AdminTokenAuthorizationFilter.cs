@@ -18,7 +18,7 @@ public class AdminTokenAuthorizationFilter : IEndpointFilter
         // Najpierw walidacja tokenu (z base)
         var tokenValidationResult = await BasicTokenAuthorizationFilter.ValidateTokenAndContinue(context, next);
         if (tokenValidationResult.IsT1)
-            return new ValueTask<object?>(Results.BadRequest(tokenValidationResult.AsT1));
+            return await new ValueTask<object?>(Results.BadRequest(tokenValidationResult.AsT1));
 
         // Sprawdź admina
         var adminApi = context.HttpContext.RequestServices.GetService<IAdminModuleApi>();

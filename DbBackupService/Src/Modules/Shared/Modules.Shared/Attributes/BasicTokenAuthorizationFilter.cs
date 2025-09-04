@@ -20,7 +20,7 @@ public class BasicTokenAuthorizationFilter(ILogger<BasicTokenAuthorizationFilter
         
         var tokenValidationResult = await ValidateTokenAndContinue(context, next);
         if (tokenValidationResult.IsT1)
-            return new ValueTask<object?>(Results.BadRequest(tokenValidationResult.AsT1));
+            return await new ValueTask<object?>(Results.BadRequest(tokenValidationResult.AsT1));
         
         return await next(context);
     }

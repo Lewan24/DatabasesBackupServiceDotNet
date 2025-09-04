@@ -371,32 +371,38 @@ public class ServersService (
         }
     }
 
-    public Task<OneOf<List<string>, string>> GetAllUsersThatDoesNotHaveAccessToServer(Guid serverId)
+    public async Task<OneOf<List<string>, string>> GetAllUsersThatDoesNotHaveAccessToServer(Guid serverId)
     {
         if (serverId == Guid.Empty)
-            return Task.FromResult<OneOf<List<string>, string>>("Id cant be empty");
-        
+            return "Id cant be empty";
+
         try
         {
-            // TODO: Refactor to show only available users
-            var serversUsersIds = db.UsersServers
+            var serversUsersIds = await db.UsersServers
                 .AsNoTracking()
                 .Where(x => x.ServerId == serverId)
                 .Select(x => x.UserId)
-                .ToList();
+                .ToListAsync();
 
-            var usersEmails = new List<string>();
+            var allUsers = await appIdentityDbContext.Users
+                .AsNoTracking()
+                .Select(u => new { u.Id, u.Email })
+                .ToListAsync();
+
+            var usersWithoutAccess = new List<string>();
             
-            foreach (var userId in serversUsersIds)
-                usersEmails.Add(appIdentityDbContext.Users.FirstOrDefaultAsync(x => x.Id == userId.ToString()).Result?.Email!);
+            foreach (var user in allUsers)
+                if (!serversUsersIds.Contains(Guid.Parse(user.Id)))
+                    usersWithoutAccess.Add(user.Email!);
 
-            return Task.FromResult<OneOf<List<string>, string>>(usersEmails);
+            return usersWithoutAccess;
         }
         catch (Exception e)
         {
-            return Task.FromResult<OneOf<List<string>, string>>(e.Message);
+            return e.Message;
         }
     }
+
 
     public async Task<OneOf<Success, string>> RemoveUserAccessFromServer(ModifyServerAccessRequest request)
     {
