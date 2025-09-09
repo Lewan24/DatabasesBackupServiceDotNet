@@ -2,13 +2,19 @@
 
 @using Client.UI.Data.Services
 @using Client.UI.Pages.BackupsModule.Dialogs.Schedule
+@using Microsoft.AspNetCore.SignalR.Client
 @using Modules.Backup.Shared.Dtos
 @using Modules.Backup.Shared.Helpers
+@using Modules.Backup.Shared.Hubs
 @using OneOf.Types
 
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
 @inject BackupsHttpClientService Service
+@inject NavigationManager Nav
+@inject AuthStateProvider Auth
+
+@implements IDisposable
 
 <PageTitle>Backup Schedules</PageTitle>
 
@@ -26,7 +32,7 @@
             <HeaderContent>
                 <MudTh>Name</MudTh>
                 <MudTh>Server</MudTh>
-                <MudTh>Status</MudTh>
+                <MudTh><MudTableSortLabel InitialDirection="SortDirection.Descending" SortBy="new Func<BackupsScheduleDto, object>(x => x.IsEnabled)">Status</MudTableSortLabel></MudTh>
                 <MudTh>Next Backup</MudTh>
                 <MudTh>Actions</MudTh>
             </HeaderContent>
@@ -42,10 +48,6 @@
                     {
                         <MudChip T="string" Color="Color.Error" Variant="Variant.Outlined">Disabled</MudChip>
                     }
-                    
-                    <MudTooltip Delay="100" Text="@(context.IsEnabled ? "Disable" : "Enable")">
-                        <MudIconButton Color="Color.Secondary" Size="Size.Small" Icon="@Icons.Material.Filled.ChangeCircle" Class="ml-3" Variant="Variant.Filled" />
-                    </MudTooltip>
                 </MudTd>
                 <MudTd>@BackupScheduleHelper.GetNextBackupDateString(context)</MudTd>
                 <MudTd>
@@ -55,6 +57,10 @@
                                    OnClick="() => DeleteSchedule(context.Id)" />
                 </MudTd>
             </RowTemplate>
+
+            <PagerContent>
+                <MudTablePager PageSizeOptions="@([25, 50, 100])" />
+            </PagerContent>
         </MudTable>
     </MudPaper>
 </MudContainer>
@@ -62,7 +68,8 @@
 @code {
     private List<BackupsScheduleDto> _schedules = new();
     private List<ServerNameIdDto> _availableServers = new();
-    
+    private HubConnection? _hubConnection;
+
     protected override async Task OnInitializedAsync()
     {
         await FetchSchedules();
@@ -72,6 +79,20 @@
             list => _availableServers = list,
             error => Snackbar.Add(error, Severity.Error)
         );
+        
+        _hubConnection = BackupHubHelper.GetBasicHubConnection(Nav.ToAbsoluteUri(BackupHubHelper.HubUrl));
+        _hubConnection.On<Guid>(BackupHubHelper.Events.ScheduleCreatedEvent.ToString(), (serverId) =>
+        {
+            if (_availableServers.FirstOrDefault(x => x.Id == serverId) is not null)
+                InvokeAsync(FetchSchedules);
+        });
+        _hubConnection.On<Guid>(BackupHubHelper.Events.ScheduleHasChangedEvent.ToString(), (id) =>
+        {
+            if (_schedules.FirstOrDefault(x => x.Id == id) is not null)
+                InvokeAsync(FetchSchedules);
+        });
+
+        await _hubConnection.StartAsync();
     }
 
     private async Task FetchSchedules()
@@ -151,4 +172,10 @@
             );
         }
     }
+
+    public void Dispose()
+    {
+        _hubConnection?.DisposeAsync();
+    }
+
 }

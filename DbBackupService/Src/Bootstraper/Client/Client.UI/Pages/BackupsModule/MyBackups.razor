@@ -58,11 +58,11 @@
                                     <span>Poprawnie przetestowano</span>
                                     break;
                                     
-                                    case false:
+                                case false:
                                     <span>Ponów test</span>
                                     break;
                                     
-                                    default:
+                                default:
                                     <span>Testuj backup</span>
                                     break;
                             }
@@ -70,6 +70,10 @@
                     </MudTd>
                 }
             </RowTemplate>
+
+            <PagerContent>
+                <MudTablePager PageSizeOptions="@([25, 50, 100])" />
+            </PagerContent>
         </MudTable>
     </MudPaper>
 </MudContainer>

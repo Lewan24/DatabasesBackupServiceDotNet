@@ -18,7 +18,8 @@ public class ServersService (
     BackupsDbContext db,
     AppIdentityDbContext appIdentityDbContext,
     UserManager<AppUser> userManager,
-    ILogger<ServersService> logger)
+    ILogger<ServersService> logger,
+    NotifyService notifyService)
 {
     public async Task<OneOf<List<ServerConnectionDto>, string>> GetServers(string? identityName)
     {
@@ -74,24 +75,21 @@ public class ServersService (
                 IsTunnelRequired = server.IsTunnelRequired
             };
             
-            if (server.IsTunnelRequired)
-            {
-                var dbTunnel = db.DbServerTunnels.FirstOrDefault(x => x.Id == server.TunnelId);
+            var dbTunnel = db.DbServerTunnels.FirstOrDefault(x => x.Id == server.TunnelId);
 
-                if (dbTunnel is not null)
+            if (dbTunnel is not null)
+            {
+                dto.Tunnel = new ServerTunnelDto
                 {
-                    dto.Tunnel = new ServerTunnelDto
-                    {
-                        Id = dbTunnel.Id,
-                        ServerHost = dbTunnel.ServerHost,
-                        SshPort = dbTunnel.SshPort,
-                        Username = dbTunnel.Username,
-                        LocalPort = dbTunnel.LocalPort,
-                        RemoteHost = dbTunnel.RemoteHost,
-                        RemotePort = dbTunnel.RemotePort,
-                        Description = dbTunnel.Description
-                    };
-                }
+                    Id = dbTunnel.Id,
+                    ServerHost = dbTunnel.ServerHost,
+                    SshPort = dbTunnel.SshPort,
+                    Username = dbTunnel.Username,
+                    LocalPort = dbTunnel.LocalPort,
+                    RemoteHost = dbTunnel.RemoteHost,
+                    RemotePort = dbTunnel.RemotePort,
+                    Description = dbTunnel.Description
+                };
             }
             
             dtoServers.Add(dto);
@@ -241,16 +239,20 @@ public class ServersService (
             return "Can't find user";
         
         var isAdmin = await userManager.IsInRoleAsync(user, AppRoles.Admin);
+
+        var serverUser = new ServersUsers
+        {
+            UserId = Guid.Parse(user.Id),
+            ServerId = dbServer.Id
+        };
         
         if (!isAdmin)
-            db.UsersServers.Add(new ServersUsers
-            {
-                UserId = Guid.Parse(user.Id),
-                ServerId = dbServer.Id
-            });
+            db.UsersServers.Add(serverUser);
         
         await db.SaveChangesAsync();
 
+        await notifyService.CallServerCreatedEvent(user.UserName!);
+        
         return new Success();
     }
 
@@ -356,6 +358,8 @@ public class ServersService (
 
         await db.SaveChangesAsync();
 
+        await notifyService.CallServerHasChangedEvent(dbServer.Id);
+        
         return new Success();
     }
 
@@ -392,6 +396,22 @@ public class ServersService (
         }
         
         await db.SaveChangesAsync();
+        
+        if (server.IsDisabled)
+            await notifyService.CallServerHasChangedEvent(server.Id);
+        else
+        {
+            var usersWithAccess = db.UsersServers
+                .AsNoTracking()
+                .Where(x => x.ServerId == serverId)
+                .ToList();
+
+            foreach (var userAccess in usersWithAccess)
+            {
+                var tempUser = await userManager.FindByIdAsync(userAccess.UserId.ToString());
+                await notifyService.CallServerCreatedEvent(tempUser?.UserName!);
+            }
+        }
         
         return new Success();
     }
@@ -495,6 +515,8 @@ public class ServersService (
         db.UsersServers.Remove(serverUserAccess);
         await db.SaveChangesAsync();
 
+        await notifyService.CallServerHasChangedEvent(request.ServerId);
+        
         return new Success();
     }
 
@@ -516,6 +538,8 @@ public class ServersService (
         db.UsersServers.Add(newServerUser);
         await db.SaveChangesAsync();
 
+        await notifyService.CallServerCreatedEvent(user.UserName!);
+        
         return new Success();
     }
 }

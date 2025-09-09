@@ -10,12 +10,12 @@ using Modules.Auth.Core.Entities;
 using Modules.Auth.Infrastructure.DbContexts;
 using Modules.Backup.Api;
 using Modules.Backup.Infrastructure.DbContexts;
+using Modules.Backup.Shared.Hubs;
 using Modules.Shared.Common;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Logs;
 using Scalar.AspNetCore;
 using Server.Api.Common;
-using Server.Api.Hubs;
 
 const string defaultCorsPolicyName = "Default";
 
@@ -188,7 +188,7 @@ app.UseAuthorization();
 
 app.UseAntiforgery();
 
-app.MapHub<BackupHub>("/backuphub");
+app.MapHub<BackupHub>(BackupHubHelper.HubUrl);
 
 DbCommon.CreateDbDirectoryIfNotExists();
 

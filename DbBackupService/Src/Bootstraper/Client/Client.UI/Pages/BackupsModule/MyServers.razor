@@ -2,11 +2,17 @@
 
 @using Client.UI.Data.Services
 @using Client.UI.Pages.BackupsModule.Dialogs.Servers
+@using Microsoft.AspNetCore.SignalR.Client
 @using Modules.Backup.Shared.Dtos
+@using Modules.Backup.Shared.Hubs
 
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
 @inject BackupsHttpClientService Service
+@inject NavigationManager Nav
+@inject AuthStateProvider Auth
+
+@implements IDisposable
 
 <PageTitle>Servers</PageTitle>
 
@@ -51,6 +57,10 @@
                     </MudTooltip>
                 </MudTd>
             </RowTemplate>
+
+            <PagerContent>
+                <MudTablePager PageSizeOptions="@([10, 25, 50, 100])" />
+            </PagerContent>
         </MudTable>
     </MudPaper>
 </MudContainer>
@@ -58,9 +68,28 @@
 @code {
     private List<ServerConnectionDto> _servers = new();
 
+    private HubConnection? _hubConnection;
+    
     protected override async Task OnInitializedAsync()
     {
         await FetchServers();
+
+        _hubConnection = BackupHubHelper.GetBasicHubConnection(Nav.ToAbsoluteUri(BackupHubHelper.HubUrl));
+        
+        _hubConnection.On<string>(BackupHubHelper.Events.ServerCreatedEvent.ToString(), (userName) =>
+        {
+            var currentUserName = Auth.GetAuthenticationStateAsync().Result.User.Identity?.Name;
+            
+            if (currentUserName!.Equals(userName, StringComparison.OrdinalIgnoreCase))
+                InvokeAsync(FetchServers);
+        });
+        _hubConnection.On<Guid>(BackupHubHelper.Events.ServerHasChangedEvent.ToString(), (id) =>
+        {
+            if (_servers.FirstOrDefault(x => x.Id == id) is not null)
+                InvokeAsync(FetchServers);
+        });
+
+        await _hubConnection.StartAsync();
     }
 
     private async Task FetchServers()
@@ -109,4 +138,10 @@
         if (dialogResult is not null && !dialogResult.Canceled)
             await FetchServers();
     }
+
+    public void Dispose()
+    {
+        _hubConnection?.DisposeAsync();
+    }
+
 }

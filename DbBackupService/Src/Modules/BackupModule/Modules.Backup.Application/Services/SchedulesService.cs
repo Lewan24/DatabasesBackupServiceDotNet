@@ -14,7 +14,8 @@ public sealed class SchedulesService(
     BackupsDbContext db,
     ILogger<SchedulesService> logger,
     ServersService serversService,
-    IAdminModuleApi adminApi)
+    IAdminModuleApi adminApi,
+    NotifyService notifyService)
 {
     public async Task<OneOf<List<BackupsScheduleDto>, string>> GetMySchedules(string? identityName)
     {
@@ -96,6 +97,8 @@ public sealed class SchedulesService(
         db.Schedules.Add(entity);
         await db.SaveChangesAsync();
 
+        await notifyService.CallScheduleCreatedEvent(schedule.DbConnectionId);
+        
         return new Success();
     }
 
@@ -127,6 +130,8 @@ public sealed class SchedulesService(
         db.Schedules.Update(entity);
         await db.SaveChangesAsync();
 
+        await notifyService.CallScheduleHasChangedEvent(entity.Id);
+        
         return new Success();
     }
 
@@ -149,6 +154,8 @@ public sealed class SchedulesService(
         db.Schedules.Remove(entity);
         await db.SaveChangesAsync();
 
+        await notifyService.CallScheduleHasChangedEvent(scheduleId);
+        
         return new Success();
     }
 

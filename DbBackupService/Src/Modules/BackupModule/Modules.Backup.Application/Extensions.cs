@@ -9,6 +9,8 @@ public static class Extensions
     {
         services.AddScoped<ServersService>();
         services.AddScoped<SchedulesService>();
+
+        services.AddTransient<NotifyService>();
         
         return services;
     }
