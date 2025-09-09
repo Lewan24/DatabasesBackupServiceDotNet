@@ -47,7 +47,7 @@
                         <MudIconButton Color="Color.Secondary" Size="Size.Small" Icon="@Icons.Material.Filled.ChangeCircle" Class="ml-3" Variant="Variant.Filled" />
                     </MudTooltip>
                 </MudTd>
-                <MudTd>@GetNextBackup(context)</MudTd>
+                <MudTd>@BackupScheduleHelper.GetNextBackupDateString(context)</MudTd>
                 <MudTd>
                     <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Warning"
                                    OnClick="() => OpenEditScheduleDialog(context)" />
@@ -97,19 +97,6 @@
             },
             error => Snackbar.Add(error, Severity.Error)
         );
-    }
-
-    private string GetNextBackup(BackupsScheduleDto schedule)
-    {
-        if (!schedule.SelectedDays.Any() || !schedule.SelectedTimes.Any())
-            return "-";
-
-        var now = DateTime.Now;
-        var candidates = schedule.SelectedDays
-            .SelectMany(d => schedule.SelectedTimes, (day, time) => BackupScheduleHelper.GetNextDateTime(day, time, now))
-            .ToList();
-
-        return candidates.Min().ToString("g");
     }
 
     private async Task OpenNewScheduleDialog()

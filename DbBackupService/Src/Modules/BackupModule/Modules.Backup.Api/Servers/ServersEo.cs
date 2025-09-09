@@ -73,7 +73,7 @@ internal abstract class ServersOperations
         HttpContext context,
         [FromServices] ServersService service)
     {
-        var result = await service.GetServersForSchedules(context.User.Identity?.Name);
+        var result = await service.GetAvailableServersBasic(context.User.Identity?.Name);
 
         return result.Match<IResult>(
             servers => TypedResults.Ok(servers),

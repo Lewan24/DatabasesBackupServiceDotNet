@@ -100,7 +100,7 @@ public class ServersService (
         return dtoServers;
     }
     
-    public async Task<OneOf<List<ServerNameIdDto>, string>> GetServersForSchedules(string? identityName)
+    public async Task<OneOf<List<ServerNameIdDto>, string>> GetAvailableServersBasic(string? identityName)
     {
         if (string.IsNullOrWhiteSpace(identityName))
             return "Can't access user name";

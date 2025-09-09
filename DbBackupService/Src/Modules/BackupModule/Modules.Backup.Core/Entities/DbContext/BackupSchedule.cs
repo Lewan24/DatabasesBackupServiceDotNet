@@ -11,7 +11,7 @@ public sealed record BackupSchedule
     public required string Name { get; set; }
     public bool IsEnabled { get; set; } = true;
     public Guid DbConnectionId { get; set; }
-    public required string ConfigurationJson { get; set; }
+    public string? ConfigurationJson { get; set; }
     [NotMapped]
     public BackupScheduleConfiguration? Configuration
     {
