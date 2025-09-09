@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using System.Data.Common;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Modules.Auth.Core.Entities;
@@ -57,19 +58,91 @@ public class ServersService (
                 .ToList();
         }
 
-        return dbServers
-            .Select(x => new ServerConnectionDto
+        var dtoServers = new List<ServerConnectionDto>();
+        
+        foreach (var server in dbServers)
+        {
+            var dto = new ServerConnectionDto
             {
-                Id = x.Id,
-                ConnectionName = x.ConnectionName,
-                ServerHost = x.ServerHost,
-                ServerPort = x.ServerPort,
-                DbName = x.DbName,
-                DbType = x.DbType,
-                DbUser = x.DbUser,
-                IsTunnelRequired = x.IsTunnelRequired
-            })
-            .ToList();;
+                Id = server.Id,
+                ConnectionName = server.ConnectionName,
+                ServerHost = server.ServerHost,
+                ServerPort = server.ServerPort,
+                DbName = server.DbName,
+                DbType = server.DbType,
+                DbUser = server.DbUser,
+                IsTunnelRequired = server.IsTunnelRequired
+            };
+            
+            if (server.IsTunnelRequired)
+            {
+                var dbTunnel = db.DbServerTunnels.FirstOrDefault(x => x.Id == server.TunnelId);
+
+                if (dbTunnel is not null)
+                {
+                    dto.Tunnel = new ServerTunnelDto
+                    {
+                        Id = dbTunnel.Id,
+                        ServerHost = dbTunnel.ServerHost,
+                        SshPort = dbTunnel.SshPort,
+                        Username = dbTunnel.Username,
+                        LocalPort = dbTunnel.LocalPort,
+                        RemoteHost = dbTunnel.RemoteHost,
+                        RemotePort = dbTunnel.RemotePort,
+                        Description = dbTunnel.Description
+                    };
+                }
+            }
+            
+            dtoServers.Add(dto);
+        }
+
+        return dtoServers;
+    }
+    
+    public async Task<OneOf<List<ServerNameIdDto>, string>> GetServersForSchedules(string? identityName)
+    {
+        if (string.IsNullOrWhiteSpace(identityName))
+            return "Can't access user name";
+        
+        var user = await userManager.FindByNameAsync(identityName);
+        if (user is null)
+            return "Can't find user";
+        
+        var isAdmin = await userManager.IsInRoleAsync(user, AppRoles.Admin);
+
+        List<DbServerConnection> dbServers;
+
+        if (!isAdmin)
+        {
+            var userServers = db.UsersServers
+                .AsNoTracking()
+                .Where(x => x.UserId == Guid.Parse(user.Id))
+                .Select(x => x.ServerId)
+                .ToList();
+
+            if (userServers.Count == 0)
+                return new List<ServerNameIdDto>();
+        
+            dbServers = db.DbConnections
+                .AsNoTracking()
+                .Where(x => userServers.Contains(x.Id))
+                .ToList();
+            
+            dbServers.RemoveAll(x => x.IsDisabled);
+        }
+        else
+        {
+            dbServers = db.DbConnections
+                .AsNoTracking()
+                .ToList();
+        }
+
+        var dtoServers = dbServers
+            .Select(x => new ServerNameIdDto(x.Id, x.ConnectionName))
+            .ToList();
+        
+        return dtoServers;
     }
 
     public async Task<OneOf<Success, string>> CreateServer(ServerConnectionDto newServer, string? identityName)

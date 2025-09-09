@@ -9,6 +9,9 @@ public class BackupsHttpClientService(TokenHttpClientService api)
     public async Task<OneOf<List<ServerConnectionDto>, string>> GetServersAsync()
         => await api.GetAsync<List<ServerConnectionDto>>("/api/servers/GetMyServers");
     
+    public async Task<OneOf<List<ServerNameIdDto>, string>> GetServersNamesForSchedulesAsync()
+        => await api.GetAsync<List<ServerNameIdDto>>("/api/servers/GetMyServersForSchedule");
+    
     public async Task<OneOf<Success, string>> CreateServerAsync(ServerConnectionDto newServer)
         => await api.PostAsync("/api/servers/CreateServer", newServer);
     

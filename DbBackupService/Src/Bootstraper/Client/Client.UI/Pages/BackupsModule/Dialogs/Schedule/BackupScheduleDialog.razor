@@ -1,5 +1,7 @@
 ﻿@using Modules.Backup.Shared.Dtos
 
+@inject ISnackbar Snackbar
+
 <MudDialog>
     <DialogContent>
         <MudStack Spacing="3">
@@ -15,6 +17,21 @@
                 <MudText Typo="Typo.body1">@(_model.IsEnabled ? "Enabled" : "Disabled")</MudText>
             </MudStack>
 
+            <MudPaper Class="pa-3 rounded-lg">
+                <MudText Typo="Typo.subtitle2" Class="mb-2">Server</MudText>
+
+                <MudSelect T="ServerNameIdDto"
+                           Label="Assign Server"
+                           @bind-Value="_selectedServer"
+                           Variant="Variant.Outlined"
+                           Dense="true">
+                    @foreach (var server in AvailableServers)
+                    {
+                        <MudSelectItem Value="server">@server.Name</MudSelectItem>
+                    }
+                </MudSelect>
+            </MudPaper>
+            
             <MudPaper Class="pa-3 rounded-lg">
                 <MudText Typo="Typo.subtitle2" Class="mb-2">Days</MudText>
 
@@ -87,9 +104,11 @@
 @code {
     [CascadingParameter] IMudDialogInstance MudDialog { get; set; } = default!;
     [Parameter] public BackupsScheduleDto? Schedule { get; set; }
+    [Parameter] public List<ServerNameIdDto> AvailableServers { get; set; } = new();
 
     private BackupsScheduleDto _model = new();
-
+    private ServerNameIdDto? _selectedServer;
+    
     // wrappers dla MultiSelection
     private IEnumerable<DayOfWeek> SelectedDays
     {
@@ -118,6 +137,9 @@
                 ServerName = Schedule.ServerName
             };
         }
+
+        if (!string.IsNullOrWhiteSpace(_model.ServerName))
+            _selectedServer = AvailableServers.FirstOrDefault(x => x.Id == _model.DbConnectionId);
     }
 
     private Task OnDayChipClose(MudChip<DayOfWeek> chip)
@@ -132,6 +154,18 @@
         return Task.CompletedTask;
     }
 
-    void Save() => MudDialog.Close(DialogResult.Ok(_model));
+    void Save()
+    {
+        if (_selectedServer is null)
+        {
+            Snackbar.Add("Select the server assigned to schedule.", Severity.Error);
+            return;
+        }
+        
+        _model.DbConnectionId = _selectedServer.Id;
+        _model.ServerName = _selectedServer.Name;
+        
+        MudDialog.Close(DialogResult.Ok(_model));
+    }
     void Cancel() => MudDialog.Cancel();
 }

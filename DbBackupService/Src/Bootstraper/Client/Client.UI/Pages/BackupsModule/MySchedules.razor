@@ -1,11 +1,13 @@
 ﻿@page "/schedules"
 
+@using Client.UI.Data.Services
 @using Client.UI.Pages.BackupsModule.Dialogs.Schedule
 @using Modules.Backup.Shared.Dtos
 @using Modules.Backup.Shared.Helpers
 
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
+@inject BackupsHttpClientService Service
 
 <PageTitle>Backup Schedules</PageTitle>
 
@@ -62,6 +64,18 @@
         new() { Name="Daily Backup", DbConnectionId=Guid.NewGuid(), SelectedDays = new List<DayOfWeek> { DayOfWeek.Monday }, SelectedTimes = new List<TimeOnly> { new(2,0) } }
     };
 
+    private List<ServerNameIdDto> _availableServers = new();
+    
+    protected override async Task OnInitializedAsync()
+    {
+        var result = await Service.GetServersNamesForSchedulesAsync();
+        
+        result.Switch(
+            list => _availableServers = list,
+            error => Snackbar.Add(error, Severity.Error)
+        );
+    }
+
     private void DeleteSchedule(Guid id)
     {
         _schedules.RemoveAll(x => x.Id == id);
@@ -83,9 +97,13 @@
 
     private async Task OpenNewScheduleDialog()
     {
-        var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
+        var parameters = new DialogParameters<BackupScheduleDialog>
+        {
+            { x => x.AvailableServers, _availableServers }
+        };
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
         
-        var dialog = await DialogService.ShowAsync<BackupScheduleDialog>("New Schedule", options);
+        var dialog = await DialogService.ShowAsync<BackupScheduleDialog>("New Schedule", parameters, options);
         var result = await dialog.Result;
 
         if (!result!.Canceled && result.Data is BackupsScheduleDto dto)
@@ -97,8 +115,12 @@
 
     private async Task OpenEditScheduleDialog(BackupsScheduleDto schedule)
     {
-        var parameters = new DialogParameters<BackupScheduleDialog> { { x => x.Schedule, schedule } };
-        var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
+        var parameters = new DialogParameters<BackupScheduleDialog>
+        {
+            { x => x.Schedule, schedule },
+            { x => x.AvailableServers, _availableServers}
+        };
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
         
         var dialog = await DialogService.ShowAsync<BackupScheduleDialog>("Edit Schedule", parameters, options);
         var result = await dialog.Result;
@@ -110,6 +132,8 @@
             existing.IsEnabled = dto.IsEnabled;
             existing.SelectedDays = dto.SelectedDays.ToList();
             existing.SelectedTimes = dto.SelectedTimes.ToList();
+            existing.DbConnectionId = dto.DbConnectionId;
+            existing.ServerName = dto.ServerName;
             Snackbar.Add("Schedule updated", Severity.Success);
         }
     }

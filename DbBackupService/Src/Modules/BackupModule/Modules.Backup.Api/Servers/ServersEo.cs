@@ -19,6 +19,9 @@ internal static class ServersEndpoints
         api.MapGet("GetMyServers", ServersOperations.GetUserServers)
             .WithSummary("Get user's enabled servers");
         
+        api.MapGet("GetMyServersForSchedule", ServersOperations.GetServersForSchedule)
+            .WithSummary("Get user's servers for schedule");
+        
         api.MapPost("CreateServer", ServersOperations.CreateServer)
             .WithSummary("Create a new server");
 
@@ -59,6 +62,18 @@ internal abstract class ServersOperations
         [FromServices] ServersService service)
     {
         var result = await service.GetServers(context.User.Identity?.Name);
+
+        return result.Match<IResult>(
+            servers => TypedResults.Ok(servers),
+            error => TypedResults.BadRequest(error)
+        );
+    }
+    
+    public static async Task<IResult> GetServersForSchedule(
+        HttpContext context,
+        [FromServices] ServersService service)
+    {
+        var result = await service.GetServersForSchedules(context.User.Identity?.Name);
 
         return result.Match<IResult>(
             servers => TypedResults.Ok(servers),
