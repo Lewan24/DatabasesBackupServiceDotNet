@@ -72,7 +72,7 @@
 
     private async Task ToggleServerStatus(Guid serverId)
     {
-        var result = await BackupService.ToggleDisabledStatus(serverId);
+        var result = await BackupService.ToggleServerDisabledStatus(serverId);
         
         result.Switch(
             success => _ = FetchServersUsers(),

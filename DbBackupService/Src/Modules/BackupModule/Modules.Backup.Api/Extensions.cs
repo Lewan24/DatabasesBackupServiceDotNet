@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Modules.Backup.Api.Backups;
+using Modules.Backup.Api.Schedules;
 using Modules.Backup.Api.Servers;
 using Modules.Backup.Application;
 using Modules.Backup.Infrastructure;
@@ -21,6 +22,7 @@ public static class Extensions
     {
         app.MapBackupEndpoints();
         app.MapServersEndpoints();
+        app.MapSchedulesEndpoints();
 
         return app;
     }

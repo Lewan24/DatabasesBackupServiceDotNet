@@ -156,6 +156,24 @@
 
     void Save()
     {
+        if (string.IsNullOrWhiteSpace(_model.Name))
+        {
+            Snackbar.Add("Provide schedule name.", Severity.Error);
+            return;
+        }    
+        
+        if (_model.SelectedDays.Count == 0)
+        {
+            Snackbar.Add("Select at least 1 day.", Severity.Error);
+            return;
+        }    
+        
+        if (_model.SelectedTimes.Count == 0)
+        {
+            Snackbar.Add("Select at least 1 time.", Severity.Error);
+            return;
+        }    
+        
         if (_selectedServer is null)
         {
             Snackbar.Add("Select the server assigned to schedule.", Severity.Error);

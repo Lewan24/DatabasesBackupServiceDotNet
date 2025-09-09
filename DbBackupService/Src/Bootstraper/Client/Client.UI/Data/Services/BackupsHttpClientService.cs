@@ -18,6 +18,18 @@ public class BackupsHttpClientService(TokenHttpClientService api)
     public async Task<OneOf<Success, string>> EditServerAsync(ServerConnectionDto server)
         => await api.PostAsync("/api/servers/EditServer", server);
     
-    public async Task<OneOf<Success, string>> ToggleDisabledStatus(Guid serverId)
+    public async Task<OneOf<Success, string>> ToggleServerDisabledStatus(Guid serverId)
         => await api.PostAsync("/api/servers/ToggleServerDisabledStatus", serverId);
+
+    public async Task<OneOf<List<BackupsScheduleDto>, string>> GetSchedulesAsync()
+        => await api.GetAsync<List<BackupsScheduleDto>>("/api/schedules/GetMySchedules");
+
+    public async Task<OneOf<Success, string>> CreateScheduleAsync(BackupsScheduleDto schedule)
+        => await api.PostAsync("/api/schedules/CreateSchedule", schedule);
+    
+    public async Task<OneOf<Success, string>> EditScheduleAsync(BackupsScheduleDto schedule)
+        => await api.PostAsync("/api/schedules/EditSchedule", schedule);
+    
+    public async Task<OneOf<Success, string>> DeleteScheduleAsync(Guid scheduleId)
+        => await api.PostAsync("/api/schedules/DeleteSchedule", scheduleId);
 }

@@ -4,6 +4,7 @@
 @using Client.UI.Pages.BackupsModule.Dialogs.Schedule
 @using Modules.Backup.Shared.Dtos
 @using Modules.Backup.Shared.Helpers
+@using OneOf.Types
 
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
@@ -59,27 +60,43 @@
 </MudContainer>
 
 @code {
-    private List<BackupsScheduleDto> _schedules = new()
-    {
-        new() { Name="Daily Backup", DbConnectionId=Guid.NewGuid(), SelectedDays = new List<DayOfWeek> { DayOfWeek.Monday }, SelectedTimes = new List<TimeOnly> { new(2,0) } }
-    };
-
+    private List<BackupsScheduleDto> _schedules = new();
     private List<ServerNameIdDto> _availableServers = new();
     
     protected override async Task OnInitializedAsync()
     {
-        var result = await Service.GetServersNamesForSchedulesAsync();
-        
-        result.Switch(
+        await FetchSchedules();
+
+        var getAvailableServersResult = await Service.GetServersNamesForSchedulesAsync();
+        getAvailableServersResult.Switch(
             list => _availableServers = list,
             error => Snackbar.Add(error, Severity.Error)
         );
     }
 
-    private void DeleteSchedule(Guid id)
+    private async Task FetchSchedules()
     {
-        _schedules.RemoveAll(x => x.Id == id);
-        Snackbar.Add("Schedule deleted", Severity.Info);
+        var getSchedulesResult = await Service.GetSchedulesAsync();
+        getSchedulesResult.Switch(
+            list => _schedules = list,
+            error => Snackbar.Add(error, Severity.Error)
+        );
+        
+        StateHasChanged();
+    }
+
+    private async Task DeleteSchedule(Guid id)
+    {
+        var result = await Service.DeleteScheduleAsync(id);
+        
+        result.Switch(
+            async void (_) =>
+            {
+                Snackbar.Add("Successfully removed schedule.", Severity.Success);
+                await FetchSchedules();
+            },
+            error => Snackbar.Add(error, Severity.Error)
+        );
     }
 
     private string GetNextBackup(BackupsScheduleDto schedule)
@@ -108,8 +125,16 @@
 
         if (!result!.Canceled && result.Data is BackupsScheduleDto dto)
         {
-            _schedules.Add(dto);
-            Snackbar.Add("Schedule added", Severity.Success);
+            var createScheduleResult = await Service.CreateScheduleAsync(dto);
+            
+            createScheduleResult.Switch(
+                async void (_) =>
+                {
+                    Snackbar.Add("Successfully created schedule.", Severity.Success);
+                    await FetchSchedules();
+                },
+                error => Snackbar.Add(error, Severity.Error)
+            );
         }
     }
 
@@ -127,14 +152,16 @@
 
         if (!result!.Canceled && result.Data is BackupsScheduleDto dto)
         {
-            var existing = _schedules.First(x => x.Id == dto.Id);
-            existing.Name = dto.Name;
-            existing.IsEnabled = dto.IsEnabled;
-            existing.SelectedDays = dto.SelectedDays.ToList();
-            existing.SelectedTimes = dto.SelectedTimes.ToList();
-            existing.DbConnectionId = dto.DbConnectionId;
-            existing.ServerName = dto.ServerName;
-            Snackbar.Add("Schedule updated", Severity.Success);
+            var editScheduleResult = await Service.EditScheduleAsync(dto);
+            
+            editScheduleResult.Switch(
+                async void (_) =>
+                {
+                    Snackbar.Add("Successfully edited schedule.", Severity.Success);
+                    await FetchSchedules();
+                },
+                error => Snackbar.Add(error, Severity.Error)
+            );
         }
     }
 }

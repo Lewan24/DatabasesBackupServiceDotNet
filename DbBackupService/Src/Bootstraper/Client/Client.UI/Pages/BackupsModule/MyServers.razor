@@ -77,7 +77,7 @@
 
     private async Task DisableServer(Guid id)
     {
-        var result = await Service.ToggleDisabledStatus(id);
+        var result = await Service.ToggleServerDisabledStatus(id);
         
         result.Switch(
             success => _ = FetchServers(),
