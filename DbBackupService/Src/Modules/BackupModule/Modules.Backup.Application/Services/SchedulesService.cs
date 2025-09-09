@@ -76,7 +76,7 @@ public sealed class SchedulesService(
         var availableServers = getAvailableServersResult.AsT0 ?? [];
         var isAdmin = await adminApi.AmIAdmin(identityName);
 
-        if (!isAdmin && !availableServers.Any(s => s.Id == schedule.DbConnectionId))
+        if (!isAdmin && availableServers.All(s => s.Id != schedule.DbConnectionId))
             return "Can't access server";
 
         var entity = new BackupSchedule
@@ -112,7 +112,7 @@ public sealed class SchedulesService(
         var availableServers = getAvailableServersResult.AsT0 ?? [];
         var isAdmin = await adminApi.AmIAdmin(identityName);
 
-        if (!isAdmin && !availableServers.Any(s => s.Id == entity.DbConnectionId))
+        if (!isAdmin && availableServers.All(s => s.Id != entity.DbConnectionId))
             return "Can't access server";
 
         entity.Name = schedule.Name;
@@ -143,7 +143,7 @@ public sealed class SchedulesService(
         var availableServers = getAvailableServersResult.AsT0 ?? [];
         var isAdmin = await adminApi.AmIAdmin(identityName);
 
-        if (!isAdmin && !availableServers.Any(s => s.Id == entity.DbConnectionId))
+        if (!isAdmin && availableServers.All(s => s.Id != entity.DbConnectionId))
             return "Can't access server";
 
         db.Schedules.Remove(entity);
