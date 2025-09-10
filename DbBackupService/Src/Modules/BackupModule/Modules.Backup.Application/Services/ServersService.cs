@@ -571,8 +571,40 @@ public class ServersService (
 
     public async Task<OneOf<Success, string>> DeleteServer(Guid serverId)
     {
-        //TODO: Implement cascading deleting server and itd references
-        await Task.Delay(500);
+        var server = db.DbConnections.FirstOrDefault(x => x.Id == serverId);
+        if (server is null)
+            return "Can't access server or server does not exist";
+
+        try
+        {
+            var usersAccess = db.UsersServers.Where(x => x.ServerId == serverId);
+            if (usersAccess.Any())
+            {
+                db.UsersServers.RemoveRange(usersAccess);
+                await db.SaveChangesAsync();   
+                
+                await notifyService.CallServerHasChangedEvent(serverId);
+            }
+            
+            var schedules = db.Schedules.Where(x => x.DbConnectionId == serverId);
+            if (schedules.Any())
+            {
+                db.Schedules.RemoveRange(schedules);
+                await db.SaveChangesAsync();
+            
+                await notifyService.CallScheduleHasChangedEvent(schedules.First().Id);
+            }
+            
+            db.DbConnections.Remove(server);
+            await db.SaveChangesAsync();
+            
+            await notifyService.CallServerHasChangedEvent(serverId);
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e.Message);
+            return e.Message;
+        }
         
         return new Success();
     }

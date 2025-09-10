@@ -48,10 +48,10 @@
                 <MudTd DataLabel="Access">@context.UsersWithAccess users</MudTd>
                 <MudTd>
                     <MudTooltip Delay="100" Text="Toggle server status">
-                        <MudIconButton Icon="@Icons.Material.Filled.ChangeCircle" Color="Color.Secondary" OnClick="@(() => ToggleServerStatus(context.ServerId))" />
+                        <MudIconButton Disabled="@_isProcessing" Icon="@Icons.Material.Filled.ChangeCircle" Color="Color.Secondary" OnClick="@(() => ToggleServerStatus(context.ServerId))" />
                     </MudTooltip>
                     <MudTooltip Delay="100" Text="Manage users that access this server">
-                        <MudIconButton Icon="@Icons.Material.Filled.People" Color="Color.Primary" OnClick="@(() => OpenManageUsersDialog(context))"/>
+                        <MudIconButton Disabled="@_isProcessing" Icon="@Icons.Material.Filled.People" Color="Color.Primary" OnClick="@(() => OpenManageUsersDialog(context))"/>
                     </MudTooltip>
                 </MudTd>
             </RowTemplate>
@@ -65,7 +65,8 @@
 
 @code {
     private List<ServersUsersListDto> _serversUsers = new();
-
+    private bool _isProcessing;
+    
     protected override async Task OnInitializedAsync()
     {
         if (string.IsNullOrWhiteSpace(
@@ -77,16 +78,22 @@
 
     private async Task ToggleServerStatus(Guid serverId)
     {
+        _isProcessing = true;
+        
         var result = await BackupService.ToggleServerDisabledStatus(serverId);
         
         result.Switch(
             success => _ = FetchServersUsers(),
             error => Snackbar.Add(error, Severity.Error)
         );
+
+        _isProcessing = false;
     }
 
     private async Task FetchServersUsers()
     {
+        _isProcessing = true;
+        
         var result = await AdminService.FetchServersUsers();
         
         result.Switch(
@@ -94,6 +101,7 @@
             error => Snackbar.Add(error, Severity.Error)
         );
         
+        _isProcessing = false;
         StateHasChanged();
     }
     

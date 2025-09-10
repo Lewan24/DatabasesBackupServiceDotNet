@@ -24,7 +24,7 @@
         <MudStack Row="true" Class="mb-4">
             <MudText Typo="Typo.h6">Lista serwerów</MudText>
             <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add"
-                       OnClick="OpenCreateNewServerDialog">Add server</MudButton>
+                       Disabled="@_isProcessing" OnClick="OpenCreateNewServerDialog">Add server</MudButton>
         </MudStack>
 
         <MudTable Items="@_servers" Hover="true" Dense="true">
@@ -52,24 +52,24 @@
                 </MudTd>
                 <MudTd DataLabel="Type">@context.DbType</MudTd>
                 <MudTd DataLabel="Operations" Class="d-flex flex-row flex-nowrap justify-center gap-1 align-center">
-                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Warning" OnClick="@(() => OpenEditServerDialog(context))" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Disabled="@_isProcessing" Color="Color.Warning" OnClick="@(() => OpenEditServerDialog(context))" />
                     <MudTooltip Delay="100" Text="Disable server">
-                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="@(() => DisableServer(context.Id))" />
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Disabled="@_isProcessing" Color="Color.Error" OnClick="@(() => DisableServer(context.Id))" />
                     </MudTooltip>
                     <AuthorizeView Roles="@AppRoles.Admin">
                         <Authorized Context="authCtx">
                             <MudTooltip Delay="100" Text="Permanently delete server and it's schedules and users access">
-                                <MudIconButton Icon="@Icons.Material.Filled.DeleteForever" Color="Color.Error" OnClick="@(() => DeleteServer(context.Id))" />
+                                <MudIconButton Icon="@Icons.Material.Filled.DeleteForever" Disabled="@_isProcessing" Color="Color.Error" OnClick="@(() => DeleteServer(context.Id))" />
                             </MudTooltip>
                         </Authorized>
                     </AuthorizeView>
                     <MudMenu>
                         <ActivatorContent>
-                            <MudIconButton Icon="@Icons.Material.Filled.Menu" />
+                            <MudIconButton Icon="@Icons.Material.Filled.Menu" Disabled="@_isProcessing" />
                         </ActivatorContent>
                         <ChildContent>
-                            <MudMenuItem OnClick="@(() => OpenTestServerDialog(context.Id))">Test Connection</MudMenuItem>
-                            <MudMenuItem>Perform Backup</MudMenuItem>
+                            <MudMenuItem Disabled="@_isProcessing" OnClick="@(() => OpenTestServerDialog(context.Id))">Test Connection</MudMenuItem>
+                            <MudMenuItem Disabled="@_isProcessing">Perform Backup</MudMenuItem>
                         </ChildContent>
                     </MudMenu>
                 </MudTd>
@@ -86,6 +86,7 @@
     private List<ServerConnectionDto> _servers = new();
 
     private HubConnection? _hubConnection;
+    private bool _isProcessing;
     
     protected override async Task OnInitializedAsync()
     {
@@ -115,24 +116,31 @@
 
     private async Task FetchServers()
     {
+        _isProcessing = true;
+        
         var result = await Service.GetServersAsync();
         
         result.Switch(
             servers => _servers = servers,
             error => Snackbar.Add(error, Severity.Error)
         );
-        
+
+        _isProcessing = false;
         StateHasChanged();
     }
 
     private async Task DisableServer(Guid id)
     {
+        _isProcessing = true;
+        
         var result = await Service.ToggleServerDisabledStatus(id);
         
         result.Switch(
             success => _ = FetchServers(),
             error => Snackbar.Add(error, Severity.Error)
         );
+
+        _isProcessing = false;
     }
     
     private async Task OpenEditServerDialog(ServerConnectionDto server)
@@ -177,12 +185,16 @@
 
     private async Task DeleteServer(Guid serverId)
     {
+        _isProcessing = true;
+        
         var result = await Service.CascadeDeleteServer(serverId);
         
         result.Switch(
             success => _ = FetchServers(),
             error => Snackbar.Add(error, Severity.Error)
         );
+
+        _isProcessing = false;
     }
 
 }

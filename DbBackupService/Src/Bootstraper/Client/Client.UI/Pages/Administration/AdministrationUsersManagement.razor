@@ -19,7 +19,7 @@
         <MudStack Row="true" JustifyContent="SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
             <MudText Typo="Typo.h6">Lista użytkowników</MudText>
             <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.PersonAdd"
-                       OnClick="OpenCreateNewUserDialog">
+                       OnClick="OpenCreateNewUserDialog" Disabled="@_isProcessing">
                 Dodaj użytkownika
             </MudButton>
         </MudStack>
@@ -40,7 +40,7 @@
                     {
                         <MudButton Variant="Variant.Filled" Color="Color.Error" Size="Size.Small"
                                    StartIcon="@Icons.Material.Filled.Block"
-                                   OnClick="@(() => ToggleBlock(context.Id.ToString()))">
+                                   OnClick="@(() => ToggleBlock(context.Id.ToString()))" Disabled="@_isProcessing">
                             Zablokuj
                         </MudButton>
                     }
@@ -48,7 +48,7 @@
                     {
                         <MudButton Variant="Variant.Filled" Color="Color.Success" Size="Size.Small"
                                    StartIcon="@Icons.Material.Filled.LockOpen"
-                                   OnClick="@(() => ToggleBlock(context.Id.ToString()))">
+                                   OnClick="@(() => ToggleBlock(context.Id.ToString()))" Disabled="@_isProcessing">
                             Odblokuj
                         </MudButton>
                     }
@@ -65,7 +65,7 @@
                 </MudTd>
                 <MudTd DataLabel="Role">@string.Join(", ", context.Roles!)</MudTd>
                 <MudTd>
-                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Variant="Variant.Filled" OnClick="@(() => OpenEditUserDialog(context))" Color="Color.Warning"/>
+                    <MudIconButton Disabled="@_isProcessing" Icon="@Icons.Material.Filled.Edit" Variant="Variant.Filled" OnClick="@(() => OpenEditUserDialog(context))" Color="Color.Warning"/>
                 </MudTd>
             </RowTemplate>
             
@@ -78,7 +78,8 @@
 
 @code {
     private List<UserDto> _users = new();
-
+    private bool _isProcessing;
+    
     protected override async Task OnInitializedAsync()
     {
         if (string.IsNullOrWhiteSpace(
@@ -90,6 +91,8 @@
 
     private async Task FetchUsers()
     {
+        _isProcessing = true;
+        
         var getUsersResult = await Service.GetUsersList();
 
         getUsersResult.Switch(
@@ -97,17 +100,22 @@
             error => Snackbar.Add(error, Severity.Error)
         );
         
+        _isProcessing = false;
         StateHasChanged();
     }
 
     private async Task ToggleBlock(string userId)
     {
+        _isProcessing = true;
+        
         var result = await Service.ToggleUserBlockade(userId);
         
         result.Switch(
             async void (_) => await FetchUsers(),
             error => Snackbar.Add(error, Severity.Error)
         );
+        
+        _isProcessing = false;
     }
 
     private async Task OpenEditUserDialog(UserDto user)

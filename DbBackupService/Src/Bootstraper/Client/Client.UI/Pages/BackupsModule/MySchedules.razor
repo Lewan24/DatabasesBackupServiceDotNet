@@ -24,7 +24,7 @@
     <MudPaper Class="pa-4 mud-elevation-2 rounded-2xl">
         <MudStack Row="true" Justify="Justify.FlexStart" Class="mb-4">
             <MudText Typo="Typo.h6">Schedules list</MudText>
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add"
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@_isProcessing" StartIcon="@Icons.Material.Filled.Add"
                        OnClick="OpenNewScheduleDialog">New Schedule</MudButton>
         </MudStack>
 
@@ -51,9 +51,9 @@
                 </MudTd>
                 <MudTd>@BackupScheduleHelper.GetNextBackupDateString(context)</MudTd>
                 <MudTd>
-                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Warning"
+                    <MudIconButton Disabled="@_isProcessing" Icon="@Icons.Material.Filled.Edit" Color="Color.Warning"
                                    OnClick="() => OpenEditScheduleDialog(context)" />
-                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error"
+                    <MudIconButton Disabled="@_isProcessing" Icon="@Icons.Material.Filled.Delete" Color="Color.Error"
                                    OnClick="() => DeleteSchedule(context.Id)" />
                 </MudTd>
             </RowTemplate>
@@ -69,6 +69,7 @@
     private List<BackupsScheduleDto> _schedules = new();
     private List<ServerNameIdDto> _availableServers = new();
     private HubConnection? _hubConnection;
+    private bool _isProcessing;
 
     protected override async Task OnInitializedAsync()
     {
@@ -101,17 +102,22 @@
 
     private async Task FetchSchedules()
     {
+        _isProcessing = true;
+        
         var getSchedulesResult = await Service.GetSchedulesAsync();
         getSchedulesResult.Switch(
             list => _schedules = list,
             error => Snackbar.Add(error, Severity.Error)
         );
-        
+
+        _isProcessing = false;
         StateHasChanged();
     }
 
     private async Task DeleteSchedule(Guid id)
     {
+        _isProcessing = true;
+        
         var result = await Service.DeleteScheduleAsync(id);
         
         result.Switch(
@@ -122,6 +128,8 @@
             },
             error => Snackbar.Add(error, Severity.Error)
         );
+
+        _isProcessing = false;
     }
 
     private async Task OpenNewScheduleDialog()
