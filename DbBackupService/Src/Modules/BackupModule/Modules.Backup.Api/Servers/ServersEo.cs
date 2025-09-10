@@ -33,6 +33,10 @@ internal static class ServersEndpoints
         api.MapPost("ToggleServerDisabledStatus", ServersOperations.ToggleServerDisabledStatus)
             .WithSummary("Toggle server's disabled status");
 
+        api.MapPost("CascadeDeleteServer", ServersOperations.DeleteServer)
+            .WithSummary("Delete server and it's schedules + users access")
+            .AddEndpointFilter<AdminTokenAuthorizationFilter>();
+
         api.MapGet("GetServersUsers", ServersOperations.GetServersUsers)
             .WithSummary("Get servers and users that access server")
             .AddEndpointFilter<AdminTokenAuthorizationFilter>();
@@ -113,6 +117,12 @@ internal abstract class ServersOperations
             TypedResults.BadRequest
         );
     }
+
+    public static async Task<IResult> DeleteServer(
+        HttpContext context,
+        [FromServices] ServersService service,
+        [FromBody] Guid serverId)
+        => await CallFuncAndReturnIResult(service.DeleteServer, serverId);
 
     public static async Task<IResult> GetServersUsers(
         HttpContext context,

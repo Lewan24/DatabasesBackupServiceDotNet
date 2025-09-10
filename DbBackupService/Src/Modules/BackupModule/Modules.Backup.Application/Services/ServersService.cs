@@ -568,4 +568,12 @@ public class ServersService (
 
         return testResult.Result ? new Success() : testResult.ErrorMsg!;
     }
+
+    public async Task<OneOf<Success, string>> DeleteServer(Guid serverId)
+    {
+        //TODO: Implement cascading deleting server and itd references
+        await Task.Delay(500);
+        
+        return new Success();
+    }
 }

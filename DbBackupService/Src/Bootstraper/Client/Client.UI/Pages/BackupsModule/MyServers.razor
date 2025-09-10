@@ -3,6 +3,7 @@
 @using Client.UI.Data.Services
 @using Client.UI.Pages.BackupsModule.Dialogs.Servers
 @using Microsoft.AspNetCore.SignalR.Client
+@using Modules.Auth.Shared.Static.Entities
 @using Modules.Backup.Shared.Dtos
 @using Modules.Backup.Shared.Hubs
 
@@ -55,6 +56,13 @@
                     <MudTooltip Delay="100" Text="Disable server">
                         <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="@(() => DisableServer(context.Id))" />
                     </MudTooltip>
+                    <AuthorizeView Roles="@AppRoles.Admin">
+                        <Authorized Context="authCtx">
+                            <MudTooltip Delay="100" Text="Permanently delete server and it's schedules and users access">
+                                <MudIconButton Icon="@Icons.Material.Filled.DeleteForever" Color="Color.Error" OnClick="@(() => DeleteServer(context.Id))" />
+                            </MudTooltip>
+                        </Authorized>
+                    </AuthorizeView>
                     <MudMenu>
                         <ActivatorContent>
                             <MudIconButton Icon="@Icons.Material.Filled.Menu" />
@@ -165,6 +173,16 @@
         };
         
         await DialogService.ShowAsync<TestServerDialog>($"Test server [{serverId}] connection", parameters: parameters);
+    }
+
+    private async Task DeleteServer(Guid serverId)
+    {
+        var result = await Service.CascadeDeleteServer(serverId);
+        
+        result.Switch(
+            success => _ = FetchServers(),
+            error => Snackbar.Add(error, Severity.Error)
+        );
     }
 
 }

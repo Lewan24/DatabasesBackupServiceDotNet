@@ -20,6 +20,9 @@ public class BackupsHttpClientService(TokenHttpClientService api)
     
     public async Task<OneOf<Success, string>> ToggleServerDisabledStatus(Guid serverId)
         => await api.PostAsync("/api/servers/ToggleServerDisabledStatus", serverId);
+    
+    public async Task<OneOf<Success, string>> CascadeDeleteServer(Guid serverId)
+        => await api.PostAsync("/api/servers/CascadeDeleteServer", serverId);
 
     public async Task<OneOf<Success, string>> TestServer(Guid serverId)
         => await api.PostAsync("/api/servers/TestServerConnection", serverId);
