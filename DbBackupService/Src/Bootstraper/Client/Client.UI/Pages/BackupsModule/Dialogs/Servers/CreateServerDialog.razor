@@ -119,6 +119,15 @@
                                         </MudItem>
 
                                         <MudItem xs="12" sm="6">
+                                            <MudTooltip Text="Provide passphrase for your private key">
+                                                <MudTextField Label="Private Key Passphrase" Disabled="@_isCreating"
+                                                              Placeholder="Type password here..."
+                                                              HelperText="Private key Passphrase"
+                                                              @bind-Value="_server.Tunnel!.PrivateKeyPassphrase"/>
+                                            </MudTooltip>
+                                        </MudItem>
+                                        
+                                        <MudItem xs="12">
                                             <MudTooltip Text="Paste the content of your private key (.pem or .ppk converted to PEM)">
                                                 <MudTextField Label="Private Key (PEM)" Lines="4" Disabled="@_isCreating"
                                                               Placeholder="Paste private key here..."

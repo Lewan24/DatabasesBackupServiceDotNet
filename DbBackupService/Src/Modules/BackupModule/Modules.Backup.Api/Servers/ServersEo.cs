@@ -5,6 +5,8 @@ using Modules.Backup.Application.Services;
 using Modules.Backup.Shared.Dtos;
 using Modules.Backup.Shared.Requests;
 using Modules.Shared.Attributes;
+using OneOf;
+using OneOf.Types;
 
 namespace Modules.Backup.Api.Servers;
 
@@ -15,7 +17,7 @@ internal static class ServersEndpoints
         var api = app.MapGroup("/api/servers")
             .RequireAuthorization()
             .AddEndpointFilter<BasicTokenAuthorizationFilter>();
-
+        
         api.MapGet("GetMyServers", ServersOperations.GetUserServers)
             .WithSummary("Get user's enabled servers");
         
@@ -50,6 +52,9 @@ internal static class ServersEndpoints
         api.MapPost("GiveUserAccessToServer", ServersOperations.GiveUserAccessToServer)
             .WithSummary("Grant user access to server")
             .AddEndpointFilter<AdminTokenAuthorizationFilter>();
+
+        api.MapPost("TestServerConnection", ServersOperations.TestServerConnection)
+            .WithSummary("Test server connection and execute test query to check communication with DB");
         
         return app;
     }
@@ -57,29 +62,25 @@ internal static class ServersEndpoints
 
 internal abstract class ServersOperations
 {
-    public static async Task<IResult> GetUserServers(
-        HttpContext context,
-        [FromServices] ServersService service)
+    private static async Task<IResult> CallFuncAndReturnIResult<TSuccess, TError, TData>(Func<TData, Task<OneOf<TSuccess, TError>>> func, TData data)
     {
-        var result = await service.GetServers(context.User.Identity?.Name);
-
+        var result = await func(data);
+        
         return result.Match<IResult>(
-            servers => TypedResults.Ok(servers),
-            error => TypedResults.BadRequest(error)
+            TypedResults.Ok,
+            TypedResults.BadRequest
         );
     }
     
+    public static async Task<IResult> GetUserServers(
+        HttpContext context,
+        [FromServices] ServersService service)
+        => await CallFuncAndReturnIResult(service.GetServers, context.User.Identity?.Name);
+
     public static async Task<IResult> GetServersForSchedule(
         HttpContext context,
         [FromServices] ServersService service)
-    {
-        var result = await service.GetAvailableServersBasic(context.User.Identity?.Name);
-
-        return result.Match<IResult>(
-            servers => TypedResults.Ok(servers),
-            error => TypedResults.BadRequest(error)
-        );
-    }
+        => await CallFuncAndReturnIResult(service.GetAvailableServersBasic, context.User.Identity?.Name);
 
     public static async Task<IResult> CreateServer(
         HttpContext context,
@@ -90,7 +91,7 @@ internal abstract class ServersOperations
 
         return result.Match<IResult>(
             _ => TypedResults.Created(),
-            error => TypedResults.BadRequest(error)
+            TypedResults.BadRequest
         );
     }
 
@@ -98,14 +99,7 @@ internal abstract class ServersOperations
         HttpContext context,
         [FromServices] ServersService service,
         [FromBody] ServerConnectionDto server)
-    {
-        var result = await service.EditServer(server);
-
-        return result.Match<IResult>(
-            _ => TypedResults.Ok(),
-            error => TypedResults.BadRequest(error)
-        );
-    }
+        => await CallFuncAndReturnIResult(service.EditServer, server);
 
     public static async Task<IResult> ToggleServerDisabledStatus(
         HttpContext context,
@@ -115,8 +109,8 @@ internal abstract class ServersOperations
         var result = await service.ToggleDisabledStatus(serverId, context.User.Identity!.Name);
         
         return result.Match<IResult>(
-            _ => TypedResults.Ok(),
-            error => TypedResults.BadRequest(error)
+            TypedResults.Ok,
+            TypedResults.BadRequest
         );
     }
 
@@ -129,51 +123,29 @@ internal abstract class ServersOperations
         HttpContext context,
         [FromServices] ServersService service,
         [FromBody] Guid serverId)
-    {
-        var result = await service.GetUsersThatAccessServer(serverId);
-        
-        return result.Match<IResult>(
-            list => TypedResults.Ok(list),
-            error => TypedResults.BadRequest(error)
-        );
-    }
+        => await CallFuncAndReturnIResult(service.GetUsersThatAccessServer, serverId);
 
     public static async Task<IResult> GetAllUsersThatDoesNotHaveAccessToServer(
         HttpContext context,
         [FromServices] ServersService service,
         [FromBody] Guid serverId)
-    {
-        var result = await service.GetAllUsersThatDoesNotHaveAccessToServer(serverId);
-        
-        return result.Match<IResult>(
-            list => TypedResults.Ok(list),
-            error => TypedResults.BadRequest(error)
-        );
-    }
+        => await CallFuncAndReturnIResult(service.GetAllUsersThatDoesNotHaveAccessToServer, serverId);
 
     public static async Task<IResult> RemoveUserAccessFromServer(
         HttpContext context,
         [FromServices] ServersService service,
         [FromBody] ModifyServerAccessRequest request)
-    {
-        var result = await service.RemoveUserAccessFromServer(request);
-        
-        return result.Match<IResult>(
-            _ => TypedResults.Ok(),
-            error => TypedResults.BadRequest(error)
-        );
-    }
+        => await CallFuncAndReturnIResult(service.RemoveUserAccessFromServer, request);
 
     public static async Task<IResult> GiveUserAccessToServer(
         HttpContext context,
         [FromServices] ServersService service,
         [FromBody] ModifyServerAccessRequest request)
-    {
-        var result = await service.GiveUserAccessToServer(request);
-        
-        return result.Match<IResult>(
-            _ => TypedResults.Ok(),
-            error => TypedResults.BadRequest(error)
-        );
-    }
+        => await CallFuncAndReturnIResult(service.GiveUserAccessToServer, request);
+
+    public static async Task<IResult> TestServerConnection(
+        HttpContext context,
+        [FromServices] ServersService service,
+        [FromBody] Guid serverId)
+        => await CallFuncAndReturnIResult(service.TestServerConnection, serverId);
 }

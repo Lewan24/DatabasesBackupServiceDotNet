@@ -9,6 +9,7 @@ public sealed record DbServerTunnel
     public bool UsePasswordAuth { get; set; } = true;
     public string? Password { get; set; }
     public string? PrivateKeyContent { get; set; }
+    public string? PrivateKeyPassphrase { get; set; }
     public int LocalPort { get; set; }
     public required string RemoteHost { get; set; }
     public int RemotePort { get; set; }

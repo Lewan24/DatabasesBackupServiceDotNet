@@ -22,10 +22,10 @@ public record ServerTunnelDto
     [Required] public string? Username { get; set; }
 
     /// <summary>
-    /// Czy używać hasła do logowania (true) czy klucza prywatnego (false)
+    /// Override passwords and private key
     /// </summary>
-    public bool UsePasswordAuth { get; set; } = true;
-
+    public bool OverridePasswordsAndPem { get; set; }
+    
     /// <summary>
     /// Hasło użytkownika (jeśli logowanie hasłem)
     /// </summary>
@@ -35,6 +35,11 @@ public record ServerTunnelDto
     /// Zawartość pliku z kluczem prywatnym (jeśli logowanie kluczem)
     /// </summary>
     public string? PrivateKeyContent { get; set; }
+    
+    /// <summary>
+    /// Password for private key
+    /// </summary>
+    public string? PrivateKeyPassphrase { get; set; }
 
     /// <summary>
     /// Lokalny port, na którym wystawiony będzie tunel (np. 8543)

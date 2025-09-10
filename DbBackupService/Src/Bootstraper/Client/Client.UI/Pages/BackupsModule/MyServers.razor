@@ -60,7 +60,7 @@
                             <MudIconButton Icon="@Icons.Material.Filled.Menu" />
                         </ActivatorContent>
                         <ChildContent>
-                            <MudMenuItem>Test Connection</MudMenuItem>
+                            <MudMenuItem OnClick="@(() => OpenTestServerDialog(context.Id))">Test Connection</MudMenuItem>
                             <MudMenuItem>Perform Backup</MudMenuItem>
                         </ChildContent>
                     </MudMenu>
@@ -155,6 +155,16 @@
     public void Dispose()
     {
         _hubConnection?.DisposeAsync();
+    }
+
+    private async Task OpenTestServerDialog(Guid serverId)
+    {
+        var parameters = new DialogParameters<TestServerDialog>
+        {
+            { x => x.ServerId, serverId}
+        };
+        
+        await DialogService.ShowAsync<TestServerDialog>($"Test server [{serverId}] connection", parameters: parameters);
     }
 
 }

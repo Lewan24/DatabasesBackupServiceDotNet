@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using Modules.Auth.Core.Entities;
 using Modules.Auth.Infrastructure.DbContexts;
 using Modules.Auth.Shared.Static.Entities;
+using Modules.Backup.Application.Static;
 using Modules.Backup.Core.Entities.DbContext;
 using Modules.Backup.Infrastructure.DbContexts;
 using Modules.Backup.Shared.Dtos;
@@ -173,8 +174,12 @@ public class ServersService (
                     errors.Add("Tunnel username is required");
 
                 if (string.IsNullOrWhiteSpace(newServer.Tunnel.PrivateKeyContent))
-                    if (string.IsNullOrWhiteSpace(newServer.Tunnel.Password))
+                {
+                    if (string.IsNullOrWhiteSpace(newServer.Tunnel.Password)) 
                         errors.Add("Tunnel password is required");
+                }
+                else if (string.IsNullOrWhiteSpace(newServer.Tunnel.PrivateKeyPassphrase))
+                    errors.Add("Tunnel private key password is required");
                 
                 if (newServer.Tunnel.LocalPort is <= 0 or > 65535)
                     errors.Add("Invalid tunnel local port");
@@ -215,6 +220,7 @@ public class ServersService (
                 UsePasswordAuth = string.IsNullOrWhiteSpace(newServer.Tunnel.PrivateKeyContent),
                 Password = newServer.Tunnel.Password,
                 PrivateKeyContent = newServer.Tunnel.PrivateKeyContent,
+                PrivateKeyPassphrase = newServer.Tunnel.PrivateKeyPassphrase,
                 LocalPort = newServer.Tunnel.LocalPort,
                 RemoteHost = newServer.Tunnel.RemoteHost!,
                 RemotePort = newServer.Tunnel.RemotePort,
@@ -284,10 +290,6 @@ public class ServersService (
                 if (string.IsNullOrWhiteSpace(server.Tunnel.Username))
                     errors.Add("Tunnel username is required");
                 
-                if (string.IsNullOrWhiteSpace(server.Tunnel.PrivateKeyContent))
-                    if (string.IsNullOrWhiteSpace(server.Tunnel.Password))
-                        errors.Add("Tunnel password is required");
-                
                 if (server.Tunnel.LocalPort is <= 0 or > 65535)
                     errors.Add("Invalid tunnel local port");
                 if (string.IsNullOrWhiteSpace(server.Tunnel.RemoteHost))
@@ -345,14 +347,21 @@ public class ServersService (
             dbTunnel.ServerHost = server.Tunnel!.ServerHost!;
             dbTunnel.SshPort = server.Tunnel.SshPort;
             dbTunnel.Username = server.Tunnel.Username!;
-            dbTunnel.UsePasswordAuth = string.IsNullOrWhiteSpace(server.Tunnel.PrivateKeyContent);
-            dbTunnel.Password = server.Tunnel.Password;
-            dbTunnel.PrivateKeyContent = server.Tunnel.PrivateKeyContent;
+
+            if (server.Tunnel.OverridePasswordsAndPem)
+            {
+                dbTunnel.Password = server.Tunnel.Password;
+                dbTunnel.PrivateKeyContent = server.Tunnel.PrivateKeyContent;
+                dbTunnel.PrivateKeyPassphrase = server.Tunnel.PrivateKeyPassphrase;
+            }
+            
             dbTunnel.LocalPort = server.Tunnel.LocalPort;
             dbTunnel.RemoteHost = server.Tunnel.RemoteHost!;
             dbTunnel.RemotePort = server.Tunnel.RemotePort;
             dbTunnel.Description = server.Tunnel.Description;
 
+            dbTunnel.UsePasswordAuth = string.IsNullOrWhiteSpace(dbTunnel.PrivateKeyContent);
+            
             dbServer.TunnelId = dbTunnel.Id;
         }
 
@@ -541,5 +550,22 @@ public class ServersService (
         await notifyService.CallServerCreatedEvent(user.UserName!);
         
         return new Success();
+    }
+
+    public async Task<OneOf<Success, string>> TestServerConnection(Guid serverId)
+    {
+        var serverConn = db.DbConnections.FirstOrDefault(x => x.Id == serverId);
+        
+        if (serverConn is null)
+            return "Can't find server";
+
+        DbServerTunnel? tunnel = null;
+
+        if (serverConn.IsTunnelRequired)
+            tunnel = db.DbServerTunnels.FirstOrDefault(x => x.Id == serverConn.TunnelId);
+
+        var testResult = await ServerConnectionTester.TestConnectionAsync(serverConn, tunnel);
+
+        return testResult.Result ? new Success() : testResult.ErrorMsg!;
     }
 }

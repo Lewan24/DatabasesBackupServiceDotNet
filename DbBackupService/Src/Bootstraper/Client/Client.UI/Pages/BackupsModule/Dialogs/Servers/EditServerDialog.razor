@@ -119,11 +119,27 @@
                                         </MudItem>
 
                                         <MudItem xs="12" sm="6">
+                                            <MudTooltip Text="Provide passphrase for your private key">
+                                                <MudTextField Label="Private Key Passphrase" Disabled="@_isSaving"
+                                                              Placeholder="Type password here..."
+                                                              HelperText="Private key Passphrase"
+                                                              @bind-Value="Server.Tunnel!.PrivateKeyPassphrase"/>
+                                            </MudTooltip>
+                                        </MudItem>
+                                        
+                                        <MudItem xs="12" sm="6">
                                             <MudTooltip Text="Paste the content of your private key (.pem or .ppk converted to PEM)">
                                                 <MudTextField Label="Private Key (PEM)" Lines="4" Disabled="@_isSaving"
                                                               Placeholder="Paste private key here..."
                                                               HelperText="Private key content"
                                                               @bind-Value="Server.Tunnel!.PrivateKeyContent"/>
+                                            </MudTooltip>
+                                        </MudItem>
+
+                                        <MudItem xs="12" sm="6">
+                                            <MudTooltip Text="Override existing passwords and private key content with actual values">
+                                                <MudSwitch T="bool" Label="Override Passwords and PEM" Disabled="@_isSaving"
+                                                              @bind-Value="Server.Tunnel!.OverridePasswordsAndPem"/>
                                             </MudTooltip>
                                         </MudItem>
 
