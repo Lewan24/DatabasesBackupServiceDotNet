@@ -8,6 +8,7 @@
 @inject BackupsHttpClientService BackupService
 @inject ISnackbar Snackbar
 @inject IDialogService DialogService
+@inject AuthStateProvider Auth
 
 <PageTitle>Manage Users in Servers</PageTitle>
 
@@ -67,6 +68,10 @@
 
     protected override async Task OnInitializedAsync()
     {
+        if (string.IsNullOrWhiteSpace(
+                await Auth.AuthorizeUser(returnPageAfterValidPasswordAuthorization: "administration-serversusers")))
+            return;
+        
         await FetchServersUsers();
     }
 

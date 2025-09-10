@@ -50,11 +50,20 @@
                     }
                 </MudTd>
                 <MudTd DataLabel="Type">@context.DbType</MudTd>
-                <MudTd DataLabel="Operations">
+                <MudTd DataLabel="Operations" Class="d-flex flex-row flex-nowrap justify-center gap-1 align-center">
                     <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Warning" OnClick="@(() => OpenEditServerDialog(context))" />
                     <MudTooltip Delay="100" Text="Disable server">
                         <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="@(() => DisableServer(context.Id))" />
                     </MudTooltip>
+                    <MudMenu>
+                        <ActivatorContent>
+                            <MudIconButton Icon="@Icons.Material.Filled.Menu" />
+                        </ActivatorContent>
+                        <ChildContent>
+                            <MudMenuItem>Test Connection</MudMenuItem>
+                            <MudMenuItem>Perform Backup</MudMenuItem>
+                        </ChildContent>
+                    </MudMenu>
                 </MudTd>
             </RowTemplate>
 
@@ -72,6 +81,10 @@
     
     protected override async Task OnInitializedAsync()
     {
+        if (string.IsNullOrWhiteSpace(
+                await Auth.AuthorizeUser(returnPageAfterValidPasswordAuthorization: "servers")))
+            return;
+        
         await FetchServers();
 
         _hubConnection = BackupHubHelper.GetBasicHubConnection(Nav.ToAbsoluteUri(BackupHubHelper.HubUrl));

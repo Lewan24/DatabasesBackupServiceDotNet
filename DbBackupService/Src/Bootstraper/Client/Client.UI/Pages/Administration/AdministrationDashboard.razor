@@ -1,5 +1,9 @@
 ﻿@page "/administration/dashboard"
 
+@using Client.UI.Data.Services
+
+@inject AuthStateProvider Auth
+
 <PageTitle>Administration Dashboard</PageTitle>
 
 <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="pa-6">
@@ -58,3 +62,12 @@
         </MudItem>
     </MudGrid>
 </MudContainer>
+
+@code{
+
+    protected override async Task OnInitializedAsync()
+    { 
+        await Auth.AuthorizeUser(returnPageAfterValidPasswordAuthorization: "administration-dashboard");
+    }
+
+}

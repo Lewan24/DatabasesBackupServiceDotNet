@@ -1,6 +1,9 @@
 ﻿@page "/backups"
 
+@using Client.UI.Data.Services
 @using Modules.Backup.Core.Entities.DbContext
+
+@inject AuthStateProvider Auth
 
 <PageTitle>Backups</PageTitle>
 
@@ -93,4 +96,10 @@
         new() { Id = Guid.CreateVersion7(), BackupId = Guid.Parse("C3C53060-4705-4348-968F-8616B98FB0BE"), TestedOn = DateTime.Now.AddDays(-2), IsSuccess = false, ErrorMessage = "Brak odpowiedzi od utworzonych tabel"},
         new() { Id = Guid.CreateVersion7(), BackupId = Guid.Parse("C916A6F7-A452-4F55-B14C-255A3BDF55C3"), TestedOn = DateTime.Now.AddDays(-9), IsSuccess = true }
     };
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Auth.AuthorizeUser(returnPageAfterValidPasswordAuthorization: "backups");
+    }
+
 }

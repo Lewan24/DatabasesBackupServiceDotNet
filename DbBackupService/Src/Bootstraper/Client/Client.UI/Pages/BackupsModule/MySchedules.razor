@@ -72,6 +72,10 @@
 
     protected override async Task OnInitializedAsync()
     {
+        if (string.IsNullOrWhiteSpace(
+                await Auth.AuthorizeUser(returnPageAfterValidPasswordAuthorization: "schedules")))
+            return;
+        
         await FetchSchedules();
 
         var getAvailableServersResult = await Service.GetServersNamesForSchedulesAsync();

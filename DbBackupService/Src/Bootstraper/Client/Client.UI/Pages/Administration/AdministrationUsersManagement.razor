@@ -8,6 +8,7 @@
 @inject AdministrationHttpService Service
 @inject ISnackbar Snackbar
 @inject IDialogService DialogService
+@inject AuthStateProvider Auth
 
 <PageTitle>Manage Users</PageTitle>
 
@@ -80,6 +81,10 @@
 
     protected override async Task OnInitializedAsync()
     {
+        if (string.IsNullOrWhiteSpace(
+                await Auth.AuthorizeUser(returnPageAfterValidPasswordAuthorization: "administration-users")))
+            return;
+        
         await FetchUsers();
     }
 
