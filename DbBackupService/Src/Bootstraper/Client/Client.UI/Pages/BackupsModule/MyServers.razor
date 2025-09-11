@@ -29,11 +29,11 @@
 
         <MudTable Items="@_servers" Hover="true" Dense="true">
             <HeaderContent>
-                <MudTh>Name</MudTh>
+                <MudTh><MudTableSortLabel SortBy="new Func<ServerConnectionDto, object>(x => x.ConnectionName)">Name</MudTableSortLabel></MudTh>
                 <MudTh>Host</MudTh>
                 <MudTh>Database</MudTh>
-                <MudTh>Tunnel Status</MudTh>
-                <MudTh>Type</MudTh>
+                <MudTh><MudTableSortLabel SortBy="new Func<ServerConnectionDto, object>(x => x.IsTunnelRequired)">Tunnel Status</MudTableSortLabel></MudTh>
+                <MudTh><MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<ServerConnectionDto, object>(x => x.DbType)">Type</MudTableSortLabel></MudTh>
                 <MudTh>Operations</MudTh>
             </HeaderContent>
             <RowTemplate>
@@ -53,15 +53,17 @@
                 <MudTd DataLabel="Type">@context.DbType</MudTd>
                 <MudTd DataLabel="Operations" Class="d-flex flex-row flex-nowrap justify-center gap-1 align-center">
                     <MudIconButton Icon="@Icons.Material.Filled.Edit" Disabled="@_isProcessing" Color="Color.Warning" OnClick="@(() => OpenEditServerDialog(context))" />
-                    <MudTooltip Delay="100" Text="Disable server">
-                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Disabled="@_isProcessing" Color="Color.Error" OnClick="@(() => DisableServer(context.Id))" />
-                    </MudTooltip>
                     <AuthorizeView Roles="@AppRoles.Admin">
                         <Authorized Context="authCtx">
                             <MudTooltip Delay="100" Text="Permanently delete server and it's schedules and users access">
                                 <MudIconButton Icon="@Icons.Material.Filled.DeleteForever" Disabled="@_isProcessing" Color="Color.Error" OnClick="@(() => DeleteServer(context.Id))" />
                             </MudTooltip>
                         </Authorized>
+                        <NotAuthorized Context="authCtx">
+                            <MudTooltip Delay="100" Text="Disable server">
+                                <MudIconButton Icon="@Icons.Material.Filled.Delete" Disabled="@_isProcessing" Color="Color.Error" OnClick="@(() => DisableServer(context.Id))" />
+                            </MudTooltip>
+                        </NotAuthorized>
                     </AuthorizeView>
                     <MudMenu>
                         <ActivatorContent>

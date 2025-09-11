@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Modules.Administration.Shared.Interfaces;
 using Modules.Auth.Core.Entities;
 using Modules.Auth.Infrastructure.DbContexts;
 using Modules.Auth.Shared.Static.Entities;
@@ -20,7 +21,8 @@ public class ServersService (
     AppIdentityDbContext appIdentityDbContext,
     UserManager<AppUser> userManager,
     ILogger<ServersService> logger,
-    NotifyService notifyService)
+    NotifyService notifyService,
+    IAdminModuleApi adminApi)
 {
     public async Task<OneOf<List<ServerConnectionDto>, string>> GetServers(string? identityName)
     {
@@ -487,15 +489,21 @@ public class ServersService (
                 .ToListAsync();
 
             var allUsers = await appIdentityDbContext.Users
-                .AsNoTracking()
+                .AsNoTracking().Where(x => !x.IsBlocked)
                 .Select(u => new { u.Id, u.Email })
                 .ToListAsync();
 
             var usersWithoutAccess = new List<string>();
-            
+
             foreach (var user in allUsers)
+            {
+                var dbUser = await userManager.FindByIdAsync(user.Id);
+                if (await adminApi.AmIAdmin(dbUser?.UserName))
+                    continue;
+                
                 if (!serversUsersIds.Contains(Guid.Parse(user.Id)))
                     usersWithoutAccess.Add(user.Email!);
+            }
 
             return usersWithoutAccess;
         }

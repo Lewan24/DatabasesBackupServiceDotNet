@@ -31,7 +31,7 @@
         <MudTable Items="@_schedules" Hover="true" Dense="true">
             <HeaderContent>
                 <MudTh>Name</MudTh>
-                <MudTh>Server</MudTh>
+                <MudTh><MudTableSortLabel SortBy="new Func<BackupsScheduleDto, object>(x => x.ServerName!)">Server</MudTableSortLabel></MudTh>
                 <MudTh><MudTableSortLabel InitialDirection="SortDirection.Descending" SortBy="new Func<BackupsScheduleDto, object>(x => x.IsEnabled)">Status</MudTableSortLabel></MudTh>
                 <MudTh>Next Backup</MudTh>
                 <MudTh>Actions</MudTh>
