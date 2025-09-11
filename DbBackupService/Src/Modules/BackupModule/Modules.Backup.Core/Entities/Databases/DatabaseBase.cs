@@ -4,23 +4,14 @@ using Modules.Backup.Core.Interfaces;
 
 namespace Modules.Backup.Core.Entities.Databases;
 
-public abstract class DatabaseBase : IDatabase
+public abstract class DatabaseBase(DbServerConnection serverConnection, ILogger logger) : IDatabase
 {
-    protected readonly DbServerConnection ServerConnection;
-    protected readonly ILogger Logger;
-
-    protected DatabaseBase(DbServerConnection serverConnection, ILogger logger)
-    {
-        ServerConnection = serverConnection;
-        Logger = logger;
-    }
-
     public async Task<string> PerformBackup(ServerBackupsConfiguration serverConfig)
     {
-        Logger.LogInformation("Performing backup for {DatabaseName}", ServerConnection.DbName);
+        logger.LogInformation("Performing backup for {DatabaseName}", serverConnection.DbName);
 
         var fileName = $"{DateTime.Now:yyyy.MM.dd.HH.mm}.sql";
-        var backupPath = serverConfig.CreateBackupPath(ServerConnection, fileName);
+        var backupPath = serverConfig.CreateBackupPath(serverConnection, fileName);
 
         try
         {
@@ -29,7 +20,7 @@ public abstract class DatabaseBase : IDatabase
         }
         catch (Exception e)
         {
-            Logger.LogError(e, "Error while performing backup for {DatabaseName}", ServerConnection.DbName);
+            logger.LogError(e, "Error while performing backup for {DatabaseName}", serverConnection.DbName);
 
             try
             {
@@ -38,7 +29,7 @@ public abstract class DatabaseBase : IDatabase
             }
             catch (Exception cleanupEx)
             {
-                Logger.LogWarning(cleanupEx, "Failed to clean up corrupted backup file {File}", backupPath.FullFilePath);
+                logger.LogWarning(cleanupEx, "Failed to clean up corrupted backup file {File}", backupPath.FullFilePath);
             }
 
             throw;
@@ -47,7 +38,7 @@ public abstract class DatabaseBase : IDatabase
 
     protected abstract Task PerformBackupInternal(string fullFilePath);
 
-    public string GetDatabaseName() => ServerConnection.DbName;
-    public Guid GetServerId() => ServerConnection.Id;
-    public DbServerConnection GetServerConnection() => ServerConnection;
+    public string GetDatabaseName() => serverConnection.DbName;
+    public Guid GetServerId() => serverConnection.Id;
+    public DbServerConnection GetServerConnection() => serverConnection;
 }

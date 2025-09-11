@@ -1,64 +1,28 @@
 using Microsoft.Extensions.Logging;
 using Modules.Backup.Core.Entities.DbContext;
-using Modules.Backup.Core.Interfaces;
-using Modules.Backup.Core.StaticClasses;
 using MySql.Data.MySqlClient;
 
 namespace Modules.Backup.Core.Entities.Databases;
 
-public sealed class MySqlDatabase(
-    DbServerConnection serverConnection,
-    ILogger logger)
-    : IDatabase
+public sealed class MySqlDatabase(DbServerConnection serverConnection, ILogger logger)
+    : DatabaseBase(serverConnection, logger)
 {
-    public async Task<string> PerformBackup(ServerBackupsConfiguration serverConfig)
-    {
-        logger.LogInformation("Performing backup for {DatabaseName}", serverConnection.DbName);
+    private readonly DbServerConnection _serverConnection = serverConnection;
 
-        var fileName = $"{DateTime.Now:yyyy.MM.dd.HH.mm}.sql";
-        var backupPath = serverConfig.CreateBackupPath(serverConnection, fileName);
-        
-        try
-        {
-            var connectionString = PrepareConnectionString(serverConnection);
-
-            await using var connection = new MySqlConnection(connectionString);
-            await using var cmd = new MySqlCommand();
-            using var backup = new MySqlBackup(cmd);
-
-            cmd.Connection = connection;
-            connection.Open();
-            
-            backup.ExportToFile(backupPath.FullFilePath);
-            await connection.CloseAsync();
-
-            return fileName;
-        }
-        catch (Exception e)
-        {
-            logger.LogError(e, "Error while performing backup for {DatabaseName}", serverConnection.DbName);
-            
-            if (File.Exists(backupPath.FullFilePath))
-                File.Delete(backupPath.FullFilePath);
-            
-            throw;
-        }
-    }
-
-    private string PrepareConnectionString(DbServerConnection configuration)
+    protected override async Task PerformBackupInternal(string fullFilePath)
     {
         var connectionString =
-            $"Server={configuration.ServerHost};Port={configuration.ServerPort};Database={configuration.DbName};Uid={configuration.DbUser};Pwd={configuration.DbPasswd};";
+            $"Server={_serverConnection.ServerHost};Port={_serverConnection.ServerPort};Database={_serverConnection.DbName};Uid={_serverConnection.DbUser};Pwd={_serverConnection.DbPasswd};";
 
-        return connectionString;
+        await using var connection = new MySqlConnection(connectionString);
+        await using var cmd = new MySqlCommand();
+        using var backup = new MySqlBackup(cmd);
+
+        cmd.Connection = connection;
+        await connection.OpenAsync();
+
+        backup.ExportToFile(fullFilePath);
+
+        await connection.CloseAsync();
     }
-    
-    public string GetDatabaseName() 
-        => serverConnection.DbName;
-
-    public Guid GetServerId()
-        => serverConnection.Id;
-
-    public DbServerConnection GetServerConnection()
-        => serverConnection;
 }

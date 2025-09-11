@@ -84,6 +84,7 @@ internal sealed class DbBackupService(
                 {
                     DatabaseType.MySql => new MySqlDatabase(serverConn, logger),
                     DatabaseType.PostgreSql => new PostgreSqlDatabase(serverConn, logger),
+                    DatabaseType.MsSql => new MsSqlDatabase(serverConn, logger),
                     _ => throw new NotSupportedException(
                         $"Selected type of database is not supported: {serverConn.DbType}")
                 };
