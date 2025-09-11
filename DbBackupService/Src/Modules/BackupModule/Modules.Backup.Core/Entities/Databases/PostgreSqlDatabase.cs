@@ -4,14 +4,17 @@ using Modules.Backup.Core.Entities.DbContext;
 
 namespace Modules.Backup.Core.Entities.Databases;
 
-public sealed class PostgreSqlDatabase(DbServerConnection serverConnection, ILogger logger)
-    : DatabaseBase(serverConnection, logger)
+public sealed class PostgreSqlDatabase(DbServerConnection serverConnection, DbServerTunnel serverTunnel, ILogger logger)
+    : DatabaseBase(serverConnection, serverTunnel, logger)
 {
     private readonly DbServerConnection _serverConnection = serverConnection;
 
     protected override async Task PerformBackupInternal(string fullFilePath)
     {
-        var server = $"{_serverConnection.ServerHost}:{_serverConnection.ServerPort}";
+        var host = _serverConnection.IsTunnelRequired ? "127.0.0.1" : _serverConnection.ServerHost;
+        var port = _serverConnection.IsTunnelRequired ? serverTunnel.LocalPort : _serverConnection.ServerPort;
+        
+        var server = $"{host}:{port}";
         var userFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
         string pgPassFilePath;
 
@@ -39,8 +42,10 @@ public sealed class PostgreSqlDatabase(DbServerConnection serverConnection, ILog
             await RunProcess("chmod", $"0600 {pgPassFilePath}");
         }
 
-        await RunProcess("pg_dump",
-            $@"-h {_serverConnection.ServerHost} -p {_serverConnection.ServerPort} -U {_serverConnection.DbUser} -F c -b -v -f {fullFilePath} {_serverConnection.DbName}");
+        var arguments = $"-h {host} -p {port} " +
+                        $"-U {_serverConnection.DbUser} -F c -b -v -f \"{fullFilePath}\" {_serverConnection.DbName}";
+        
+        await RunProcess("pg_dump", arguments);
 
         await File.WriteAllTextAsync(pgPassFilePath, "Cleaned");
     }
@@ -59,7 +64,9 @@ public sealed class PostgreSqlDatabase(DbServerConnection serverConnection, ILog
                 UseShellExecute = false
             }
         };
-
+        
+        process.StartInfo.EnvironmentVariables["PGSSLMODE"] = "prefer";
+        
         process.Start();
         var stdErr = await process.StandardError.ReadToEndAsync();
         var stdOut = await process.StandardOutput.ReadToEndAsync();

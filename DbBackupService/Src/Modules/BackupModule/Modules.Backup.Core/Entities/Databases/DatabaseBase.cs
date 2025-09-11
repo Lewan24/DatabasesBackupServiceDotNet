@@ -1,20 +1,32 @@
 ﻿using Microsoft.Extensions.Logging;
 using Modules.Backup.Core.Entities.DbContext;
 using Modules.Backup.Core.Interfaces;
+using Modules.Backup.Core.StaticClasses;
+using Modules.Backup.Shared.Enums;
 
 namespace Modules.Backup.Core.Entities.Databases;
 
-public abstract class DatabaseBase(DbServerConnection serverConnection, ILogger logger) : IDatabase
+public abstract class DatabaseBase(DbServerConnection serverConnection, DbServerTunnel serverTunnel, ILogger logger) : IDatabase
 {
     public async Task<string> PerformBackup(ServerBackupsConfiguration serverConfig)
     {
         logger.LogInformation("Performing backup for {DatabaseName}", serverConnection.DbName);
 
-        var fileName = $"{DateTime.Now:yyyy.MM.dd.HH.mm}.sql";
+        string fileName = $"{DateTime.Now:yyyy.MM.dd.HH.mm}";
+
+        if (serverConnection.DbType is DatabaseType.SqlServer)
+            fileName += ".bak";
+        else
+            fileName += ".sql";
+        
         var backupPath = serverConfig.CreateBackupPath(serverConnection, fileName);
 
         try
         {
+            using var tunnel = serverConnection.IsTunnelRequired
+                ? SshTunnelHelper.OpenTunnel(serverConnection, serverTunnel)
+                : null;
+            
             await PerformBackupInternal(backupPath.FullFilePath!);
             return fileName;
         }

@@ -1,28 +1,51 @@
+using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 using Modules.Backup.Core.Entities.DbContext;
-using MySql.Data.MySqlClient;
 
 namespace Modules.Backup.Core.Entities.Databases;
 
-public sealed class MySqlDatabase(DbServerConnection serverConnection, ILogger logger)
-    : DatabaseBase(serverConnection, logger)
+public sealed class MySqlDatabase(DbServerConnection serverConnection, DbServerTunnel serverTunnel, ILogger logger)
+    : DatabaseBase(serverConnection, serverTunnel, logger)
 {
     private readonly DbServerConnection _serverConnection = serverConnection;
 
     protected override async Task PerformBackupInternal(string fullFilePath)
     {
-        var connectionString =
-            $"Server={_serverConnection.ServerHost};Port={_serverConnection.ServerPort};Database={_serverConnection.DbName};Uid={_serverConnection.DbUser};Pwd={_serverConnection.DbPasswd};";
+        var host = _serverConnection.IsTunnelRequired ? "127.0.0.1" : _serverConnection.ServerHost;
+        var port = _serverConnection.IsTunnelRequired ? serverTunnel.LocalPort : _serverConnection.ServerPort;
+        
+        var args =
+            $"-h {host} " +
+            $"-P {port} " +
+            $"-u {_serverConnection.DbUser} " +
+            $"-p{_serverConnection.DbPasswd} " +
+            $"--single-transaction --routines --events " +
+            $"{_serverConnection.DbName}";
 
-        await using var connection = new MySqlConnection(connectionString);
-        await using var cmd = new MySqlCommand();
-        using var backup = new MySqlBackup(cmd);
+        var process = new Process
+        {
+            StartInfo = new ProcessStartInfo
+            {
+                FileName = "mysqldump",
+                Arguments = args,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            }
+        };
 
-        cmd.Connection = connection;
-        await connection.OpenAsync();
+        process.Start();
 
-        backup.ExportToFile(fullFilePath);
+        await using (var fileStream = new FileStream(fullFilePath, FileMode.Create, FileAccess.Write, FileShare.None))
+        {
+            await process.StandardOutput.BaseStream.CopyToAsync(fileStream);
+        }
 
-        await connection.CloseAsync();
+        var stdErr = await process.StandardError.ReadToEndAsync();
+        await process.WaitForExitAsync();
+
+        if (process.ExitCode != 0)
+            throw new Exception($"mysqldump exited with code {process.ExitCode} // error: {stdErr}");
     }
 }

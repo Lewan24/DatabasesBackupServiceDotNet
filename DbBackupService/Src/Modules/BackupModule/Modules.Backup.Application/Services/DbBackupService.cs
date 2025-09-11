@@ -65,14 +65,19 @@ internal sealed class DbBackupService(
             return "Can't find server";
         }
         
-        await PerformBackup([server]);
+        var result = await PerformBackup([server]);
 
-        logger.LogInformation("{ServiceName} finished its job.", nameof(DbBackupService));
-        
-        return new Success();
+        return result.Match<OneOf<Success, string>>(
+            _ =>
+            {
+                logger.LogInformation("{ServiceName} finished its job.", nameof(DbBackupService));
+                return new Success();
+            },
+            error => error
+        );
     }
 
-    private async Task PerformBackup(List<DbServerConnection> serversConnections)
+    private async Task<OneOf<Success, string>> PerformBackup(List<DbServerConnection> serversConnections)
     {
         try
         {
@@ -80,11 +85,13 @@ internal sealed class DbBackupService(
 
             foreach (var serverConn in serversConnections)
             {
+                var serverTunnel = dbContext.DbServerTunnels.FirstOrDefault(x => x.Id == serverConn.TunnelId);
+                
                 IDatabase database = serverConn.DbType switch
                 {
-                    DatabaseType.MySql => new MySqlDatabase(serverConn, logger),
-                    DatabaseType.PostgreSql => new PostgreSqlDatabase(serverConn, logger),
-                    DatabaseType.MsSql => new MsSqlDatabase(serverConn, logger),
+                    DatabaseType.MySql => new MySqlDatabase(serverConn, serverTunnel!, logger),
+                    DatabaseType.PostgreSql => new PostgreSqlDatabase(serverConn, serverTunnel!, logger),
+                    DatabaseType.SqlServer => new SqlServerDatabase(serverConn, serverTunnel!, logger),
                     _ => throw new NotSupportedException(
                         $"Selected type of database is not supported: {serverConn.DbType}")
                 };
@@ -118,23 +125,33 @@ internal sealed class DbBackupService(
                     
                     var createdFileName = await db.PerformBackup(serverConfig);
                     newDbBackup.FilePath = Path.Combine(backupPath.DirectoryPath, createdFileName);
+
+                    string compressedFilename = "";
                     
-                    var compressedFilename = CompressBackupFile.Perform(backupPath.DirectoryPath, createdFileName);
+                    if (serverConn.DbType is not DatabaseType.SqlServer)
+                        compressedFilename = CompressBackupFile.Perform(backupPath.DirectoryPath, createdFileName);
                     
                     dbContext.Backups.Add(newDbBackup);
                     await dbContext.SaveChangesAsync();
                     
-                    logger.LogInformation("Successfully created and compressed backup: [{Database}], [{ZipFile}]", db.GetDatabaseName(), compressedFilename);
+                    if (!string.IsNullOrWhiteSpace(compressedFilename))
+                        logger.LogInformation("Successfully created and compressed backup: [{Database}], [{ZipFile}]", db.GetDatabaseName(), compressedFilename);
+                    
+                    return new Success();
                 }
                 catch (Exception e)
                 {
                     logger.LogWarning(e, "Exception thrown while performing backup in database");
+                    return e.Message;
                 }
         }
         catch (NotSupportedException e)
         {
             logger.LogWarning(e, "Exception thrown while preparing databases");
+            return e.Message;
         }
+        
+        return new Success();
     }
     
     public async Task<OneOf<List<PerformedBackupDto>, string>> GetAllBackups(string? identityName)

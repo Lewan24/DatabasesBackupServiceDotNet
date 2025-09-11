@@ -87,7 +87,7 @@ internal static class ServerConnectionTester
                         CommandTimeout = 5
                     }.ToString()),
 
-                DatabaseType.MsSql => new SqlConnection(
+                DatabaseType.SqlServer => new SqlConnection(
                     new SqlConnectionStringBuilder
                     {
                         DataSource = $"{host},{port}",
@@ -146,7 +146,7 @@ internal static class ServerConnectionTester
         {
             DatabaseType.MySql => "SELECT 1;",
             DatabaseType.PostgreSql => "SELECT 1;",
-            DatabaseType.MsSql => "SELECT 1;",
+            DatabaseType.SqlServer => "SELECT 1;",
             _ => throw new NotSupportedException()
         };
 

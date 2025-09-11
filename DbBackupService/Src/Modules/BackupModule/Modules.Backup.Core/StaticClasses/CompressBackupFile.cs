@@ -14,13 +14,14 @@ public static class CompressBackupFile
     /// </example>
     /// <param name="fileBasePath">Base path of directory where the file currently is</param>
     /// <param name="fileName">name of file that we want to compress</param>
+    /// <param name="fileExtension">extension of created file like .sql or .bak</param>
     /// <returns>string of zip file name that contains full path</returns>
-    public static string Perform(string fileBasePath, string fileName)
+    public static string Perform(string fileBasePath, string fileName, string fileExtension = ".sql")
     {
         try
         {
             var completeFilePath = Path.Combine(fileBasePath, fileName);
-            var zipFileName = Path.Combine(fileBasePath, $"{fileName.Split(".sql")[0]}.zip");
+            var zipFileName = Path.Combine(fileBasePath, $"{fileName.Split(fileExtension)[0]}.zip");
 
             if (File.Exists(zipFileName))
                 throw new Exception("Zip with the same name already exists. Stopping compression.");
