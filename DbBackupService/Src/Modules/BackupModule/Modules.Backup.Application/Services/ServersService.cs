@@ -257,6 +257,15 @@ public class ServersService (
         if (!isAdmin)
             db.UsersServers.Add(serverUser);
         
+        var serverBackupConfig = new ServerBackupsConfiguration
+        {
+            Id = Guid.CreateVersion7(),
+            ServerId = dbServer.Id,
+            TimeInDaysToHoldBackups = 4
+        };
+        
+        db.Configurations.Add(serverBackupConfig);
+        
         await db.SaveChangesAsync();
 
         await notifyService.CallServerCreatedEvent(user.UserName!);
@@ -585,22 +594,35 @@ public class ServersService (
 
         try
         {
-            var usersAccess = db.UsersServers.Where(x => x.ServerId == serverId);
-            if (usersAccess.Any())
+            if (db.UsersServers.Any())
             {
-                db.UsersServers.RemoveRange(usersAccess);
-                await db.SaveChangesAsync();   
+                var usersAccess = db.UsersServers.Where(x => x.ServerId == serverId);
+                if (usersAccess.Any())
+                {
+                    db.UsersServers.RemoveRange(usersAccess);
+                    await db.SaveChangesAsync();   
                 
-                await notifyService.CallServerHasChangedEvent(serverId);
+                    await notifyService.CallServerHasChangedEvent(serverId);
+                }   
+            }
+
+            if (db.Schedules.Any())
+            {
+                var schedules = db.Schedules.Where(x => x.DbConnectionId == serverId);
+                if (schedules.Any())
+                {
+                    db.Schedules.RemoveRange(schedules);
+                    await db.SaveChangesAsync();
+            
+                    await notifyService.CallScheduleHasChangedEvent(schedules.First().Id);
+                }
             }
             
-            var schedules = db.Schedules.Where(x => x.DbConnectionId == serverId);
-            if (schedules.Any())
+            var serverBackupConfig = db.Configurations.FirstOrDefault(x => x.ServerId == serverId);
+            if (serverBackupConfig is not null)
             {
-                db.Schedules.RemoveRange(schedules);
+                db.Configurations.Remove(serverBackupConfig);
                 await db.SaveChangesAsync();
-            
-                await notifyService.CallScheduleHasChangedEvent(schedules.First().Id);
             }
             
             db.DbConnections.Remove(server);

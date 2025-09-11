@@ -21,7 +21,7 @@ public sealed class ServerBackupsConfiguration
         if (!Directory.Exists(BackupSaveDirectory))
             Directory.CreateDirectory(BackupSaveDirectory);
 
-        var serverPath = Path.Combine(BackupSaveDirectory, $"{server.ServerHost}:{server.ServerPort}");
+        var serverPath = Path.Combine(BackupSaveDirectory, $"{server.ServerHost}_{server.ServerPort}");
         if (!Directory.Exists(serverPath))
             Directory.CreateDirectory(serverPath);
         

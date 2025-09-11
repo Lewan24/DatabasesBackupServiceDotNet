@@ -3,6 +3,7 @@ using Modules.Backup.Application.Interfaces;
 using Modules.Backup.Core.Entities.Databases;
 using Modules.Backup.Core.Entities.DbContext;
 using Modules.Backup.Core.Interfaces;
+using Modules.Backup.Core.StaticClasses;
 using Modules.Backup.Infrastructure.DbContexts;
 using Modules.Backup.Shared.Enums;
 using OneOf;
@@ -96,12 +97,12 @@ internal sealed class DbBackupService(
                         continue;
                     }
                     
-                    // var backupPath = serverConfig.CreateBackupPath(db.GetServerConnection(), null);
-                    // await DeleteOldBackup.Delete(backupPath.DirectoryPath, serverConfig.TimeInDaysToHoldBackups);
+                    var backupPath = serverConfig.CreateBackupPath(db.GetServerConnection(), null);
+                    await DeleteOldBackup.Delete(backupPath.DirectoryPath, serverConfig.TimeInDaysToHoldBackups);
                     
                     var createdFileName = await db.PerformBackup(serverConfig);
-                    // var compressedFilename = CompressBackupFile.Perform(backupPath.DirectoryPath, createdFileName);
-                    //logger.LogInformation("Successfully created and compressed backup: [{Database}], [{ZipFile}]", db.GetDatabaseName(), compressedFilename);
+                    var compressedFilename = CompressBackupFile.Perform(backupPath.DirectoryPath, createdFileName);
+                    logger.LogInformation("Successfully created and compressed backup: [{Database}], [{ZipFile}]", db.GetDatabaseName(), compressedFilename);
                 }
                 catch (Exception e)
                 {

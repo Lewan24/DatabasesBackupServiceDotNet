@@ -29,8 +29,8 @@ public sealed class MySqlDatabase(
             var fileName = $"{DateTime.Now:yyyy.MM.dd.HH.mm}.sql";
             var backupPath = serverConfig.CreateBackupPath(serverConnection, fileName);
             
-            //backup.ExportToFile(backupPath.FullFilePath);
-            //await connection.CloseAsync();
+            backup.ExportToFile(backupPath.FullFilePath);
+            await connection.CloseAsync();
 
             return fileName;
         }
