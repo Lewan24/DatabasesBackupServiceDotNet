@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Modules.Backup.Application.Interfaces;
 using Modules.Backup.Shared.Dtos;
 using Modules.Shared.Attributes;
 using OneOf.Types;
@@ -23,6 +24,10 @@ internal static class BackupsEndpoints
 
         api.MapPost("PerformBackup", BackupsOperations.PerformBackup)
             .WithSummary("Perform backup on provided server");
+        
+        api.MapPost("PerformSchedulesBackup", BackupsOperations.PerformSchedulesBackup)
+            .WithSummary("Perform backup on pending schedules")
+            .AddEndpointFilter<AdminTokenAuthorizationFilter>();
 
         api.MapPost("DeleteBackup", BackupsOperations.DeleteBackup)
             .WithSummary("Delete backup entry + backup file")
@@ -53,9 +58,23 @@ internal abstract record BackupsOperations
         return Task.FromResult<IResult>(TypedResults.Ok(new List<PerformedBackupDto>()));
     }
 
-    public static Task<IResult> PerformBackup(
+    public static async Task<IResult> PerformBackup(
         HttpContext context,
+        [FromServices] IDbBackupService service,
         [FromBody] Guid serverId)
+    {
+        var result = await service.BackupDb(serverId);
+        
+        return result.Match<IResult>(
+            TypedResults.Ok,
+            TypedResults.BadRequest
+        );
+    }
+    
+    // TODO: idk why but AdminTokenFilter needs additional parameter to provide
+    public static Task<IResult> PerformSchedulesBackup(
+        HttpContext context,
+        [FromBody] bool test)
     {
         return Task.FromResult<IResult>(TypedResults.Ok(new Success()));
     }

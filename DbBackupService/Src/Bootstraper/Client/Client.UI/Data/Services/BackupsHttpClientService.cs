@@ -38,4 +38,7 @@ public class BackupsHttpClientService(TokenHttpClientService api)
     
     public async Task<OneOf<Success, string>> DeleteScheduleAsync(Guid scheduleId)
         => await api.PostAsync("/api/schedules/DeleteSchedule", scheduleId);
+
+    public async Task<OneOf<Success, string>> BackupServerAsync(Guid serverId)
+        => await api.PostAsync("/api/backups/PerformBackup", serverId);
 }

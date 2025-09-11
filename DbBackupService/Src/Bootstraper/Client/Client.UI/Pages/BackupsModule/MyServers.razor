@@ -71,7 +71,7 @@
                         </ActivatorContent>
                         <ChildContent>
                             <MudMenuItem Disabled="@_isProcessing" OnClick="@(() => OpenTestServerDialog(context.Id))">Test Connection</MudMenuItem>
-                            <MudMenuItem Disabled="@_isProcessing">Perform Backup</MudMenuItem>
+                            <MudMenuItem Disabled="@_isProcessing" OnClick="@(() => PerformServerBackup(context.Id))">Perform Backup</MudMenuItem>
                         </ChildContent>
                     </MudMenu>
                 </MudTd>
@@ -196,6 +196,20 @@
             error => Snackbar.Add(error, Severity.Error)
         );
 
+        _isProcessing = false;
+    }
+
+    private async Task PerformServerBackup(Guid serverId)
+    {
+        _isProcessing = true;
+
+        var result = await Service.BackupServerAsync(serverId);
+        
+        result.Switch(
+            _ => Snackbar.Add("Successfully performed backup", Severity.Success),
+            error => Snackbar.Add(error, Severity.Error)
+        );
+        
         _isProcessing = false;
     }
 

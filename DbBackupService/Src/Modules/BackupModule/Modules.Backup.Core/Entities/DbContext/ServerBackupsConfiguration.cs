@@ -8,8 +8,8 @@ public sealed class ServerBackupsConfiguration
     public Guid ServerId { get; set; }
     public int TimeInDaysToHoldBackups { get; set; } = 4;
     [NotMapped]
-    public string BackupSaveDirectory { get; set; } = "/backups";
-
+    public string BackupSaveDirectory { get; set; } = Path.Combine(Path.GetDirectoryName(Environment.ProcessPath)!, "backups");
+    
     /// <summary>
     /// Create required directories for provided server and database
     /// </summary>

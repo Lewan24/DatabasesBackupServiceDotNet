@@ -1,8 +1,10 @@
-using Modules.Backup.Core.Entities.DbContext;
+using OneOf;
+using OneOf.Types;
 
 namespace Modules.Backup.Application.Interfaces;
 
 public interface IDbBackupService
 {
-    Task RunService(List<DbServerConnection> dbConfigurations);
+    Task<OneOf<Success, string>> BackupFromSchedules();
+    Task<OneOf<Success, string>> BackupDb(Guid serverId);
 }
