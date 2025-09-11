@@ -1,53 +1,41 @@
+using Microsoft.Extensions.Logging;
 using Modules.Backup.Application.Interfaces;
 using Modules.Backup.Core.Entities.Databases;
 using Modules.Backup.Core.Entities.DbContext;
-using Modules.Backup.Core.Entities.Models;
 using Modules.Backup.Core.Interfaces;
-using Modules.Backup.Core.StaticClasses;
+using Modules.Backup.Infrastructure.DbContexts;
 using Modules.Backup.Shared.Enums;
-using NLog;
 
 namespace Modules.Backup.Application.Services;
 
-public class DbBackupService(
-    Logger logger,
-    ApplicationConfigurationModel appConfig,
-    IEmailProviderService emailProviderService)
+internal sealed class DbBackupService(
+    BackupsDbContext dbContext,
+    ILogger<DbBackupService> logger)
     : IDbBackupService
 {
-    private readonly Logger _logger = logger.Factory.GetLogger(nameof(DbBackupService));
-
-    private int _madeBackupsCounter;
-
     public async Task RunService(List<DbServerConnection> dbConfigurations)
     {
-        _logger.Info("{ServiceName} has started", nameof(DbBackupService));
-        _logger.Info("Preparing backups for {DbCConfigsCount} databases...", dbConfigurations.Count);
+        logger.LogInformation("Preparing backups for {DbCConfigsCount} databases...", dbConfigurations.Count);
 
         await PerformBackup(dbConfigurations);
 
-        _logger.Info("{ServiceName} finished its job and stoped.", nameof(DbBackupService));
+        logger.LogInformation("{ServiceName} finished its job.", nameof(DbBackupService));
     }
 
-    public Task<int> GetBackupsCounter()
-    {
-        return Task.FromResult(_madeBackupsCounter);
-    }
-
-    private async Task PerformBackup(List<DbServerConnection> dbConfigurations)
+    private async Task PerformBackup(List<DbServerConnection> serversConnections)
     {
         try
         {
             var databasesList = new List<IDatabase>();
 
-            foreach (var dbConfig in dbConfigurations)
+            foreach (var serverConn in serversConnections)
             {
-                IDatabase database = dbConfig.DbType switch
+                IDatabase database = serverConn.DbType switch
                 {
-                    DatabaseType.MySql => new MySqlDatabase(dbConfig, _logger, appConfig),
-                    DatabaseType.PostgreSql => new PostgreSqlDatabase(dbConfig, _logger, appConfig),
+                    DatabaseType.MySql => new MySqlDatabase(serverConn, logger),
+                    DatabaseType.PostgreSql => new PostgreSqlDatabase(serverConn, logger),
                     _ => throw new NotSupportedException(
-                        $"Selected type of database is not supported: {dbConfig.DbType}")
+                        $"Selected type of database is not supported: {serverConn.DbType}")
                 };
 
                 databasesList.Add(database);
@@ -56,36 +44,26 @@ public class DbBackupService(
             foreach (var db in databasesList)
                 try
                 {
-                    await db.PerformBackup();
-
-                    _madeBackupsCounter++;
-
-                    if ((await emailProviderService.GetEmailSettings()).SendEmailOnEachDbSuccessfulBackup)
-                        await emailProviderService.PrepareAndSendEmail(new MailModel(
-                            $"Successful backup of '{await db.GetDatabaseName()}'",
-                            EmailMessageBody.PrepareDbBackupSuccessReport(
-                                $"<b><span style='color: green'>Backup for '{await db.GetDatabaseName()}' has been made with success.</span></b><br>Backup finish time: <b>{DateTime.Now:t}</b>")));
+                    // TODO: implement cleaning old backups here
+                    // TODO: implement removing db entries on successful clearing old backups
+                    // TODO: move compressing here
+                    // TODO: implement adding backup entry to db after successful backup
+                    var serverConfig = dbContext.Configurations.FirstOrDefault(x => x.ServerId == db.GetServerId());
+                    if (serverConfig is null)
+                    {
+                        logger.LogWarning("Can't find any backups configuration for server {ServerId}", db.GetServerId());
+                        continue;
+                    }
+                    await db.PerformBackup(serverConfig);
                 }
                 catch (Exception e)
                 {
-                    _logger.Warn(e, "Exception thrown while performing backup in database");
-
-                    if ((await emailProviderService.GetEmailSettings()).SendEmailOnEachDbFailureBackup)
-                        await emailProviderService.PrepareAndSendEmail(new MailModel(
-                            "There was a problem in the backup service",
-                            EmailMessageBody.PrepareDbBackupFailureReport(
-                                $"<b><span style='color: red'>Error occurs while performing backup</span></b><br><i><b>Error message: </b><span style='color: red'>{e.Message}</span></i>")));
+                    logger.LogWarning(e, "Exception thrown while performing backup in database");
                 }
         }
         catch (NotSupportedException e)
         {
-            _logger.Warn(e, "Exception thrown while preparing databases");
-
-            if ((await emailProviderService.GetEmailSettings()).SendEmailOnOtherFailures)
-                await emailProviderService.PrepareAndSendEmail(new MailModel(
-                    "There was a problem in the backup service",
-                    EmailMessageBody.PrepareErrorReport(
-                        $"<b><span style='color: red'>Error occurs while doing dbType assignment to each database configuration</span></b><br><i><b>Error message: </b><span style='color: red'>{e.Message}</span></i>")));
+            logger.LogWarning(e, "Exception thrown while preparing databases");
         }
     }
 }

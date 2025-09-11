@@ -2,7 +2,7 @@
 
 public sealed record BackupTest
 {
-    public Guid Id { get; init; }
+    public Guid Id { get; set; }
     public Guid BackupId { get; set; }
     public DateTime TestedOn { get; set; }
     public bool IsSuccess { get; set; }

@@ -1,28 +1,23 @@
+using Microsoft.Extensions.Logging;
 using Modules.Backup.Core.Entities.DbContext;
-using Modules.Backup.Core.Entities.Models;
 using Modules.Backup.Core.Interfaces;
 using Modules.Backup.Core.StaticClasses;
 using MySql.Data.MySqlClient;
-using NLog;
 
 namespace Modules.Backup.Core.Entities.Databases;
 
-public class MySqlDatabase(DbServerConnection databaseConfig, Logger logger, ApplicationConfigurationModel appConfig)
+public sealed class MySqlDatabase(
+    DbServerConnection serverConnection,
+    ILogger logger)
     : IDatabase
 {
-    private readonly Logger _logger = logger.Factory.GetLogger(nameof(MySqlDatabase));
-
-    public async Task PerformBackup()
+    public async Task<string> PerformBackup(ServerBackupsConfiguration serverConfig)
     {
-        _logger.Info("Performing backup for {DatabaseName}", databaseConfig.DbName);
+        logger.LogInformation("Performing backup for {DatabaseName}", serverConnection.DbName);
 
         try
         {
-            var backupPaths = BackupDirectories.CheckDbNameAndPrepareBackupPaths(databaseConfig, appConfig);
-            var combinedBackupPathBackupFile =
-                await BackupDirectories.PrepareNeededDirectoryAndClean(backupPaths, appConfig, _logger);
-
-            var connectionString = DatabaseBackupStrings.PrepareConnectionString(databaseConfig);
+            var connectionString = DatabaseBackupStrings.PrepareConnectionString(serverConnection);
 
             await using var connection = new MySqlConnection(connectionString);
             await using var cmd = new MySqlCommand();
@@ -30,25 +25,31 @@ public class MySqlDatabase(DbServerConnection databaseConfig, Logger logger, App
 
             cmd.Connection = connection;
             connection.Open();
-            backup.ExportToFile(combinedBackupPathBackupFile);
-            await connection.CloseAsync();
 
-            _logger.Info("Performing backup compression...");
+            var backupPathFileName = serverConfig.GetBackupPathAndBackupFileName(serverConnection);
+            
+            backup.ExportToFile(backupPathFileName.Path);
+            await connection.CloseAsync();
+            
+            // todo: move compressing to service
+            logger.LogInformation("Performing backup compression...");
             var compressionResult =
                 CompressBackupFile.Perform(backupPaths.DatabaseBackupPath, backupPaths.BackupFileName);
-            _logger.Info("Completed backup for {DatabaseName}. Backup path: {ZipFilePath}", databaseConfig.DbName,
+            logger.LogInformation("Completed backup for {DatabaseName}. Backup path: {ZipFilePath}", serverConnection.DbName,
                 compressionResult);
+
+            return backupPathFileName.FileName;
         }
         catch (Exception e)
         {
-            _logger.Debug(e);
-            _logger.Warn(e);
+            logger.LogError(e, "Error while performing backup for {DatabaseName}", serverConnection.DbName);
             throw;
         }
     }
 
-    public Task<string?> GetDatabaseName()
-    {
-        return Task.FromResult(databaseConfig.DbName);
-    }
+    public string GetDatabaseName() 
+        => serverConnection.DbName;
+
+    public Guid GetServerId()
+        => serverConnection.Id;
 }

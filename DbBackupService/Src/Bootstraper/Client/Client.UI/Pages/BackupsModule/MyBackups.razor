@@ -1,7 +1,7 @@
 ﻿@page "/backups"
 
 @using Client.UI.Data.Services
-@using Modules.Backup.Core.Entities.DbContext
+@using Modules.Backup.Shared.Dtos
 
 @inject AuthStateProvider Auth
 
@@ -21,9 +21,9 @@
         <MudTable Items="@_backups" Hover="true" Dense="true">
             <HeaderContent>
                 <MudTh>Nazwa</MudTh>
-                <MudTh>Utworzono</MudTh>
+                <MudTh><MudTableSortLabel InitialDirection="SortDirection.Descending" SortBy="new Func<PerformedBackupDto, object>(x => x.CreatedOn)">Utworzono</MudTableSortLabel></MudTh>
                 <MudTh>Plik</MudTh>
-                <MudTh>Status testu</MudTh>
+                <MudTh><MudTableSortLabel SortBy="new Func<PerformedBackupDto, object>(x => x.Test?.IsSuccess)">Status testu</MudTableSortLabel></MudTh>
                 <MudTh>Akcje</MudTh>
             </HeaderContent>
             <RowTemplate>
@@ -31,17 +31,16 @@
                 <MudTd>@context.CreatedOn.ToString("g")</MudTd>
                 <MudTd>@context.FilePath</MudTd>
                 @{
-                    var test = _tests.FirstOrDefault(t => t.BackupId == context.Id);
                     <MudTd>
-                        @if (test is not null)
+                        @if (context.Test is not null)
                         {
-                            if (test.IsSuccess)
+                            if (context.Test.IsSuccess)
                             {
                                 <MudChip T="string" Color="Color.Success" Variant="Variant.Filled">OK</MudChip>
                             }
                             else
                             {
-                                <MudTooltip Text="@test.ErrorMessage" Delay="100">
+                                <MudTooltip Text="@context.Test.ErrorMessage" Delay="100">
                                     <MudChip T="string" Color="Color.Error" Variant="Variant.Filled">Błąd</MudChip>
                                 </MudTooltip>
                             }
@@ -54,8 +53,8 @@
                     
                     <MudTd>
                         <MudButton Size="Size.Small" Variant="Variant.Filled" Color="Color.Primary"
-                                   StartIcon="@Icons.Material.Filled.PlayArrow" Disabled="@((test?.IsSuccess ?? true) && test is not null)">
-                            @switch (test?.IsSuccess)
+                                   StartIcon="@Icons.Material.Filled.PlayArrow" Disabled="@((context.Test?.IsSuccess ?? true) && context.Test is not null)">
+                            @switch (context.Test?.IsSuccess)
                             {
                                 case true:
                                     <span>Poprawnie przetestowano</span>
@@ -82,19 +81,12 @@
 </MudContainer>
 
 @code {
-    private List<PerformedBackup> _backups = new()
+    private List<PerformedBackupDto> _backups = new()
     {
-        new() { Id = Guid.Parse("7E2E27F1-1083-43E4-A606-19ED946E9EFE"), Name = "Daily app backup", CreatedOn = DateTime.Now.AddDays(-1), FilePath = "/backups/db1.sql" },
-        new() { Id = Guid.Parse("C3C53060-4705-4348-968F-8616B98FB0BE"), Name = "Daily localhost", CreatedOn = DateTime.Now.AddDays(-4), FilePath = "/backups/db2.sql" },
-        new() { Id = Guid.Parse("C916A6F7-A452-4F55-B14C-255A3BDF55C3"), Name = "Daily Domain", CreatedOn = DateTime.Now.AddDays(-12), FilePath = "/backups/db3.sql" },
-        new() { Id = Guid.CreateVersion7(), Name = "Daily Test", CreatedOn = DateTime.Now.AddDays(-12), FilePath = "/backups/db4.sql" }
-    };
-
-    private List<BackupTest> _tests = new()
-    {
-        new() { Id = Guid.CreateVersion7(), BackupId = Guid.Parse("7E2E27F1-1083-43E4-A606-19ED946E9EFE"), TestedOn = DateTime.Now, IsSuccess = true },
-        new() { Id = Guid.CreateVersion7(), BackupId = Guid.Parse("C3C53060-4705-4348-968F-8616B98FB0BE"), TestedOn = DateTime.Now.AddDays(-2), IsSuccess = false, ErrorMessage = "Brak odpowiedzi od utworzonych tabel"},
-        new() { Id = Guid.CreateVersion7(), BackupId = Guid.Parse("C916A6F7-A452-4F55-B14C-255A3BDF55C3"), TestedOn = DateTime.Now.AddDays(-9), IsSuccess = true }
+        new() { Test = new BackupTestDto{IsSuccess = true, TestedOn = DateTime.Now}, Name = "Daily app backup", CreatedOn = DateTime.Now.AddDays(-1), FilePath = "/backups/db1.sql" },
+        new() { Test = new BackupTestDto{IsSuccess = false, TestedOn = DateTime.Now.AddDays(-2), ErrorMessage = "Can't connect to server"}, Name = "Daily localhost", CreatedOn = DateTime.Now.AddDays(-4), FilePath = "/backups/db2.sql" },
+        new() { Name = "Daily Domain", CreatedOn = DateTime.Now.AddDays(-16), FilePath = "/backups/db3.sql" },
+        new() { Test = new BackupTestDto{IsSuccess = true, TestedOn = DateTime.Now.AddDays(-11)}, Name = "Daily Test", CreatedOn = DateTime.Now.AddDays(-12), FilePath = "/backups/db4.sql" }
     };
 
     protected override async Task OnInitializedAsync()

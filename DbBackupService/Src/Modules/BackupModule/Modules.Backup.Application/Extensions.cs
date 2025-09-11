@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Modules.Backup.Application.Interfaces;
 using Modules.Backup.Application.Services;
 
 namespace Modules.Backup.Application;
@@ -10,6 +11,8 @@ public static class Extensions
         services.AddScoped<ServersService>();
         services.AddScoped<SchedulesService>();
 
+        services.AddScoped<IDbBackupService, DbBackupService>();
+        
         services.AddTransient<NotifyService>();
         
         return services;

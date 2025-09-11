@@ -14,6 +14,8 @@ public sealed class BackupsDbContext : DbContext
     public DbSet<AutomaticBackupTestConfig> AutomaticBackupTestConfigs { get; set; }
     public DbSet<ServersUsers> UsersServers { get; set; }
     public DbSet<UserNotificationsSettings> UsersNotificationsSettings { get; set; }
+    
+    public DbSet<ServerBackupsConfiguration> Configurations { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseSqlite($"Data Source={DbCommon.DbPath}");
