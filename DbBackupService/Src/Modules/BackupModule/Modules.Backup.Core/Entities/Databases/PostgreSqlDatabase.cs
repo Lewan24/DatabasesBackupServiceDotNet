@@ -14,11 +14,11 @@ public sealed class PostgreSqlDatabase(
     {
         logger.LogInformation("Performing backup for {DatabaseName}", serverConnection.DbName);
 
+        var fileName = $"{DateTime.Now:yyyy.MM.dd.HH.mm}.sql";
+        var backupPath = serverConfig.CreateBackupPath(serverConnection, fileName);
+        
         try
         {
-            var fileName = $"{DateTime.Now:yyyy.MM.dd.HH.mm}.sql";
-            var backupPath = serverConfig.CreateBackupPath(serverConnection, fileName);
-            
             var server = $"{serverConnection.ServerHost}:{serverConnection.ServerPort}";
 
             var userFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
@@ -97,6 +97,10 @@ public sealed class PostgreSqlDatabase(
         catch (Exception e)
         {
             logger.LogWarning(e, e.Message);
+            
+            if (File.Exists(backupPath.FullFilePath))
+                File.Delete(backupPath.FullFilePath);
+            
             throw;
         }
     }

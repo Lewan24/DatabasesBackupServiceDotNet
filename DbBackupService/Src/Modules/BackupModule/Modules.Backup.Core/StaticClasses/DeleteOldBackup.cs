@@ -1,16 +1,18 @@
+using System.Globalization;
 using System.Text.RegularExpressions;
-using NLog;
+using Microsoft.Extensions.Logging;
 
 namespace Modules.Backup.Core.StaticClasses;
 
 public static class DeleteOldBackup
 {
-    public static Task Delete(string directoryPath, int daysThreshold)
+    public static Task Delete(string directoryPath, int daysThreshold, ILogger logger)
     {
         try
         {
             var zipFiles = Directory.GetFiles(directoryPath, "*.zip");
-
+            int deleted = 0;
+            
             foreach (var zipFile in zipFiles)
             {
                 var fileName = Path.GetFileNameWithoutExtension(zipFile);
@@ -19,20 +21,23 @@ public static class DeleteOldBackup
                 if (!match.Success) 
                     continue;
                 
-                var backupDateTime = DateTime.Parse(match.Value);
+                var backupDateTime = DateTime.ParseExact(match.Value, "yyyy.MM.dd.HH.mm", CultureInfo.InvariantCulture);
 
-                var difference = DateTime.Now - backupDateTime;
+                var timeDifference = DateTime.Now - backupDateTime;
 
-                if (difference.TotalDays < daysThreshold)
+                if (timeDifference.TotalDays < daysThreshold)
                     continue;
 
                 File.Delete(zipFile);
+                deleted++;
             }
-
+            
+            logger.LogInformation("Successfully deleted [{DeletedFilesCount}] old backups.", deleted);
             return Task.CompletedTask;
         }
         catch (Exception e)
         {
+            logger.LogWarning(e, "Failed to delete old backups [{ErrorMsg}]", e.Message);
             return Task.CompletedTask;
         }
     }

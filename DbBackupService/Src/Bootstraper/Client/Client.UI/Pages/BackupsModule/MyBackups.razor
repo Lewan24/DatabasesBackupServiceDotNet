@@ -1,35 +1,53 @@
 ﻿@page "/backups"
 
 @using Client.UI.Data.Services
+@using Microsoft.AspNetCore.SignalR.Client
 @using Modules.Backup.Shared.Dtos
+@using Modules.Backup.Shared.Hubs
 
 @inject AuthStateProvider Auth
+@inject BackupsHttpClientService Service
+@inject ISnackbar Snackbar
+@inject NavigationManager Nav
+
+@implements IDisposable
 
 <PageTitle>Backups</PageTitle>
 
 <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="pa-6">
-    <MudText Typo="Typo.h4" Color="Color.Primary" Class="mb-6">Podgląd backupów</MudText>
+    <MudText Typo="Typo.h4" Color="Color.Primary" Class="mb-6">My Backups</MudText>
 
     <MudPaper Class="pa-4 mud-elevation-2 rounded-2xl">
-        <MudStack Row="true" JustifyContent="SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
-            <MudText Typo="Typo.h6">Lista wykonanych backupów</MudText>
+        <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
+            <MudText Typo="Typo.h6">Backups list</MudText>
             <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add">
-                Nowy backup
+                New backup
             </MudButton>
         </MudStack>
 
         <MudTable Items="@_backups" Hover="true" Dense="true">
             <HeaderContent>
-                <MudTh>Nazwa</MudTh>
-                <MudTh><MudTableSortLabel InitialDirection="SortDirection.Descending" SortBy="new Func<PerformedBackupDto, object>(x => x.CreatedOn)">Utworzono</MudTableSortLabel></MudTh>
-                <MudTh>Plik</MudTh>
-                <MudTh><MudTableSortLabel SortBy="new Func<PerformedBackupDto, object>(x => x.Test?.IsSuccess)">Status testu</MudTableSortLabel></MudTh>
-                <MudTh>Akcje</MudTh>
+                <MudTh><MudTableSortLabel SortBy="new Func<PerformedBackupDto, object>(x => x.Name)">Name</MudTableSortLabel></MudTh>
+                <MudTh><MudTableSortLabel InitialDirection="SortDirection.Descending" SortBy="new Func<PerformedBackupDto, object>(x => x.CreatedOn)">Created on</MudTableSortLabel></MudTh>
+                <MudTh>File Location</MudTh>
+                <MudTh><MudTableSortLabel SortBy="new Func<PerformedBackupDto, object>(x => x.Test?.IsSuccess)">Test Status</MudTableSortLabel></MudTh>
+                <MudTh>Operations</MudTh>
             </HeaderContent>
             <RowTemplate>
                 <MudTd>@context.Name</MudTd>
                 <MudTd>@context.CreatedOn.ToString("g")</MudTd>
-                <MudTd>@context.FilePath</MudTd>
+                <MudTd>
+                    @if (context.FilePath?.Length >= 50)
+                    {
+                        <MudTooltip Delay="100" Text="@context.FilePath">
+                            <span>@context.FilePath.Substring(0, 50)...</span>
+                        </MudTooltip>
+                    }
+                    else
+                    {
+                        <span>@context.FilePath</span>
+                    }
+                </MudTd>
                 @{
                     <MudTd>
                         @if (context.Test is not null)
@@ -41,13 +59,13 @@
                             else
                             {
                                 <MudTooltip Text="@context.Test.ErrorMessage" Delay="100">
-                                    <MudChip T="string" Color="Color.Error" Variant="Variant.Filled">Błąd</MudChip>
+                                    <MudChip T="string" Color="Color.Error" Variant="Variant.Filled">Error</MudChip>
                                 </MudTooltip>
                             }
                         }
                         else
                         {
-                            <MudChip T="string" Color="Color.Info" Variant="Variant.Outlined">Nie testowano</MudChip>
+                            <MudChip T="string" Color="Color.Info" Variant="Variant.Outlined">Not Tested</MudChip>
                         }
                     </MudTd>
                     
@@ -57,15 +75,15 @@
                             @switch (context.Test?.IsSuccess)
                             {
                                 case true:
-                                    <span>Poprawnie przetestowano</span>
+                                    <span>Successful Test</span>
                                     break;
                                     
                                 case false:
-                                    <span>Ponów test</span>
+                                    <span>Retry Test</span>
                                     break;
                                     
                                 default:
-                                    <span>Testuj backup</span>
+                                    <span>Perform Test</span>
                                     break;
                             }
                         </MudButton>
@@ -81,17 +99,42 @@
 </MudContainer>
 
 @code {
-    private List<PerformedBackupDto> _backups = new()
-    {
-        new() { Test = new BackupTestDto{IsSuccess = true, TestedOn = DateTime.Now}, Name = "Daily app backup", CreatedOn = DateTime.Now.AddDays(-1), FilePath = "/backups/db1.sql" },
-        new() { Test = new BackupTestDto{IsSuccess = false, TestedOn = DateTime.Now.AddDays(-2), ErrorMessage = "Can't connect to server"}, Name = "Daily localhost", CreatedOn = DateTime.Now.AddDays(-4), FilePath = "/backups/db2.sql" },
-        new() { Name = "Daily Domain", CreatedOn = DateTime.Now.AddDays(-16), FilePath = "/backups/db3.sql" },
-        new() { Test = new BackupTestDto{IsSuccess = true, TestedOn = DateTime.Now.AddDays(-11)}, Name = "Daily Test", CreatedOn = DateTime.Now.AddDays(-12), FilePath = "/backups/db4.sql" }
-    };
-
+    private List<PerformedBackupDto> _backups = new();
+    private HubConnection? _hubConnection;
+    
     protected override async Task OnInitializedAsync()
     {
-        await Auth.AuthorizeUser(returnPageAfterValidPasswordAuthorization: "backups");
+        if (string.IsNullOrWhiteSpace(
+                await Auth.AuthorizeUser(returnPageAfterValidPasswordAuthorization: "backups")))
+            return;
+
+        await FetchBackups();
+        
+        _hubConnection = BackupHubHelper.GetBasicHubConnection(Nav.ToAbsoluteUri(BackupHubHelper.HubUrl));
+        
+        _hubConnection.On<Guid>(BackupHubHelper.Events.ServerHasChangedEvent.ToString(), (id) =>
+        {
+            if (_backups.FirstOrDefault(x => x.ServerConnectionId == id) is not null)
+                InvokeAsync(FetchBackups);
+        });
+
+        await _hubConnection.StartAsync();
+    }
+    
+    private async Task FetchBackups()
+    {
+        var getBackupsResult = await Service.GetAllBackupsAsync();
+        getBackupsResult.Switch(
+            list => _backups = list,
+            error => Snackbar.Add(error, Severity.Error)
+        );
+
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        _hubConnection?.DisposeAsync();
     }
 
 }

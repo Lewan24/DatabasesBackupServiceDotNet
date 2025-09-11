@@ -18,11 +18,11 @@
 <PageTitle>Servers</PageTitle>
 
 <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="pa-6">
-    <MudText Typo="Typo.h4" Color="Color.Primary" Class="mb-6">Moje serwery</MudText>
+    <MudText Typo="Typo.h4" Color="Color.Primary" Class="mb-6">My Servers</MudText>
 
     <MudPaper Class="pa-4 mud-elevation-2 rounded-2xl">
-        <MudStack Row="true" Class="mb-4">
-            <MudText Typo="Typo.h6">Lista serwerów</MudText>
+        <MudStack Justify="Justify.SpaceBetween" Row="true" Class="mb-4">
+            <MudText Typo="Typo.h6">Servers list</MudText>
             <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add"
                        Disabled="@_isProcessing" OnClick="OpenCreateNewServerDialog">Add server</MudButton>
         </MudStack>

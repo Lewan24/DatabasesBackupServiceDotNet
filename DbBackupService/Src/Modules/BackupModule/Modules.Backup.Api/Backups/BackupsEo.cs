@@ -45,10 +45,16 @@ internal static class BackupsEndpoints
 
 internal abstract record BackupsOperations
 {
-    public static Task<IResult> GetAllBackups(
-        HttpContext context)
+    public static async Task<IResult> GetAllBackups(
+        HttpContext context,
+        [FromServices] IDbBackupService service)
     {
-        return Task.FromResult<IResult>(TypedResults.Ok(new List<PerformedBackupDto>()));
+        var result = await service.GetAllBackups(context.User.Identity?.Name);
+        
+        return result.Match<IResult>(
+            TypedResults.Ok,
+            TypedResults.BadRequest
+        );
     }
     
     public static Task<IResult> GetBackups(

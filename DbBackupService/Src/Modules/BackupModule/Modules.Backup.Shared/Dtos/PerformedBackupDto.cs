@@ -6,6 +6,6 @@ public class PerformedBackupDto
     public string? Name { get; set; }
     public DateTime CreatedOn { get; set; }
     public BackupTestDto? Test { get; set; }
-    public Guid ServerConnectionId { get; set; }
+    public Guid? ServerConnectionId { get; set; }
     public string? FilePath { get; set; }
 }

@@ -1,10 +1,15 @@
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Modules.Auth.Core.Entities;
+using Modules.Auth.Shared.Static.Entities;
 using Modules.Backup.Application.Interfaces;
 using Modules.Backup.Core.Entities.Databases;
 using Modules.Backup.Core.Entities.DbContext;
 using Modules.Backup.Core.Interfaces;
 using Modules.Backup.Core.StaticClasses;
 using Modules.Backup.Infrastructure.DbContexts;
+using Modules.Backup.Shared.Dtos;
 using Modules.Backup.Shared.Enums;
 using OneOf;
 using OneOf.Types;
@@ -13,6 +18,7 @@ namespace Modules.Backup.Application.Services;
 
 internal sealed class DbBackupService(
     BackupsDbContext dbContext,
+    UserManager<AppUser> userManager,
     ILogger<DbBackupService> logger)
     : IDbBackupService
 {
@@ -65,7 +71,7 @@ internal sealed class DbBackupService(
         
         return new Success();
     }
-    
+
     private async Task PerformBackup(List<DbServerConnection> serversConnections)
     {
         try
@@ -89,7 +95,6 @@ internal sealed class DbBackupService(
                 try
                 {
                     // TODO: implement removing db entries on successful clearing old backups
-                    // TODO: implement adding backup entry to db after successful backup
                     var serverConfig = dbContext.Configurations.FirstOrDefault(x => x.ServerId == db.GetServerId());
                     if (serverConfig is null)
                     {
@@ -98,10 +103,26 @@ internal sealed class DbBackupService(
                     }
                     
                     var backupPath = serverConfig.CreateBackupPath(db.GetServerConnection(), null);
-                    await DeleteOldBackup.Delete(backupPath.DirectoryPath, serverConfig.TimeInDaysToHoldBackups);
+                    await DeleteOldBackup.Delete(backupPath.DirectoryPath, serverConfig.TimeInDaysToHoldBackups, logger);
+
+                    var serverConn = db.GetServerConnection();
+                    var newDbBackup = new PerformedBackup
+                    {
+                        Id = Guid.CreateVersion7(),
+                        CreatedOn = DateTime.Now,
+                        ServerConnectionId = db.GetServerId(),
+                        Name = $"{serverConn.ServerHost}:{serverConn.ServerPort}_{serverConn.DbName}",
+                        FilePath = ""
+                    };
                     
                     var createdFileName = await db.PerformBackup(serverConfig);
+                    newDbBackup.FilePath = Path.Combine(backupPath.DirectoryPath, createdFileName);
+                    
                     var compressedFilename = CompressBackupFile.Perform(backupPath.DirectoryPath, createdFileName);
+                    
+                    dbContext.Backups.Add(newDbBackup);
+                    await dbContext.SaveChangesAsync();
+                    
                     logger.LogInformation("Successfully created and compressed backup: [{Database}], [{ZipFile}]", db.GetDatabaseName(), compressedFilename);
                 }
                 catch (Exception e)
@@ -113,5 +134,90 @@ internal sealed class DbBackupService(
         {
             logger.LogWarning(e, "Exception thrown while preparing databases");
         }
+    }
+    
+    public async Task<OneOf<List<PerformedBackupDto>, string>> GetAllBackups(string? identityName)
+    {
+        if (string.IsNullOrWhiteSpace(identityName))
+            return "Can't access user name";
+        
+        var user = await userManager.FindByNameAsync(identityName);
+        if (user is null)
+            return "Can't find user";
+        
+        var isAdmin = await userManager.IsInRoleAsync(user, AppRoles.Admin);
+
+        List<DbServerConnection> dbServers;
+
+        if (!isAdmin)
+        {
+            var userServers = dbContext.UsersServers
+                .AsNoTracking()
+                .Where(x => x.UserId == Guid.Parse(user.Id))
+                .Select(x => x.ServerId)
+                .ToList();
+
+            if (userServers.Count == 0)
+                return new List<PerformedBackupDto>();
+        
+            dbServers = dbContext.DbConnections
+                .AsNoTracking()
+                .Where(x => userServers.Contains(x.Id))
+                .ToList();
+            
+            dbServers.RemoveAll(x => x.IsDisabled);
+        }
+        else
+        {
+            dbServers = dbContext.DbConnections
+                .AsNoTracking()
+                .ToList();
+        }
+
+        var backups = new List<PerformedBackupDto>();
+
+        if (isAdmin)
+            return dbContext.Backups
+                .AsNoTracking()
+                .Select(x => new PerformedBackupDto
+                {
+                    Id = x.Id, 
+                    CreatedOn = x.CreatedOn, 
+                    FilePath = x.FilePath, 
+                    Name = x.Name, 
+                    ServerConnectionId = x.ServerConnectionId,
+                    Test = dbContext.BackupsTests.AsNoTracking().Where(y => y.BackupId == x.Id).Select(y => new BackupTestDto
+                    {
+                        Id = y.Id, 
+                        ErrorMessage = y.ErrorMessage, 
+                        IsSuccess = y.IsSuccess,
+                        TestedOn = y.TestedOn
+                    }).FirstOrDefault()
+                }).ToList();
+
+        foreach (var server in dbServers)
+        {
+            backups.AddRange(dbContext.Backups
+                .AsNoTracking()
+                .Where(x => x.ServerConnectionId == server.Id)
+                .Select(x => new PerformedBackupDto
+                {
+                    Id = x.Id,
+                    CreatedOn = x.CreatedOn,
+                    FilePath = x.FilePath,
+                    Name = x.Name,
+                    ServerConnectionId = x.ServerConnectionId,
+                    Test = dbContext.BackupsTests.AsNoTracking().Where(y => y.BackupId == x.Id).Select(y =>
+                        new BackupTestDto
+                        {
+                            Id = y.Id,
+                            ErrorMessage = y.ErrorMessage,
+                            IsSuccess = y.IsSuccess,
+                            TestedOn = y.TestedOn
+                        }).FirstOrDefault()
+                }));
+        }
+        
+        return backups;
     }
 }

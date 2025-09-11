@@ -1,3 +1,4 @@
+using Modules.Backup.Shared.Dtos;
 using OneOf;
 using OneOf.Types;
 
@@ -7,4 +8,5 @@ public interface IDbBackupService
 {
     Task<OneOf<Success, string>> BackupFromSchedules();
     Task<OneOf<Success, string>> BackupDb(Guid serverId);
+    Task<OneOf<List<PerformedBackupDto>, string>> GetAllBackups(string? identityName);
 }

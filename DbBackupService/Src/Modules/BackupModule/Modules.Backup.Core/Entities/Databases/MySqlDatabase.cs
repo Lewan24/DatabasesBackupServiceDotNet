@@ -15,6 +15,9 @@ public sealed class MySqlDatabase(
     {
         logger.LogInformation("Performing backup for {DatabaseName}", serverConnection.DbName);
 
+        var fileName = $"{DateTime.Now:yyyy.MM.dd.HH.mm}.sql";
+        var backupPath = serverConfig.CreateBackupPath(serverConnection, fileName);
+        
         try
         {
             var connectionString = PrepareConnectionString(serverConnection);
@@ -26,9 +29,6 @@ public sealed class MySqlDatabase(
             cmd.Connection = connection;
             connection.Open();
             
-            var fileName = $"{DateTime.Now:yyyy.MM.dd.HH.mm}.sql";
-            var backupPath = serverConfig.CreateBackupPath(serverConnection, fileName);
-            
             backup.ExportToFile(backupPath.FullFilePath);
             await connection.CloseAsync();
 
@@ -37,6 +37,10 @@ public sealed class MySqlDatabase(
         catch (Exception e)
         {
             logger.LogError(e, "Error while performing backup for {DatabaseName}", serverConnection.DbName);
+            
+            if (File.Exists(backupPath.FullFilePath))
+                File.Delete(backupPath.FullFilePath);
+            
             throw;
         }
     }

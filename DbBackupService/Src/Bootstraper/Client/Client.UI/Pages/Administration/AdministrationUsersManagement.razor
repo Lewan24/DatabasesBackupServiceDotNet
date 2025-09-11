@@ -13,14 +13,14 @@
 <PageTitle>Manage Users</PageTitle>
 
 <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="pa-6">
-    <MudText Typo="Typo.h4" Color="Color.Primary" Class="mb-6">Zarządzanie użytkownikami</MudText>
+    <MudText Typo="Typo.h4" Color="Color.Primary" Class="mb-6">Users management</MudText>
 
     <MudPaper Class="pa-4 mud-elevation-2 rounded-2xl">
-        <MudStack Row="true" JustifyContent="SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
-            <MudText Typo="Typo.h6">Lista użytkowników</MudText>
+        <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
+            <MudText Typo="Typo.h6">Users list</MudText>
             <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.PersonAdd"
                        OnClick="OpenCreateNewUserDialog" Disabled="@_isProcessing">
-                Dodaj użytkownika
+                Add new user
             </MudButton>
         </MudStack>
 
@@ -30,7 +30,7 @@
                 <MudTh>Email</MudTh>
                 <MudTh>Blocked</MudTh>
                 <MudTh>Email Status</MudTh>
-                <MudTh>Role</MudTh>
+                <MudTh>Roles</MudTh>
                 <MudTh>Akcje</MudTh>
             </HeaderContent>
             <RowTemplate>
@@ -38,18 +38,18 @@
                 <MudTd DataLabel="Blocked">
                     @if (!context.IsBlocked)
                     {
-                        <MudButton Variant="Variant.Filled" Color="Color.Error" Size="Size.Small"
+                        <MudButton Variant="Variant.Filled" Color="Color.Success" Size="Size.Small"
                                    StartIcon="@Icons.Material.Filled.Block"
                                    OnClick="@(() => ToggleBlock(context.Id.ToString()))" Disabled="@_isProcessing">
-                            Zablokuj
+                            Block
                         </MudButton>
                     }
                     else
                     {
-                        <MudButton Variant="Variant.Filled" Color="Color.Success" Size="Size.Small"
+                        <MudButton Variant="Variant.Filled" Color="Color.Error" Size="Size.Small"
                                    StartIcon="@Icons.Material.Filled.LockOpen"
                                    OnClick="@(() => ToggleBlock(context.Id.ToString()))" Disabled="@_isProcessing">
-                            Odblokuj
+                            Unblock
                         </MudButton>
                     }
                 </MudTd>
