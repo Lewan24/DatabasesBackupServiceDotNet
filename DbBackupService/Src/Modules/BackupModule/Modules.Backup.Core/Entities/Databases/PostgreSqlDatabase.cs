@@ -2,7 +2,6 @@ using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 using Modules.Backup.Core.Entities.DbContext;
 using Modules.Backup.Core.Interfaces;
-using Modules.Backup.Core.StaticClasses;
 
 namespace Modules.Backup.Core.Entities.Databases;
 
@@ -11,16 +10,15 @@ public sealed class PostgreSqlDatabase(
     ILogger logger)
     : IDatabase
 {
-    public async Task PerformBackup(ServerBackupsConfiguration serverConfig)
+    public async Task<string> PerformBackup(ServerBackupsConfiguration serverConfig)
     {
         logger.LogInformation("Performing backup for {DatabaseName}", serverConnection.DbName);
 
         try
         {
-            var backupPaths = BackupDirectories.CheckDbNameAndPrepareBackupPaths(serverConnection, appConfig);
-            var combinedBackupPathBackupFile =
-                await BackupDirectories.PrepareNeededDirectoryAndClean(backupPaths, appConfig, logger);
-
+            var fileName = $"{DateTime.Now:yyyy.MM.dd.HH.mm}.sql";
+            var backupPath = serverConfig.CreateBackupPath(serverConnection, fileName);
+            
             var server = $"{serverConnection.ServerHost}:{serverConnection.ServerPort}";
 
             var userFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
@@ -75,7 +73,7 @@ public sealed class PostgreSqlDatabase(
                 {
                     FileName = "pg_dump",
                     Arguments =
-                        $@"-h {serverConnection.ServerHost} -p {serverConnection.ServerPort} -U {serverConnection.DbUser} -F c -b -v -f {combinedBackupPathBackupFile} {serverConnection.DbName}",
+                        $@"-h {serverConnection.ServerHost} -p {serverConnection.ServerPort} -U {serverConnection.DbUser} -F c -b -v -f {backupPath.FullFilePath} {serverConnection.DbName}",
                     RedirectStandardError = true,
                     CreateNoWindow = true,
                     UseShellExecute = false
@@ -94,11 +92,7 @@ public sealed class PostgreSqlDatabase(
 
             await File.WriteAllTextAsync(pgPassFilePath, "Cleaned");
 
-            logger.LogInformation("Performing backup compression...");
-            var compressionResult =
-                CompressBackupFile.Perform(backupPaths.DatabaseBackupPath, backupPaths.BackupFileName);
-            logger.LogInformation("Completed backup for {DatabaseName}. Backup path: {ZipFilePath}", serverConnection.DbName,
-                compressionResult);
+            return fileName;
         }
         catch (Exception e)
         {
@@ -112,4 +106,7 @@ public sealed class PostgreSqlDatabase(
 
     public Guid GetServerId()
         => serverConnection.Id;
+
+    public DbServerConnection GetServerConnection()
+        => serverConnection;
 }

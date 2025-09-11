@@ -10,16 +10,25 @@ public sealed class ServerBackupsConfiguration
     [NotMapped]
     public string BackupSaveDirectory { get; set; } = "/backups";
 
-    public (string Path, string FileName) GetBackupPathAndBackupFileName(DbServerConnection server, string? fileName)
+    /// <summary>
+    /// Create required directories for provided server and database
+    /// </summary>
+    /// <param name="server"><see cref="DbServerConnection"/></param>
+    /// <param name="fileName">Target backup filename</param>
+    /// <returns>Returns base directory path for backup and full path with file name included. Full path will be null if file name is not provided</returns>
+    public (string DirectoryPath, string? FullFilePath) CreateBackupPath(DbServerConnection server, string? fileName)
     {
-        var date = $"{DateTime.Now:yyyyMMddHHmm}";
+        if (!Directory.Exists(BackupSaveDirectory))
+            Directory.CreateDirectory(BackupSaveDirectory);
 
-        if (!string.IsNullOrWhiteSpace(fileName))
-            date = fileName;
-            
-        var path =
-            $"{BackupSaveDirectory}/{server.ServerHost}:{server.ServerPort}/:{server.DbName}/{date}";
-
-        return (path, date);
+        var serverPath = Path.Combine(BackupSaveDirectory, $"{server.ServerHost}:{server.ServerPort}");
+        if (!Directory.Exists(serverPath))
+            Directory.CreateDirectory(serverPath);
+        
+        var dbPath = Path.Combine(serverPath, server.DbName);
+        if (!Directory.Exists(dbPath))
+            Directory.CreateDirectory(dbPath);
+        
+        return (dbPath, string.IsNullOrWhiteSpace(fileName) ? null : Path.Combine(dbPath, fileName));
     }
 }

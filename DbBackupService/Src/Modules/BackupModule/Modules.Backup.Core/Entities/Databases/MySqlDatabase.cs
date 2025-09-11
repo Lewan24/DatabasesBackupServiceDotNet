@@ -17,7 +17,7 @@ public sealed class MySqlDatabase(
 
         try
         {
-            var connectionString = DatabaseBackupStrings.PrepareConnectionString(serverConnection);
+            var connectionString = PrepareConnectionString(serverConnection);
 
             await using var connection = new MySqlConnection(connectionString);
             await using var cmd = new MySqlCommand();
@@ -25,20 +25,14 @@ public sealed class MySqlDatabase(
 
             cmd.Connection = connection;
             connection.Open();
-
-            var backupPathFileName = serverConfig.GetBackupPathAndBackupFileName(serverConnection);
             
-            backup.ExportToFile(backupPathFileName.Path);
+            var fileName = $"{DateTime.Now:yyyy.MM.dd.HH.mm}.sql";
+            var backupPath = serverConfig.CreateBackupPath(serverConnection, fileName);
+            
+            backup.ExportToFile(backupPath.FullFilePath);
             await connection.CloseAsync();
-            
-            // todo: move compressing to service
-            logger.LogInformation("Performing backup compression...");
-            var compressionResult =
-                CompressBackupFile.Perform(backupPaths.DatabaseBackupPath, backupPaths.BackupFileName);
-            logger.LogInformation("Completed backup for {DatabaseName}. Backup path: {ZipFilePath}", serverConnection.DbName,
-                compressionResult);
 
-            return backupPathFileName.FileName;
+            return fileName;
         }
         catch (Exception e)
         {
@@ -47,9 +41,20 @@ public sealed class MySqlDatabase(
         }
     }
 
+    private string PrepareConnectionString(DbServerConnection configuration)
+    {
+        var connectionString =
+            $"Server={configuration.ServerHost};Port={configuration.ServerPort};Database={configuration.DbName};Uid={configuration.DbUser};Pwd={configuration.DbPasswd};";
+
+        return connectionString;
+    }
+    
     public string GetDatabaseName() 
         => serverConnection.DbName;
 
     public Guid GetServerId()
         => serverConnection.Id;
+
+    public DbServerConnection GetServerConnection()
+        => serverConnection;
 }

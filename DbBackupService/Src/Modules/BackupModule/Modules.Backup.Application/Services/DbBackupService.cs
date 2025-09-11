@@ -3,6 +3,7 @@ using Modules.Backup.Application.Interfaces;
 using Modules.Backup.Core.Entities.Databases;
 using Modules.Backup.Core.Entities.DbContext;
 using Modules.Backup.Core.Interfaces;
+using Modules.Backup.Core.StaticClasses;
 using Modules.Backup.Infrastructure.DbContexts;
 using Modules.Backup.Shared.Enums;
 
@@ -44,9 +45,7 @@ internal sealed class DbBackupService(
             foreach (var db in databasesList)
                 try
                 {
-                    // TODO: implement cleaning old backups here
                     // TODO: implement removing db entries on successful clearing old backups
-                    // TODO: move compressing here
                     // TODO: implement adding backup entry to db after successful backup
                     var serverConfig = dbContext.Configurations.FirstOrDefault(x => x.ServerId == db.GetServerId());
                     if (serverConfig is null)
@@ -54,7 +53,13 @@ internal sealed class DbBackupService(
                         logger.LogWarning("Can't find any backups configuration for server {ServerId}", db.GetServerId());
                         continue;
                     }
-                    await db.PerformBackup(serverConfig);
+                    
+                    var backupPath = serverConfig.CreateBackupPath(db.GetServerConnection(), null);
+                    await DeleteOldBackup.Delete(backupPath.DirectoryPath, serverConfig.TimeInDaysToHoldBackups);
+                    
+                    var createdFileName = await db.PerformBackup(serverConfig);
+                    var compressedFilename = CompressBackupFile.Perform(backupPath.DirectoryPath, createdFileName);
+                    logger.LogInformation("Successfully created and compressed backup: [{Database}], [{ZipFile}]", db.GetDatabaseName(), compressedFilename);
                 }
                 catch (Exception e)
                 {
