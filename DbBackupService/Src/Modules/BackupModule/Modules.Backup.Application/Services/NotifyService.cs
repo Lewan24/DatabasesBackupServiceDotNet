@@ -21,6 +21,9 @@ public class NotifyService(
     public async Task CallScheduleHasChangedEvent(Guid id)
         => await CallEvent(nameof(BackupHub.CallScheduleChangedEvent), id);
 
+    public async Task CallBackupCreatedEvent(string userName)
+        => await CallEvent(nameof(BackupHub.CallBackupCreatedEvent), userName);
+    
     private async Task CallEvent<T>(string eventName, T data)
     {
         logger.LogInformation("Sending event [{EventName}] to BackupHub with data: {@data}", eventName, data);

@@ -16,6 +16,9 @@ public class BackupHub : Hub
     
     public async Task CallScheduleChangedEvent(Guid id)
         => await Clients.All.SendAsync(BackupHubHelper.Events.ScheduleHasChangedEvent.ToString(), id);
+    
+    public async Task CallBackupCreatedEvent(string userName)
+        => await Clients.All.SendAsync(BackupHubHelper.Events.BackupCreatedEvent.ToString(), userName);
 }
 
 public static class BackupHubHelper
@@ -27,7 +30,8 @@ public static class BackupHubHelper
         ServerCreatedEvent,
         ServerHasChangedEvent,
         ScheduleCreatedEvent,
-        ScheduleHasChangedEvent
+        ScheduleHasChangedEvent,
+        BackupCreatedEvent
     }
     
     public static HubConnection GetBasicHubConnection(Uri hubAbsoluteUrl)

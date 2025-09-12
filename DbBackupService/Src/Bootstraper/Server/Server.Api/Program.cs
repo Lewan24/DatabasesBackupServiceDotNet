@@ -9,6 +9,7 @@ using Modules.Auth.Api;
 using Modules.Auth.Core.Entities;
 using Modules.Auth.Infrastructure.DbContexts;
 using Modules.Backup.Api;
+using Modules.Backup.Application.Workers;
 using Modules.Backup.Infrastructure.DbContexts;
 using Modules.Backup.Shared.Hubs;
 using Modules.Shared.Common;
@@ -143,6 +144,8 @@ builder.Services.AddResponseCompression(opts =>
     opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
         ["application/octet-stream"]);
 });
+
+builder.Services.AddHostedService<BackupWorker>();
 
 var app = builder.Build();
 

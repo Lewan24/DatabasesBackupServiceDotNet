@@ -14,12 +14,15 @@ public static class BackupScheduleHelper
     }
 
     public static DateTime GetNextDateTime(BackupsScheduleDto schedule)
+        => GetNextDateTime(schedule.SelectedDays, schedule.SelectedTimes);
+    
+    public static DateTime GetNextDateTime(List<DayOfWeek> selectedDays, List<TimeOnly> selectedTimes)
     {
-        if (!schedule.SelectedDays.Any() || !schedule.SelectedTimes.Any())
+        if (!selectedDays.Any() || !selectedTimes.Any())
             return DateTime.Now.AddHours(1);
         
-        var candidates = schedule.SelectedDays
-            .SelectMany(d => schedule.SelectedTimes, (day, time) => GetNextDateTime(day, time, DateTime.Now))
+        var candidates = selectedDays
+            .SelectMany(d => selectedTimes, (day, time) => GetNextDateTime(day, time, DateTime.Now))
             .ToList();
 
         return candidates.Min();

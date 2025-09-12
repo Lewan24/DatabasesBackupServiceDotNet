@@ -72,7 +72,7 @@
                            Dense="true">
                     @for (int h = 0; h < 24; h++)
                     {
-                        for (int m = 0; m < 60; m += 30)
+                        for (int m = 0; m < 60; m += 15)
                         {
                             var time = new TimeOnly(h, m);
                             <MudSelectItem Value="@time">@time.ToString("HH:mm")</MudSelectItem>

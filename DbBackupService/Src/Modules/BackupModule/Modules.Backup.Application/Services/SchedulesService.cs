@@ -126,7 +126,8 @@ public sealed class SchedulesService(
             Days = schedule.SelectedDays,
             Times = schedule.SelectedTimes
         };
-
+        entity.NextBackupDate = BackupScheduleHelper.GetNextDateTime(schedule);
+        
         db.Schedules.Update(entity);
         await db.SaveChangesAsync();
 

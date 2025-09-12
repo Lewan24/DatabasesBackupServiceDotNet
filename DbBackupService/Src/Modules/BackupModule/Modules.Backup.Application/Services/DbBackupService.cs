@@ -11,6 +11,7 @@ using Modules.Backup.Core.StaticClasses;
 using Modules.Backup.Infrastructure.DbContexts;
 using Modules.Backup.Shared.Dtos;
 using Modules.Backup.Shared.Enums;
+using Modules.Backup.Shared.Helpers;
 using OneOf;
 using OneOf.Types;
 
@@ -18,7 +19,9 @@ namespace Modules.Backup.Application.Services;
 
 internal sealed class DbBackupService(
     BackupsDbContext dbContext,
+    ServersService serversService,
     UserManager<AppUser> userManager,
+    NotifyService notifyService,
     ILogger<DbBackupService> logger)
     : IDbBackupService
 {
@@ -45,10 +48,22 @@ internal sealed class DbBackupService(
             return "No servers assigned to schedules found.";
         }
         
+        var schedules = dbContext.Schedules
+            .Where(x => x.IsEnabled && DateTime.Now >= x.NextBackupDate);
+        foreach (var schedule in schedules)
+        {
+            var nextBackupDate = BackupScheduleHelper.GetNextDateTime(schedule.Configuration?.Days!, schedule.Configuration?.Times!);
+            schedule.NextBackupDate = nextBackupDate;
+        }
+        await dbContext.SaveChangesAsync();
+        
+        foreach (var schedule in schedules)
+            _ = notifyService.CallScheduleHasChangedEvent(schedule.Id);
+        
         logger.LogInformation("Preparing backups for {ServersCount} databases...", servers.Count);
 
         await PerformBackup(servers);
-
+        
         logger.LogInformation("{ServiceName} finished its job.", nameof(DbBackupService));
         
         return new Success();
@@ -122,10 +137,12 @@ internal sealed class DbBackupService(
                     var backupPath = serverConfig.CreateBackupPath(db.GetServerConnection(), null);
                     await DeleteOldBackup.Delete(backupPath.DirectoryPath, serverConfig.TimeInDaysToHoldBackups, logger);
 
-                    var serverActualBackups = 
-                        dbContext.Backups.Where(x => x.ServerConnectionId != null && 
-                                                     x.ServerConnectionId == db.GetServerId() &&
-                                                     (DateTime.Now - x.CreatedOn).Days > serverConfig.TimeInDaysToHoldBackups);
+                    var cutoffDate = DateTime.Now.AddDays(-serverConfig.TimeInDaysToHoldBackups);
+
+                    var serverActualBackups = dbContext.Backups
+                        .Where(x => x.ServerConnectionId != null &&
+                                    x.ServerConnectionId == db.GetServerId() &&
+                                    x.CreatedOn < cutoffDate);
                     if (serverActualBackups.Any())
                     {
                         dbContext.Backups.RemoveRange(serverActualBackups);
@@ -154,6 +171,17 @@ internal sealed class DbBackupService(
                     
                     dbContext.Backups.Add(newDbBackup);
                     await dbContext.SaveChangesAsync();
+
+                    var usersResult = await serversService.GetUsersThatAccessServer(db.GetServerId());
+                    
+                    usersResult.Switch(
+                        async void (users) =>
+                        {
+                            foreach (var user in users)
+                                await notifyService.CallBackupCreatedEvent(user);
+                        },
+                        error => logger.LogWarning(error)
+                    );
                     
                     if (!string.IsNullOrWhiteSpace(compressedFilename))
                         logger.LogInformation("Successfully created and compressed backup: [{Database}], [{ZipFile}]", db.GetDatabaseName(), compressedFilename);
