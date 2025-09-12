@@ -102,7 +102,6 @@ internal sealed class DbBackupService(
             foreach (var db in databasesList)
                 try
                 {
-                    // TODO: implement removing db entries on successful clearing old backups
                     var serverConfig = dbContext.Configurations.FirstOrDefault(x => x.ServerId == db.GetServerId());
                     if (serverConfig is null)
                     {
@@ -123,6 +122,18 @@ internal sealed class DbBackupService(
                     var backupPath = serverConfig.CreateBackupPath(db.GetServerConnection(), null);
                     await DeleteOldBackup.Delete(backupPath.DirectoryPath, serverConfig.TimeInDaysToHoldBackups, logger);
 
+                    var serverActualBackups = 
+                        dbContext.Backups.Where(x => x.ServerConnectionId != null && 
+                                                     x.ServerConnectionId == db.GetServerId() &&
+                                                     (DateTime.Now - x.CreatedOn).Days > serverConfig.TimeInDaysToHoldBackups);
+                    if (serverActualBackups.Any())
+                    {
+                        dbContext.Backups.RemoveRange(serverActualBackups);
+                        await dbContext.SaveChangesAsync();
+                        
+                        logger.LogInformation("Successfully cleaned [{DeletedCount}] old backups entries", serverActualBackups.Count());
+                    }
+                    
                     var serverConn = db.GetServerConnection();
                     var newDbBackup = new PerformedBackup
                     {
