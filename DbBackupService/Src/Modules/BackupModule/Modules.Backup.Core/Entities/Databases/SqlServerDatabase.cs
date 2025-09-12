@@ -1,55 +1,77 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.Diagnostics;
+using Microsoft.Extensions.Logging;
 using Microsoft.SqlServer.Management.Smo;
 using Microsoft.SqlServer.Management.Common;
 using Modules.Backup.Core.Entities.DbContext;
+using Modules.Backup.Core.StaticClasses;
 
 namespace Modules.Backup.Core.Entities.Databases;
 
-public sealed class SqlServerDatabase(DbServerConnection serverConnection, DbServerTunnel serverTunnel, ILogger logger)
-    : DatabaseBase(serverConnection, serverTunnel, logger)
+public sealed class SqlServerDatabase(
+    DbServerConnection serverConnection,
+    DbServerTunnel serverTunnel,
+    ILogger logger)
+    : DatabaseBase(serverConnection, serverTunnel, logger, ".bak")
 {
     private readonly DbServerConnection _serverConnection = serverConnection;
 
     protected override async Task PerformBackupInternal(string fullFilePath)
     {
-        var host = _serverConnection.IsTunnelRequired ? "127.0.0.1" : _serverConnection.ServerHost;
-        var port = _serverConnection.IsTunnelRequired ? serverTunnel.LocalPort : _serverConnection.ServerPort;
+        if (ToolChecker.IsToolAvailable("sqlcmd"))
+            await PerformBackupWithSqlCmd(fullFilePath);
+        else
+            await PerformBackupWithSmo(fullFilePath);
+    }
 
-        await Task.Run(() =>
+    private async Task PerformBackupWithSqlCmd(string fullFilePath)
+    {
+        var hostPort = GetHostAndPort();
+        var args = $"-S {hostPort.Host},{hostPort.Port} -U {_serverConnection.DbUser} -P {_serverConnection.DbPasswd} " +
+                   $"-Q \"BACKUP DATABASE [{_serverConnection.DbName}] TO DISK='{fullFilePath}' WITH INIT\"";
+
+        var process = new Process
         {
-            try
+            StartInfo = new ProcessStartInfo
             {
-                var serverName = _serverConnection.IsTunnelRequired
-                    ? $"127.0.0.1,{serverTunnel.LocalPort}"
-                    : $"{_serverConnection.ServerHost},{_serverConnection.ServerPort}";
-
-                var connection = new ServerConnection(serverName, _serverConnection.DbUser, _serverConnection.DbPasswd)
-                {
-                    LoginSecure = false,
-                    StatementTimeout = 0
-                };
-
-                var server = new Server(connection);
-                var db = server.Databases[_serverConnection.DbName];
-
-                if (db == null)
-                    throw new Exception($"Database '{_serverConnection.DbName}' not found on server '{host}:{port}'");
-
-                var backup = new Microsoft.SqlServer.Management.Smo.Backup
-                {
-                    Database = db.Name,
-                    Action = BackupActionType.Database,
-                    Initialize = true
-                };
-
-                backup.Devices.AddDevice(fullFilePath, DeviceType.File);
-                backup.SqlBackup(server);
+                FileName = "sqlcmd",
+                Arguments = args,
+                RedirectStandardError = true,
+                RedirectStandardOutput = true,
+                UseShellExecute = false,
+                CreateNoWindow = true,
             }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "Error while performing MSSQL backup for {DatabaseName}", _serverConnection.DbName);
-                throw;
-            }
-        });
+        };
+
+        process.Start();
+        var error = await process.StandardError.ReadToEndAsync();
+        await process.WaitForExitAsync();
+
+        if (process.ExitCode != 0)
+            throw new Exception($"sqlcmd failed: {error}");
+    }
+
+    private async Task PerformBackupWithSmo(string fullFilePath)
+    {
+        var hostPort = GetHostAndPort();
+        var connStr = $"Data Source={hostPort.Host},{hostPort.Port};" +
+                      $"Initial Catalog={_serverConnection.DbName};" +
+                      $"User ID={_serverConnection.DbUser};" +
+                      $"Password={_serverConnection.DbPasswd};" +
+                      $"Encrypt=True;TrustServerCertificate=True;";
+        
+        var sqlConn = new Microsoft.Data.SqlClient.SqlConnection(connStr);
+        var serverConn = new ServerConnection(sqlConn);
+        var server = new Server(serverConn);
+
+        var backup = new Microsoft.SqlServer.Management.Smo.Backup
+        {
+            Action = BackupActionType.Database,
+            Database = _serverConnection.DbName
+        };
+
+        backup.Devices.AddDevice(fullFilePath, DeviceType.File);
+        backup.Initialize = true;
+
+        await Task.Run(() => backup.SqlBackup(server));
     }
 }

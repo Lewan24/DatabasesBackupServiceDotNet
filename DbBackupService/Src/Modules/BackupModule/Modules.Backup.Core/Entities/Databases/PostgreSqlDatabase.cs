@@ -1,78 +1,105 @@
 using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 using Modules.Backup.Core.Entities.DbContext;
+using Modules.Backup.Core.StaticClasses;
+using Npgsql;
 
 namespace Modules.Backup.Core.Entities.Databases;
 
-public sealed class PostgreSqlDatabase(DbServerConnection serverConnection, DbServerTunnel serverTunnel, ILogger logger)
-    : DatabaseBase(serverConnection, serverTunnel, logger)
+public sealed class PostgreSqlDatabase : DatabaseBase
 {
-    private readonly DbServerConnection _serverConnection = serverConnection;
+    private readonly DbServerConnection _serverConnection;
+    private readonly ILogger _logger;
 
+    public PostgreSqlDatabase(
+        DbServerConnection serverConnection, 
+        DbServerTunnel serverTunnel, 
+        ILogger logger) : base(serverConnection, serverTunnel, logger, null)
+    {
+        _serverConnection = serverConnection;
+        _logger = logger;
+
+        if (!ToolChecker.IsToolAvailable("pg_dump"))
+            BackupExtension = ".csv";
+    }
+    
     protected override async Task PerformBackupInternal(string fullFilePath)
     {
-        var host = _serverConnection.IsTunnelRequired ? "127.0.0.1" : _serverConnection.ServerHost;
-        var port = _serverConnection.IsTunnelRequired ? serverTunnel.LocalPort : _serverConnection.ServerPort;
-        
-        var server = $"{host}:{port}";
-        var userFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-        string pgPassFilePath;
-
-        var isLinux = Environment.OSVersion.Platform == PlatformID.Unix ||
-                      Environment.OSVersion.Platform == PlatformID.MacOSX;
-
-        if (isLinux)
-        {
-            pgPassFilePath = Path.Combine(userFolderPath, ".pgpass");
-        }
+        if (ToolChecker.IsToolAvailable("pg_dump"))
+            await PerformBackupWithDump(fullFilePath);
         else
-        {
-            var postgresConfDirectory = Path.Combine(userFolderPath, "AppData", "Roaming", "postgresql");
-            if (!Directory.Exists(postgresConfDirectory))
-                Directory.CreateDirectory(postgresConfDirectory);
-
-            pgPassFilePath = Path.Combine(postgresConfDirectory, "pgpass.conf");
-        }
-
-        await File.WriteAllTextAsync(pgPassFilePath,
-            $"{server}:{_serverConnection.DbName}:{_serverConnection.DbUser}:{_serverConnection.DbPasswd}");
-
-        if (isLinux)
-        {
-            await RunProcess("chmod", $"0600 {pgPassFilePath}");
-        }
-
-        var arguments = $"-h {host} -p {port} " +
-                        $"-U {_serverConnection.DbUser} -F c -b -v -f \"{fullFilePath}\" {_serverConnection.DbName}";
-        
-        await RunProcess("pg_dump", arguments);
-
-        await File.WriteAllTextAsync(pgPassFilePath, "Cleaned");
+            await PerformBackupWithLibrary(fullFilePath);
     }
 
-    private static async Task RunProcess(string fileName, string arguments)
+    private async Task PerformBackupWithDump(string fullFilePath)
     {
+        var hostPort = GetHostAndPort();
+        var args = $"--host={hostPort.Host} --port={hostPort.Port} --username={_serverConnection.DbUser} --no-password --dbname={_serverConnection.DbName}";
+
         var process = new Process
         {
             StartInfo = new ProcessStartInfo
             {
-                FileName = fileName,
-                Arguments = arguments,
-                RedirectStandardError = true,
+                FileName = "pg_dump",
+                Arguments = args,
                 RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
                 CreateNoWindow = true,
-                UseShellExecute = false
+                Environment =
+                {
+                    ["PGPASSWORD"] = _serverConnection.DbPasswd
+                }
             }
         };
-        
-        process.StartInfo.EnvironmentVariables["PGSSLMODE"] = "prefer";
-        
+
+        await using var fs = new FileStream(fullFilePath, FileMode.Create, FileAccess.Write);
         process.Start();
-        var stdErr = await process.StandardError.ReadToEndAsync();
-        var stdOut = await process.StandardOutput.ReadToEndAsync();
+        await process.StandardOutput.BaseStream.CopyToAsync(fs);
+        var error = await process.StandardError.ReadToEndAsync();
         await process.WaitForExitAsync();
 
         if (process.ExitCode != 0)
-            throw new Exception($"{fileName} exited with {process.ExitCode} // stderr: {stdErr} // stdout: {stdOut}");
+            throw new Exception($"pg_dump failed: {error}");
+    }
+
+    private async Task PerformBackupWithLibrary(string fullFilePath)
+    {
+        var hostPort = GetHostAndPort();
+        var connStr =
+            $"Host={hostPort.Host};Port={hostPort.Port};Database={_serverConnection.DbName};Username={_serverConnection.DbUser };Password={_serverConnection.DbPasswd};";
+        await using var conn = new NpgsqlConnection(connStr);
+        await conn.OpenAsync();
+        
+        _logger.LogInformation("Connection opened.");
+        
+        var tables = new List<(string Schema, string Table)>();
+
+        await using (var cmd = new NpgsqlCommand(@"
+    SELECT schemaname, tablename
+    FROM pg_tables
+    WHERE schemaname NOT IN ('pg_catalog', 'information_schema', 'pg_toast')
+    ORDER BY schemaname, tablename;", conn))
+        await using (var reader = await cmd.ExecuteReaderAsync())
+        {
+            while (await reader.ReadAsync())
+                tables.Add((reader.GetString(0), reader.GetString(1)));
+        }
+
+        await using var writer = new StreamWriter(fullFilePath, false, System.Text.Encoding.UTF8);
+
+        foreach (var (schema, table) in tables)
+        {
+            var fullName = $"{schema}.{table}";
+            var copyCmd = $"COPY {fullName} TO STDOUT WITH CSV HEADER";
+            using var exporter = await conn.BeginTextExportAsync(copyCmd);
+
+            string? line;
+            while ((line = await exporter.ReadLineAsync()) != null)
+                await writer.WriteLineAsync(line);
+
+            await writer.WriteLineAsync();
+            await writer.FlushAsync();
+        }
     }
 }

@@ -107,7 +107,17 @@ internal sealed class DbBackupService(
                     if (serverConfig is null)
                     {
                         logger.LogWarning("Can't find any backups configuration for server {ServerId}", db.GetServerId());
-                        continue;
+                        logger.LogInformation("Creating new default configuration for server...");
+                        
+                        var newServerConfig = new ServerBackupsConfiguration
+                        {
+                            ServerId = db.GetServerId(),
+                        };
+                        
+                        dbContext.Configurations.Add(newServerConfig);
+                        await dbContext.SaveChangesAsync();
+                        
+                        serverConfig = newServerConfig;
                     }
                     
                     var backupPath = serverConfig.CreateBackupPath(db.GetServerConnection(), null);
@@ -129,7 +139,7 @@ internal sealed class DbBackupService(
                     string compressedFilename = "";
                     
                     if (serverConn.DbType is not DatabaseType.SqlServer)
-                        compressedFilename = CompressBackupFile.Perform(backupPath.DirectoryPath, createdFileName);
+                        compressedFilename = CompressBackupFile.Perform(backupPath.DirectoryPath, createdFileName, db.GetBackupExtension());
                     
                     dbContext.Backups.Add(newDbBackup);
                     await dbContext.SaveChangesAsync();

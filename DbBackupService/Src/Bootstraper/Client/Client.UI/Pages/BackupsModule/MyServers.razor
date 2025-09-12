@@ -84,6 +84,10 @@
     </MudPaper>
 </MudContainer>
 
+<MudOverlay @bind-Visible="_isProcessing" DarkBackground ZIndex="9999">
+    <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+</MudOverlay>
+
 @code {
     private List<ServerConnectionDto> _servers = new();
 

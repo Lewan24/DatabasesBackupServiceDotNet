@@ -13,4 +13,5 @@ public interface IDatabase
     string GetDatabaseName();
     Guid GetServerId();
     DbServerConnection GetServerConnection();
+    string GetBackupExtension();
 }
