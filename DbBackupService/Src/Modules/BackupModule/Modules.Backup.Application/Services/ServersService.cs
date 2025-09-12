@@ -622,7 +622,13 @@ public class ServersService (
             if (serverBackupConfig is not null)
             {
                 db.Configurations.Remove(serverBackupConfig);
-                await db.SaveChangesAsync();
+            }
+
+            var backups = db.Backups.Where(x => x.ServerConnectionId == server.Id);
+            if (backups.Any())
+            {
+                foreach (var backup in backups)
+                    backup.ServerConnectionId = null;
             }
             
             db.DbConnections.Remove(server);
