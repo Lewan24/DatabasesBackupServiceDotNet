@@ -33,8 +33,9 @@ internal static class BackupsEndpoints
             .WithSummary("Delete backup entry + backup file")
             .AddEndpointFilter<AdminTokenAuthorizationFilter>();
 
-        api.MapPost("DownloadBackup", BackupsOperations.DownloadBackup)
-            .WithSummary("Download backup file from server");
+        api.MapGet("Download", BackupsOperations.DownloadBackup)
+            .WithSummary("Download backup file from server")
+            .WithMetadata(new AllowWithoutTokenValidationAttribute());
         
         api.MapPost("TestBackup", BackupsOperations.TestBackup)
             .WithSummary("Test backup file in prepared test container");
@@ -92,12 +93,17 @@ internal abstract record BackupsOperations
         return Task.FromResult<IResult>(TypedResults.Ok(new Success()));
     }
 
-    public static Task<IResult> DownloadBackup(
+    public static async Task<IResult> DownloadBackup(
         HttpContext context,
-        [FromBody] Guid id)
+        [FromServices] IDbBackupService service,
+        [FromQuery] Guid id)
     {
-        // TODO: return some type of stream or file?
-        return Task.FromResult<IResult>(TypedResults.Ok(new Success()));
+        var result = await service.DownloadBackup(id, context.User.Identity?.Name);
+        
+        return result.Match<IResult>(
+            file => TypedResults.PhysicalFile(file.FilePath, file.ContentType, file.FileName),
+            TypedResults.BadRequest
+        );
     }
 
     public static Task<IResult> TestBackup(

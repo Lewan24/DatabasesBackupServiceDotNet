@@ -70,23 +70,32 @@
                     </MudTd>
                     
                     <MudTd>
-                        <MudButton Size="Size.Small" Variant="Variant.Filled" Color="Color.Primary"
-                                   StartIcon="@Icons.Material.Filled.PlayArrow" Disabled="@((context.Test?.IsSuccess ?? true) && context.Test is not null)">
-                            @switch (context.Test?.IsSuccess)
-                            {
-                                case true:
-                                    <span>Successful Test</span>
-                                    break;
-                                    
-                                case false:
-                                    <span>Retry Test</span>
-                                    break;
-                                    
-                                default:
-                                    <span>Perform Test</span>
-                                    break;
-                            }
-                        </MudButton>
+                        <MudMenu>
+                            <ActivatorContent>
+                                <MudIconButton Icon="@Icons.Material.Filled.Menu"/>
+                            </ActivatorContent>
+                            
+                            <ChildContent>
+                                <MudMenuItem Icon="@Icons.Material.Filled.Download" Label="Download Backup .zip" Target="_blank" Href="@(Nav.ToAbsoluteUri($"/api/backups/download?id={context.Id}").ToString())" />
+                                
+                                <MudMenuItem Icon="@Icons.Material.Filled.PlayArrow" Disabled="@((context.Test?.IsSuccess ?? true) && context.Test is not null)">
+                                    @switch (context.Test?.IsSuccess)
+                                    {
+                                        case true:
+                                            <span>Successful Test</span>
+                                            break;
+
+                                        case false:
+                                            <span>Retry Test</span>
+                                            break;
+
+                                        default:
+                                            <span>Perform Test</span>
+                                            break;
+                                    }
+                                </MudMenuItem>
+                            </ChildContent>
+                        </MudMenu>
                     </MudTd>
                 }
             </RowTemplate>

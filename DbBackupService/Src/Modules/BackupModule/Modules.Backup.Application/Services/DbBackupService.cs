@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -162,12 +163,13 @@ internal sealed class DbBackupService(
                     };
                     
                     var createdFileName = await db.PerformBackup(serverConfig);
-                    newDbBackup.FilePath = Path.Combine(backupPath.DirectoryPath, createdFileName);
 
                     string compressedFilename = "";
                     
                     if (serverConn.DbType is not DatabaseType.SqlServer)
                         compressedFilename = CompressBackupFile.Perform(backupPath.DirectoryPath, createdFileName, db.GetBackupExtension());
+                    
+                    newDbBackup.FilePath = Path.Combine(backupPath.DirectoryPath, compressedFilename);
                     
                     dbContext.Backups.Add(newDbBackup);
                     await dbContext.SaveChangesAsync();
@@ -286,5 +288,37 @@ internal sealed class DbBackupService(
         }
         
         return backups;
+    }
+
+    public async Task<OneOf<(string FilePath, string ContentType, string FileName), string>> DownloadBackup(Guid id, string? identityName)
+    {
+        var backup = dbContext.Backups.AsNoTracking().FirstOrDefault(x => x.Id == id);
+        if (backup is null)
+            return "Can't find backup with specified id";
+
+        if (string.IsNullOrWhiteSpace(identityName))
+            return "You have to be logged in to have access to this api.";
+        
+        var user = await userManager.FindByNameAsync(identityName);
+        if (user is null)
+            return "Can't find user";
+        
+        var isAdmin = await userManager.IsInRoleAsync(user, AppRoles.Admin);
+        if (!isAdmin)
+        {
+            var hasAccess = dbContext.UsersServers.FirstOrDefault(x => x.ServerId == backup.ServerConnectionId && x.UserId == Guid.Parse(user.Id));
+            if (hasAccess is null)
+                return "User don't have access to this server.";
+        }
+        
+        if (!File.Exists(backup.FilePath))
+            return "File does not exist.";
+
+        var server = dbContext.DbConnections.AsNoTracking().FirstOrDefault(x => x.Id == backup.ServerConnectionId);
+        
+        var fileName = server is not null ? 
+            $"{server.DbName}_{backup.CreatedOn:yyyy-MM-dd_hh-mm}.zip" : 
+            $"DbBackup_{backup.CreatedOn:yyyy-MM-dd_hh-mm}.zip";
+        return (backup.FilePath, "application/zip", fileName);
     }
 }
