@@ -12,7 +12,8 @@
     environment:
       ASPNETCORE_ENVIRONMENT: Production
       ASPNETCORE_URLS: "https://+;http://+"
-      Kestrel__Certificates__Default__Path: "/app/Certificate/OctoBackupCert.pfx"
-      Kestrel__Certificates__Default__Password: "Password"
+      Kestrel__Certificates__Default__Path: "/app/Certificate/OctoBackupCert.pfx" # your cert, could be anything to only run if you use proxy
+      Kestrel__Certificates__Default__Password: "Password" # generated cert password
+      CRYPTO_KEY: "C5Znh9Rwota8gSeeTLCMn4ag0OvD5vI9aj0me39/G0g=" # base64 crypto key used to encrypt data
     volumes:
-      - ./certs/:/app/Certificate/
+      - ./certs/:/app/Certificate/ # certificate location

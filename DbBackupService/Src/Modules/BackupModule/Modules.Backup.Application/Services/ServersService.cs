@@ -283,7 +283,7 @@ public class ServersService (
     public async Task<OneOf<Success, string>> EditServer(ServerConnectionDto server)
     {
         // TODO: Implement checking if user has access to server or is admin
-        List<string> errors = new();
+        List<string> errors = [];
         
         if (string.IsNullOrWhiteSpace(server.ConnectionName))
             errors.Add("Connection name is required");

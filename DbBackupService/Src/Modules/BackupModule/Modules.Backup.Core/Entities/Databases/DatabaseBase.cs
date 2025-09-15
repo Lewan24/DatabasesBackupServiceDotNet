@@ -3,10 +3,11 @@ using Modules.Backup.Core.Entities.DbContext;
 using Modules.Backup.Core.Interfaces;
 using Modules.Backup.Core.StaticClasses;
 using Modules.Backup.Shared.Enums;
+using Modules.Crypto.Shared.Interfaces;
 
 namespace Modules.Backup.Core.Entities.Databases;
 
-public abstract class DatabaseBase(DbServerConnection serverConnection, DbServerTunnel serverTunnel, ILogger logger, string? defaulBackupExtension) : IDatabase
+public abstract class DatabaseBase(DbServerConnection serverConnection, DbServerTunnel serverTunnel, ILogger logger, string? defaulBackupExtension, ICryptoService cryptoService) : IDatabase
 {
     protected string BackupExtension = defaulBackupExtension ?? ".sql";
     

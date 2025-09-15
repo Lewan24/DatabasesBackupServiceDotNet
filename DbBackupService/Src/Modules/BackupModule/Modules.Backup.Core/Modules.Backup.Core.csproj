@@ -18,6 +18,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\CryptoModule\Modules.Crypto.Shared\Modules.Crypto.Shared.csproj" />
       <ProjectReference Include="..\Modules.Backup.Shared\Modules.Backup.Shared.csproj" />
     </ItemGroup>
 

@@ -2,6 +2,7 @@ using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 using Modules.Backup.Core.Entities.DbContext;
 using Modules.Backup.Core.StaticClasses;
+using Modules.Crypto.Shared.Interfaces;
 using Npgsql;
 
 namespace Modules.Backup.Core.Entities.Databases;
@@ -10,14 +11,17 @@ public sealed class PostgreSqlDatabase : DatabaseBase
 {
     private readonly DbServerConnection _serverConnection;
     private readonly ILogger _logger;
+    private readonly ICryptoService _cryptoService;
 
     public PostgreSqlDatabase(
         DbServerConnection serverConnection, 
         DbServerTunnel serverTunnel, 
-        ILogger logger) : base(serverConnection, serverTunnel, logger, null)
+        ILogger logger,
+        ICryptoService cryptoService) : base(serverConnection, serverTunnel, logger, null, cryptoService)
     {
         _serverConnection = serverConnection;
         _logger = logger;
+        _cryptoService = cryptoService;
 
         if (!ToolChecker.IsToolAvailable("pg_dump"))
             BackupExtension = ".csv";
@@ -36,6 +40,8 @@ public sealed class PostgreSqlDatabase : DatabaseBase
         var hostPort = GetHostAndPort();
         var args = $"--host={hostPort.Host} --port={hostPort.Port} --username={_serverConnection.DbUser} --no-password --dbname={_serverConnection.DbName}";
 
+        var decryptedDbPasswd = _cryptoService.Decrypt(_serverConnection.DbPasswd);
+        
         var process = new Process
         {
             StartInfo = new ProcessStartInfo
@@ -48,7 +54,7 @@ public sealed class PostgreSqlDatabase : DatabaseBase
                 CreateNoWindow = true,
                 Environment =
                 {
-                    ["PGPASSWORD"] = _serverConnection.DbPasswd
+                    ["PGPASSWORD"] = decryptedDbPasswd
                 }
             }
         };
@@ -66,8 +72,9 @@ public sealed class PostgreSqlDatabase : DatabaseBase
     private async Task PerformBackupWithLibrary(string fullFilePath)
     {
         var hostPort = GetHostAndPort();
+        var decryptedDbPasswd = _cryptoService.Decrypt(_serverConnection.DbPasswd);
         var connStr =
-            $"Host={hostPort.Host};Port={hostPort.Port};Database={_serverConnection.DbName};Username={_serverConnection.DbUser };Password={_serverConnection.DbPasswd};";
+            $"Host={hostPort.Host};Port={hostPort.Port};Database={_serverConnection.DbName};Username={_serverConnection.DbUser };Password={decryptedDbPasswd};";
         await using var conn = new NpgsqlConnection(connStr);
         await conn.OpenAsync();
         
@@ -94,8 +101,7 @@ public sealed class PostgreSqlDatabase : DatabaseBase
             var copyCmd = $"COPY {fullName} TO STDOUT WITH CSV HEADER";
             using var exporter = await conn.BeginTextExportAsync(copyCmd);
 
-            string? line;
-            while ((line = await exporter.ReadLineAsync()) != null)
+            while (await exporter.ReadLineAsync() is { } line)
                 await writer.WriteLineAsync(line);
 
             await writer.WriteLineAsync();

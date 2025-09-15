@@ -4,16 +4,19 @@ using Microsoft.SqlServer.Management.Smo;
 using Microsoft.SqlServer.Management.Common;
 using Modules.Backup.Core.Entities.DbContext;
 using Modules.Backup.Core.StaticClasses;
+using Modules.Crypto.Shared.Interfaces;
 
 namespace Modules.Backup.Core.Entities.Databases;
 
 public sealed class SqlServerDatabase(
     DbServerConnection serverConnection,
     DbServerTunnel serverTunnel,
-    ILogger logger)
-    : DatabaseBase(serverConnection, serverTunnel, logger, ".bak")
+    ILogger logger,
+    ICryptoService cryptoService)
+    : DatabaseBase(serverConnection, serverTunnel, logger, ".bak", cryptoService)
 {
     private readonly DbServerConnection _serverConnection = serverConnection;
+    private readonly ICryptoService _cryptoService = cryptoService;
 
     protected override async Task PerformBackupInternal(string fullFilePath)
     {
@@ -26,7 +29,8 @@ public sealed class SqlServerDatabase(
     private async Task PerformBackupWithSqlCmd(string fullFilePath)
     {
         var hostPort = GetHostAndPort();
-        var args = $"-S {hostPort.Host},{hostPort.Port} -U {_serverConnection.DbUser} -P {_serverConnection.DbPasswd} " +
+        var decryptedDbPasswd = _cryptoService.Decrypt(_serverConnection.DbPasswd);
+        var args = $"-S {hostPort.Host},{hostPort.Port} -U {_serverConnection.DbUser} -P {decryptedDbPasswd} " +
                    $"-Q \"BACKUP DATABASE [{_serverConnection.DbName}] TO DISK='{fullFilePath}' WITH INIT\"";
 
         var process = new Process
@@ -53,10 +57,11 @@ public sealed class SqlServerDatabase(
     private async Task PerformBackupWithSmo(string fullFilePath)
     {
         var hostPort = GetHostAndPort();
+        var decryptedDbPasswd = _cryptoService.Decrypt(_serverConnection.DbPasswd);
         var connStr = $"Data Source={hostPort.Host},{hostPort.Port};" +
                       $"Initial Catalog={_serverConnection.DbName};" +
                       $"User ID={_serverConnection.DbUser};" +
-                      $"Password={_serverConnection.DbPasswd};" +
+                      $"Password={decryptedDbPasswd};" +
                       $"Encrypt=True;TrustServerCertificate=True;";
         
         var sqlConn = new Microsoft.Data.SqlClient.SqlConnection(connStr);

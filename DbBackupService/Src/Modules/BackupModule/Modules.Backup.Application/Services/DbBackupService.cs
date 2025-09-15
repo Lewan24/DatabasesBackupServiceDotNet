@@ -13,6 +13,7 @@ using Modules.Backup.Infrastructure.DbContexts;
 using Modules.Backup.Shared.Dtos;
 using Modules.Backup.Shared.Enums;
 using Modules.Backup.Shared.Helpers;
+using Modules.Crypto.Shared.Interfaces;
 using OneOf;
 using OneOf.Types;
 
@@ -23,6 +24,7 @@ internal sealed class DbBackupService(
     ServersService serversService,
     UserManager<AppUser> userManager,
     NotifyService notifyService,
+    ICryptoService cryptoService,
     ILogger<DbBackupService> logger)
     : IDbBackupService
 {
@@ -105,9 +107,9 @@ internal sealed class DbBackupService(
                 
                 IDatabase database = serverConn.DbType switch
                 {
-                    DatabaseType.MySql => new MySqlDatabase(serverConn, serverTunnel!, logger),
-                    DatabaseType.PostgreSql => new PostgreSqlDatabase(serverConn, serverTunnel!, logger),
-                    DatabaseType.SqlServer => new SqlServerDatabase(serverConn, serverTunnel!, logger),
+                    DatabaseType.MySql => new MySqlDatabase(serverConn, serverTunnel!, logger, cryptoService),
+                    DatabaseType.PostgreSql => new PostgreSqlDatabase(serverConn, serverTunnel!, logger, cryptoService),
+                    DatabaseType.SqlServer => new SqlServerDatabase(serverConn, serverTunnel!, logger, cryptoService),
                     _ => throw new NotSupportedException(
                         $"Selected type of database is not supported: {serverConn.DbType}")
                 };

@@ -23,18 +23,17 @@ internal sealed class CryptoService : ICryptoService
         if (Convert.TryFromBase64String(s, new Span<byte>(new byte[s.Length]), out var _))
             return Convert.FromBase64String(s);
 
-        if (s.Length % 2 == 0)
+        if (s.Length % 2 != 0) 
+            return Encoding.UTF8.GetBytes(s);
+        
+        try
         {
-            try
-            {
-                return Enumerable.Range(0, s.Length / 2)
-                                 .Select(i => Convert.ToByte(s.Substring(i * 2, 2), 16))
-                                 .ToArray();
-            }
-            catch { /* ignore */ }
+            return Enumerable.Range(0, s.Length / 2)
+                .Select(i => Convert.ToByte(s.Substring(i * 2, 2), 16))
+                .ToArray();
         }
+        catch { /* ignore */ }
 
-        // Fallback: UTF8 (mało losowe, ale działa)
         return Encoding.UTF8.GetBytes(s);
     }
 

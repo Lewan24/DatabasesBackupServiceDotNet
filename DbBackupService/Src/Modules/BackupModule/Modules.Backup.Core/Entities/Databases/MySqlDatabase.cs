@@ -2,14 +2,16 @@ using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 using Modules.Backup.Core.Entities.DbContext;
 using Modules.Backup.Core.StaticClasses;
+using Modules.Crypto.Shared.Interfaces;
 using MySql.Data.MySqlClient;
 
 namespace Modules.Backup.Core.Entities.Databases;
 
-public sealed class MySqlDatabase(DbServerConnection serverConnection, DbServerTunnel serverTunnel, ILogger logger)
-    : DatabaseBase(serverConnection, serverTunnel, logger, null)
+public sealed class MySqlDatabase(DbServerConnection serverConnection, DbServerTunnel serverTunnel, ILogger logger, ICryptoService cryptoService)
+    : DatabaseBase(serverConnection, serverTunnel, logger, null, cryptoService)
 {
     private readonly DbServerConnection _serverConnection = serverConnection;
+    private readonly ICryptoService _cryptoService = cryptoService;
 
     protected override async Task PerformBackupInternal(string fullFilePath)
     {
@@ -22,8 +24,9 @@ public sealed class MySqlDatabase(DbServerConnection serverConnection, DbServerT
     private async Task PerformBackupWithDump(string fullFilePath)
     {
         var hostPort = GetHostAndPort();
-        
-        var args = $"-h {hostPort.Host} -P {hostPort.Port} -u {_serverConnection.DbUser} -p{_serverConnection.DbPasswd} {_serverConnection.DbName}";
+
+        var decryptedDbPassword = _cryptoService.Decrypt(_serverConnection.DbPasswd);
+        var args = $"-h {hostPort.Host} -P {hostPort.Port} -u {_serverConnection.DbUser} -p{decryptedDbPassword} {_serverConnection.DbName}";
 
         var process = new Process
         {
@@ -52,7 +55,8 @@ public sealed class MySqlDatabase(DbServerConnection serverConnection, DbServerT
     {
         var hostPort = GetHostAndPort();
         
-        var connStr = $"Server={hostPort.Host};Port={hostPort.Port};Database={_serverConnection.DbName};Uid={_serverConnection.DbUser};Pwd={_serverConnection.DbPasswd};";
+        var decryptedDbPassword = _cryptoService.Decrypt(_serverConnection.DbPasswd);
+        var connStr = $"Server={hostPort.Host};Port={hostPort.Port};Database={_serverConnection.DbName};Uid={_serverConnection.DbUser};Pwd={decryptedDbPassword};";
 
         await using var conn = new MySqlConnection(connStr);
         await using var cmd = new MySqlCommand();
