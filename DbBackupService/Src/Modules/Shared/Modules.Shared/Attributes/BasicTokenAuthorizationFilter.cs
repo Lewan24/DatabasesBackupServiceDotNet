@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Modules.Auth.Shared.Interfaces;
 using Modules.Auth.Shared.Static.Entities;
 using OneOf;
@@ -8,7 +7,7 @@ using OneOf.Types;
 
 namespace Modules.Shared.Attributes;
 
-public class BasicTokenAuthorizationFilter(ILogger<BasicTokenAuthorizationFilter> logger) : IEndpointFilter
+public class BasicTokenAuthorizationFilter : IEndpointFilter
 {
     public async ValueTask<object?> InvokeAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
     {
@@ -17,32 +16,32 @@ public class BasicTokenAuthorizationFilter(ILogger<BasicTokenAuthorizationFilter
 
         if (allowWithoutValidation)
             return await next(context);
-        
-        var tokenValidationResult = await ValidateTokenAndContinue(context, next);
+
+        var tokenValidationResult = await ValidateTokenAndContinue(context);
         if (tokenValidationResult.IsT1)
             return await new ValueTask<object?>(Results.BadRequest(tokenValidationResult.AsT1));
-        
+
         return await next(context);
     }
 
     /// <summary>
-    /// Wspólna logika walidacji tokenu do ponownego użycia w klasach dziedziczących.
+    ///     Wspólna logika walidacji tokenu do ponownego użycia w klasach dziedziczących.
     /// </summary>
-    public static async Task<OneOf<Success, string>> ValidateTokenAndContinue(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
+    public static Task<OneOf<Success, string>> ValidateTokenAndContinue(EndpointFilterInvocationContext context)
     {
         var authToken = context.HttpContext.Request.Headers[AuthHeaderName.Name].FirstOrDefault();
         if (string.IsNullOrWhiteSpace(authToken))
-            return "Empty authorization token. The request cannot be executed. Please log in again to refresh the token.";
+            return Task.FromResult<OneOf<Success, string>>("Empty authorization token. The request cannot be executed. Please log in again to refresh the token.");
 
         var tokenValidationService = context.HttpContext.RequestServices.GetService<ITokenValidationService>();
         if (tokenValidationService is null)
-            return "The service for verifying the authenticity of the authentication token cannot be started. Try to restart application.";
+            return Task.FromResult<OneOf<Success, string>>("The service for verifying the authenticity of the authentication token cannot be started. Try to restart application.");
 
         var isTokenValid = tokenValidationService.IsValid(authToken, context.HttpContext.User.Identity?.Name);
 
-        return isTokenValid.Match<OneOf<Success, string>>(
+        return Task.FromResult(isTokenValid.Match<OneOf<Success, string>>(
             _ => new Success(),
             _ => "Invalid authentication token. Please log in again to refresh the token."
-        );
+        ));
     }
 }

@@ -11,16 +11,16 @@ public static class DeleteOldBackup
         try
         {
             var zipFiles = Directory.GetFiles(directoryPath, "*.zip");
-            int deleted = 0;
-            
+            var deleted = 0;
+
             foreach (var zipFile in zipFiles)
             {
                 var fileName = Path.GetFileNameWithoutExtension(zipFile);
                 var match = Regex.Match(fileName, @"\d{2,4}\.\d{1,2}\.\d{1,2}\.\d{1,2}\.\d{1,2}");
 
-                if (!match.Success) 
+                if (!match.Success)
                     continue;
-                
+
                 var backupDateTime = DateTime.ParseExact(match.Value, "yyyy.MM.dd.HH.mm", CultureInfo.InvariantCulture);
 
                 var timeDifference = DateTime.Now - backupDateTime;
@@ -31,7 +31,7 @@ public static class DeleteOldBackup
                 File.Delete(zipFile);
                 deleted++;
             }
-            
+
             logger.LogInformation("Successfully deleted [{DeletedFilesCount}] old backups.", deleted);
             return Task.CompletedTask;
         }

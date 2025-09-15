@@ -11,7 +11,9 @@ public sealed class TokenHttpClientService(IHttpClientFactory factory)
     private readonly HttpClient _http = factory.CreateClient("token");
 
     public async Task<OneOf<T, string>> GetAsync<T>(string url)
-        => await SendRequestAsync<T>(() => _http.GetAsync(url));
+    {
+        return await SendRequestAsync<T>(() => _http.GetAsync(url));
+    }
 
     public async Task<HttpResponseMessage> GetAsync(string url)
     {
@@ -26,10 +28,14 @@ public sealed class TokenHttpClientService(IHttpClientFactory factory)
     }
 
     public async Task<OneOf<Success, string>> PostAsync<T>(string url, T data)
-        => await SendRequestAsync(() => _http.PostAsJsonAsync(url, data));
+    {
+        return await SendRequestAsync(() => _http.PostAsJsonAsync(url, data));
+    }
 
     public async Task<OneOf<T, string>> PostAsync<T, TU>(string url, TU data)
-        => await SendRequestAsync<T>(() => _http.PostAsJsonAsync(url, data));
+    {
+        return await SendRequestAsync<T>(() => _http.PostAsJsonAsync(url, data));
+    }
 
 
     private async Task<OneOf<T, string>> SendRequestAsync<T>(Func<Task<HttpResponseMessage>> httpCall)
@@ -42,15 +48,16 @@ public sealed class TokenHttpClientService(IHttpClientFactory factory)
                 or HttpStatusCode.NotFound)
                 return await response.Content.ReadAsStringAsync();
 
-            if (response.StatusCode is HttpStatusCode.Unauthorized 
-                                    or HttpStatusCode.Forbidden)
+            if (response.StatusCode is HttpStatusCode.Unauthorized
+                or HttpStatusCode.Forbidden)
                 return "Dostęp zabroniony. Skontaktuj się z Administratorem";
 
             response.EnsureSuccessStatusCode();
-            
+
             var stream = await response.Content.ReadAsStreamAsync();
-            var result = await JsonSerializer.DeserializeAsync<T>(stream, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-            
+            var result = await JsonSerializer.DeserializeAsync<T>(stream,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
             return result!;
         }
         catch (Exception ex)

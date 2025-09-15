@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Modules.Administration.Shared.Interfaces;
 
 namespace Modules.Shared.Attributes;
@@ -14,9 +13,9 @@ public class AdminTokenAuthorizationFilter : IEndpointFilter
 
         if (allowWithoutValidation)
             return await next(context);
-        
+
         // Najpierw walidacja tokenu (z base)
-        var tokenValidationResult = await BasicTokenAuthorizationFilter.ValidateTokenAndContinue(context, next);
+        var tokenValidationResult = await BasicTokenAuthorizationFilter.ValidateTokenAndContinue(context);
         if (tokenValidationResult.IsT1)
             return await new ValueTask<object?>(Results.BadRequest(tokenValidationResult.AsT1));
 
@@ -30,7 +29,7 @@ public class AdminTokenAuthorizationFilter : IEndpointFilter
             return Results.NotFound("Can't get user name");
 
         var isAdmin = await adminApi.AmIAdmin(userName);
-        
+
         if (!isAdmin)
             return Results.Forbid();
 

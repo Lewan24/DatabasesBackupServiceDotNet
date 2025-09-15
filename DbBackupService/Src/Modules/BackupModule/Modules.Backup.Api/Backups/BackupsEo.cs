@@ -18,13 +18,13 @@ internal static class BackupsEndpoints
 
         api.MapGet("GetAllBackups", BackupsOperations.GetAllBackups)
             .WithSummary("Get all user's backups");
-        
+
         api.MapPost("GetBackups", BackupsOperations.GetBackups)
             .WithSummary("Get user's 25 backups with provided offset");
 
         api.MapPost("PerformBackup", BackupsOperations.PerformBackup)
             .WithSummary("Perform backup on provided server");
-        
+
         api.MapPost("PerformSchedulesBackup", BackupsOperations.PerformSchedulesBackup)
             .WithSummary("Perform backup on pending schedules")
             .AddEndpointFilter<AdminTokenAuthorizationFilter>();
@@ -36,10 +36,10 @@ internal static class BackupsEndpoints
         api.MapGet("Download", BackupsOperations.DownloadBackup)
             .WithSummary("Download backup file from server")
             .WithMetadata(new AllowWithoutTokenValidationAttribute());
-        
+
         api.MapPost("TestBackup", BackupsOperations.TestBackup)
             .WithSummary("Test backup file in prepared test container");
-        
+
         return app;
     }
 }
@@ -51,13 +51,13 @@ internal abstract record BackupsOperations
         [FromServices] IDbBackupService service)
     {
         var result = await service.GetAllBackups(context.User.Identity?.Name);
-        
+
         return result.Match<IResult>(
             TypedResults.Ok,
             TypedResults.BadRequest
         );
     }
-    
+
     public static Task<IResult> GetBackups(
         HttpContext context,
         [FromBody] int offset = 0)
@@ -71,13 +71,13 @@ internal abstract record BackupsOperations
         [FromBody] Guid serverId)
     {
         var result = await service.BackupDb(serverId);
-        
+
         return result.Match<IResult>(
             TypedResults.Ok,
             TypedResults.BadRequest
         );
     }
-    
+
     // TODO: idk why but AdminTokenFilter needs additional parameter to provide
     public static Task<IResult> PerformSchedulesBackup(
         HttpContext context,
@@ -99,7 +99,7 @@ internal abstract record BackupsOperations
         [FromQuery] Guid id)
     {
         var result = await service.DownloadBackup(id, context.User.Identity?.Name);
-        
+
         return result.Match<IResult>(
             file => TypedResults.PhysicalFile(file.FilePath, file.ContentType, file.FileName),
             TypedResults.BadRequest

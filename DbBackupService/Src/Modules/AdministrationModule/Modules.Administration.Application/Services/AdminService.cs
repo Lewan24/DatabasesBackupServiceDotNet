@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Modules.Auth.Core.Entities;
 using Modules.Auth.Infrastructure.DbContexts;
@@ -11,8 +10,7 @@ using OneOf.Types;
 
 namespace Modules.Administration.Application.Services;
 
-public class AdminService (
-    ILogger<AdminService> logger,
+public class AdminService(
     AppIdentityDbContext context,
     UserManager<AppUser> userManager)
 {
@@ -20,14 +18,14 @@ public class AdminService (
     {
         if (string.IsNullOrWhiteSpace(identityName))
             return null;
-                
+
         var user = context.Users.SingleOrDefault(u => u.UserName == identityName);
-        
-        if  (user is null) 
+
+        if (user is null)
             return null;
 
         var isUserAdmin = await userManager.IsInRoleAsync(user, AppRoles.Admin);
-        
+
         return isUserAdmin;
     }
 
@@ -36,14 +34,14 @@ public class AdminService (
         var users = context.Users
             .AsNoTracking()
             .Select(x => new UserDto
-        {
-            Id = Guid.Parse(x.Id),
-            Email = x.Email!,
-            IsBlocked = x.IsBlocked,
-            IsEmailConfirmed = x.EmailConfirmed,
-            Roles = userManager.GetRolesAsync(x).Result
-        }).ToList();
-        
+            {
+                Id = Guid.Parse(x.Id),
+                Email = x.Email!,
+                IsBlocked = x.IsBlocked,
+                IsEmailConfirmed = x.EmailConfirmed,
+                Roles = userManager.GetRolesAsync(x).Result
+            }).ToList();
+
         return Task.FromResult(users);
     }
 
@@ -56,14 +54,14 @@ public class AdminService (
 
         if (user is null)
             return "Can't find specified user";
-        
+
         var isAdmin = await IsUserAdmin(user.UserName);
         if (isAdmin is not null && isAdmin.Value)
             return "Can't change blockade for admin user";
-        
+
         user.IsBlocked = !user.IsBlocked;
         await context.SaveChangesAsync();
-        
+
         return new Success();
     }
 
@@ -76,7 +74,7 @@ public class AdminService (
 
         if (user is null)
             return "Can't find specified user";
-        
+
         await userManager.SetEmailAsync(user, request.Email);
         await userManager.SetUserNameAsync(user, request.Email);
 
@@ -85,14 +83,14 @@ public class AdminService (
             var confirmEmailToken = await userManager.GenerateEmailConfirmationTokenAsync(user);
             await userManager.ConfirmEmailAsync(user, confirmEmailToken);
         }
-        
+
         if (string.IsNullOrWhiteSpace(request.Password))
             return new Success();
 
         if (string.IsNullOrWhiteSpace(request.ConfirmPassword) ||
             request.ConfirmPassword != request.Password)
             return "Password do not match";
-        
+
         var resetPassToken = await userManager.GeneratePasswordResetTokenAsync(user);
         var resetPassResult = await userManager.ResetPasswordAsync(user, resetPassToken, request.Password);
 

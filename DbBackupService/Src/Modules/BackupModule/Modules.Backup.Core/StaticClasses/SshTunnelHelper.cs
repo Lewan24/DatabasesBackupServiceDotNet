@@ -32,7 +32,8 @@ public static class SshTunnelHelper
 
         sshClient.Connect();
 
-        var portForward = new ForwardedPortLocal("127.0.0.1", (uint)tunnelConfig.LocalPort, tunnelConfig.RemoteHost, (uint)tunnelConfig.RemotePort);
+        var portForward = new ForwardedPortLocal("127.0.0.1", (uint)tunnelConfig.LocalPort, tunnelConfig.RemoteHost,
+            (uint)tunnelConfig.RemotePort);
         sshClient.AddForwardedPort(portForward);
         portForward.Start();
 
@@ -47,6 +48,9 @@ public static class SshTunnelHelper
 
     private class DisposableAction(Action action) : IDisposable
     {
-        public void Dispose() => action();
+        public void Dispose()
+        {
+            action();
+        }
     }
 }

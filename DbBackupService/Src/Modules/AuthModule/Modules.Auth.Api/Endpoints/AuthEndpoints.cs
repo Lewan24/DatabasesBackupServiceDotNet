@@ -32,7 +32,7 @@ internal static class AuthEndpoints
         return api;
     }
 
-    private static RouteGroupBuilder MapAuthPosts(this RouteGroupBuilder api)
+    private static void MapAuthPosts(this RouteGroupBuilder api)
     {
         api.MapPost("Login", AuthOperations.Login)
             .WithSummary("Log in user")
@@ -62,7 +62,5 @@ internal static class AuthEndpoints
 
         api.MapPost("RefreshToken", AuthOperations.RefreshToken)
             .WithSummary("Refresh user's authorization token");
-
-        return api;
     }
 }

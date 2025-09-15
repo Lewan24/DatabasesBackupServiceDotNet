@@ -1,6 +1,5 @@
 ﻿@using Client.UI.Data.Services
 @using Modules.Backup.Shared.Requests
-
 @inject IDialogService DialogService
 @inject AdministrationHttpService Service
 @inject ISnackbar Snackbar
@@ -19,7 +18,7 @@
                         <MudTooltip Text="Remove user access">
                             <MudIconButton Icon="@Icons.Material.Filled.Delete"
                                            Color="Color.Error"
-                                           OnClick="@(() => RemoveUserFromServer(context))" />
+                                           OnClick="@(() => RemoveUserFromServer(context))"/>
                         </MudTooltip>
                     </MudTd>
                 </RowTemplate>
@@ -53,21 +52,24 @@
     private async Task FetchUsers()
     {
         var result = await Service.GetUsersThatAccessServer(ServerId);
-        
+
         result.Switch(
             list => _usersWithAccess = list,
             error => Snackbar.Add(error, Severity.Error)
         );
-        
+
         StateHasChanged();
     }
 
-    private void Cancel() => MudDialog.Cancel();
+    private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
 
     private async Task RemoveUserFromServer(string email)
     {
         var result = await Service.RemoveUserAccessFromServer(new ModifyServerAccessRequest(ServerId, email));
-        
+
         result.Switch(
             success => _ = FetchUsers(),
             error => Snackbar.Add(error, Severity.Error)
@@ -76,7 +78,7 @@
 
     private async Task OpenAddUserDialog()
     {
-        var parameters = new DialogParameters<AddUserToServerDialog> { {x => x.ServerId, ServerId} };
+        var parameters = new DialogParameters<AddUserToServerDialog> { { x => x.ServerId, ServerId } };
         var options = new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true };
 
         var dialog = await DialogService.ShowAsync<AddUserToServerDialog>("Give access to server for user", parameters, options);
@@ -85,11 +87,12 @@
         if (!result!.Canceled && result.Data is string addedUser)
         {
             var giveAccessResult = await Service.GiveUserAccessToServer(new ModifyServerAccessRequest(ServerId, addedUser));
-            
+
             giveAccessResult.Switch(
                 success => _ = FetchUsers(),
                 error => Snackbar.Add(error, Severity.Error)
             );
         }
     }
+
 }

@@ -23,7 +23,8 @@ internal sealed class AuthService(
     ILogger<AuthService> logger)
     : IAuthService
 {
-    private readonly AuthSettings _authSettings = config.GetSection("AuthSettings").Get<AuthSettings>() ?? new AuthSettings();
+    private readonly AuthSettings _authSettings =
+        config.GetSection("AuthSettings").Get<AuthSettings>() ?? new AuthSettings();
 
     public async Task<IResult> Login(HttpContext context, LoginRequest? request)
     {
@@ -32,16 +33,16 @@ internal sealed class AuthService(
         if (!await CanLogIn(context, request))
             return Results.BadRequest("Can't log in. User is blocked or email is not confirmed.");
 
-        var user = await userManager.FindByEmailAsync(request!.Email!);
+        var user = await userManager.FindByEmailAsync(request!.Email);
         if (user is null)
             return Results.NotFound("Taki użytkownik nie istnieje.");
-        
+
         await signInManager.SignInAsync(user, request.RememberMe);
 
         logger.LogInformation("User {UserName} successfully logged in. Generating token...", user.Email);
         var result = await GetUserToken(context, request);
         if (string.IsNullOrWhiteSpace(result.Token))
-            await CreateNewUserToken(request.Email!, _authSettings.DefaultTokenExpirationTimeInMinutes);
+            await CreateNewUserToken(request.Email, _authSettings.DefaultTokenExpirationTimeInMinutes);
 
         return Results.Accepted("/auth/Login", request.Email);
     }
@@ -57,7 +58,7 @@ internal sealed class AuthService(
         if (user is null)
             return Results.BadRequest("Nie można znaleźć użytkownika");
 
-        var result = await userManager.ChangePasswordAsync(user, request.CurrentPassword!, request.NewPassword!);
+        var result = await userManager.ChangePasswordAsync(user, request.CurrentPassword, request.NewPassword);
         return result.Succeeded
             ? Results.Ok()
             : Results.BadRequest("Błąd przy zmianie hasła, sprawdź dane i wymagania.");
@@ -81,7 +82,7 @@ internal sealed class AuthService(
 
     public async Task<IResult> Register(HttpContext context, RegisterRequest request)
     {
-        var userName = context.User?.Identity?.Name;
+        var userName = context.User.Identity?.Name;
 
         var currentUser = userName is null
             ? null
@@ -149,14 +150,14 @@ internal sealed class AuthService(
         };
     }
 
-    public async Task<IResult> ValidateToken(TokenValidationRequest request)
+    public Task<IResult> ValidateToken(TokenValidationRequest request)
     {
         var isValid = tokenValidationService.IsValid(request.Token, request.Email);
 
-        return isValid.Match<IResult>(
+        return Task.FromResult(isValid.Match<IResult>(
             _ => Results.Ok(),
             _ => Results.BadRequest()
-        );
+        ));
     }
 
     public async Task<TokenModelDto> GetUserToken(HttpContext context, LoginRequest request)
@@ -192,8 +193,8 @@ internal sealed class AuthService(
         if (!await CanLogIn(context, request))
             return new TokenModelDto { ExpirationDate = DateTime.UtcNow.AddMinutes(-1) };
 
-        return CheckIfAnyActiveUserTokenExist(request.Email!) ??
-               await CreateNewUserToken(request.Email!, _authSettings.DefaultTokenExpirationTimeInMinutes);
+        return CheckIfAnyActiveUserTokenExist(request.Email) ??
+               await CreateNewUserToken(request.Email, _authSettings.DefaultTokenExpirationTimeInMinutes);
     }
 
     // ----------------- Helpers (przeniesione z operacji) -----------------

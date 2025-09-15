@@ -10,7 +10,7 @@ public static class Extensions
     {
         services.AddScoped<AdminService>();
         services.AddScoped<IAdminModuleApi, AdminModuleApi>();
-            
+
         return services;
     }
 }

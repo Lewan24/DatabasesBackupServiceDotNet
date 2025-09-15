@@ -79,7 +79,6 @@ if (builder.Environment.IsDevelopment())
     });
 
 if (builder.Environment.IsProduction())
-{
     builder.Services.AddCors(opt =>
     {
         opt.AddPolicy(defaultCorsPolicyName, policy =>
@@ -95,7 +94,6 @@ if (builder.Environment.IsProduction())
                 .AllowCredentials();
         });
     });
-}
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>

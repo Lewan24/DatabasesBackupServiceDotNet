@@ -27,7 +27,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="DbContexts\Migrations\" />
+        <Folder Include="DbContexts\Migrations\"/>
     </ItemGroup>
 
 </Project>

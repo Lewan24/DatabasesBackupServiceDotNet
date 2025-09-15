@@ -1,6 +1,5 @@
 ﻿@using Client.UI.Data.Services
 @using Modules.Auth.Shared.ActionsRequests
-
 @inject AdministrationHttpService Service
 @inject ISnackbar SnackBar
 
@@ -8,7 +7,7 @@
     <DialogContent>
         <EditForm Model="User" OnValidSubmit="Save"
                   OnInvalidSubmit="@(() => SnackBar.Add("Please check the entered data", Severity.Warning))">
-            <DataAnnotationsValidator />
+            <DataAnnotationsValidator/>
 
             <MudCard Elevation="4" Class="pa-4 rounded-2xl mb-5">
                 <MudCardContent>
@@ -20,7 +19,7 @@
                                           Adornment="Adornment.Start"
                                           AdornmentIcon="@Icons.Material.Filled.Fingerprint"
                                           @bind-Value="User.Id"
-                                          For="@(() => User.Id)" />
+                                          For="@(() => User.Id)"/>
                         </MudItem>
 
                         <MudItem xs="12">
@@ -32,7 +31,7 @@
                                           Adornment="Adornment.Start"
                                           AdornmentIcon="@Icons.Material.Filled.Email"
                                           @bind-Value="User.Email"
-                                          For="@(() => User.Email)" />
+                                          For="@(() => User.Email)"/>
                         </MudItem>
 
                         <MudItem xs="12">
@@ -40,7 +39,7 @@
                                        @bind-Value="_changePassword"
                                        Disabled="@_isSaving"
                                        Color="Color.Primary"
-                                       Label="Change password" />
+                                       Label="Change password"/>
                         </MudItem>
 
                         @if (_changePassword)
@@ -53,7 +52,7 @@
                                               Adornment="Adornment.Start"
                                               AdornmentIcon="@Icons.Material.Filled.Lock"
                                               @bind-Value="User.Password"
-                                              For="@(() => User.Password)" />
+                                              For="@(() => User.Password)"/>
                             </MudItem>
                             <MudItem xs="12" sm="6">
                                 <MudTextField Label="Confirm New Password"
@@ -63,13 +62,13 @@
                                               Adornment="Adornment.Start"
                                               AdornmentIcon="@Icons.Material.Filled.LockReset"
                                               @bind-Value="User.ConfirmPassword"
-                                              For="@(() => User.ConfirmPassword)" />
+                                              For="@(() => User.ConfirmPassword)"/>
                             </MudItem>
                         }
                     </MudGrid>
                 </MudCardContent>
             </MudCard>
-            
+
             <MudContainer Class="d-flex justify-between pa-4">
                 <MudButton OnClick="Cancel" Variant="Variant.Text" Color="Color.Default" Disabled="@_isSaving">
                     Cancel
@@ -78,7 +77,7 @@
                 <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
                     @if (_isSaving)
                     {
-                        <MudProgressCircular Color="Color.Secondary" Indeterminate="true" Size="Size.Small" />
+                        <MudProgressCircular Color="Color.Secondary" Indeterminate="true" Size="Size.Small"/>
                     }
                     <MudButton ButtonType="ButtonType.Submit"
                                Variant="Variant.Filled"
@@ -100,7 +99,10 @@
 
     [Parameter] public required EditUserRequest User { get; set; }
 
-    private void Cancel() => MudDialog.Cancel();
+    private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
 
     private async Task Save()
     {
@@ -122,4 +124,5 @@
 
         _isSaving = false;
     }
+
 }

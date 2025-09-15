@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Modules.Crypto.Application.Services;
 using Modules.Crypto.Shared.Interfaces;
 
@@ -10,7 +9,7 @@ public static class Extensions
     public static IServiceCollection AddCryptoApplication(this IServiceCollection services)
     {
         services.AddScoped<ICryptoService, CryptoService>();
-        
+
         return services;
     }
 }

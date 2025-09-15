@@ -1,14 +1,14 @@
 ﻿@page "/backups"
 
-@using Client.UI.Data.Services
-@using Microsoft.AspNetCore.SignalR.Client
-@using Modules.Backup.Shared.Dtos
-@using Modules.Backup.Shared.Hubs
-
 @inject AuthStateProvider Auth
 @inject BackupsHttpClientService Service
 @inject ISnackbar Snackbar
 @inject NavigationManager Nav
+
+@using Client.UI.Data.Services
+@using Microsoft.AspNetCore.SignalR.Client
+@using Modules.Backup.Shared.Dtos
+@using Modules.Backup.Shared.Hubs
 
 @implements IDisposable
 
@@ -27,10 +27,21 @@
 
         <MudTable Items="@_backups" Hover="true" Dense="true">
             <HeaderContent>
-                <MudTh><MudTableSortLabel SortBy="new Func<PerformedBackupDto, object>(x => x.Name)">Name</MudTableSortLabel></MudTh>
-                <MudTh><MudTableSortLabel InitialDirection="SortDirection.Descending" SortBy="new Func<PerformedBackupDto, object>(x => x.CreatedOn)">Created on</MudTableSortLabel></MudTh>
+                <MudTh>
+                    <MudTableSortLabel SortBy="new Func<PerformedBackupDto, object>(x => x.Name!)">Name
+                    </MudTableSortLabel>
+                </MudTh>
+                <MudTh>
+                    <MudTableSortLabel InitialDirection="SortDirection.Descending"
+                                       SortBy="new Func<PerformedBackupDto, object>(x => x.CreatedOn)">Created on
+                    </MudTableSortLabel>
+                </MudTh>
                 <MudTh>File Location</MudTh>
-                <MudTh><MudTableSortLabel SortBy="new Func<PerformedBackupDto, object>(x => x.Test?.IsSuccess)">Test Status</MudTableSortLabel></MudTh>
+                <MudTh>
+                    <MudTableSortLabel SortBy="new Func<PerformedBackupDto, object>(x => x.Test!.IsSuccess)">Test
+                        Status
+                    </MudTableSortLabel>
+                </MudTh>
                 <MudTh>Operations</MudTh>
             </HeaderContent>
             <RowTemplate>
@@ -68,17 +79,20 @@
                             <MudChip T="string" Color="Color.Info" Variant="Variant.Outlined">Not Tested</MudChip>
                         }
                     </MudTd>
-                    
+
                     <MudTd>
                         <MudMenu>
                             <ActivatorContent>
                                 <MudIconButton Icon="@Icons.Material.Filled.Menu"/>
                             </ActivatorContent>
-                            
+
                             <ChildContent>
-                                <MudMenuItem Icon="@Icons.Material.Filled.Download" Label="Download Backup .zip" Target="_blank" Href="@(Nav.ToAbsoluteUri($"/api/backups/download?id={context.Id}").ToString())" />
-                                
-                                <MudMenuItem Icon="@Icons.Material.Filled.PlayArrow" Disabled="@((context.Test?.IsSuccess ?? true) && context.Test is not null)">
+                                <MudMenuItem Icon="@Icons.Material.Filled.Download" Label="Download Backup .zip"
+                                             Target="_blank"
+                                             Href="@(Nav.ToAbsoluteUri($"/api/backups/download?id={context.Id}").ToString())"/>
+
+                                <MudMenuItem Icon="@Icons.Material.Filled.PlayArrow"
+                                             Disabled="@((context.Test?.IsSuccess ?? true) && context.Test is not null)">
                                     @switch (context.Test?.IsSuccess)
                                     {
                                         case true:
@@ -101,7 +115,7 @@
             </RowTemplate>
 
             <PagerContent>
-                <MudTablePager PageSizeOptions="@([25, 50, 100])" />
+                <MudTablePager PageSizeOptions="@( [25, 50, 100])"/>
             </PagerContent>
         </MudTable>
     </MudPaper>
@@ -110,7 +124,7 @@
 @code {
     private List<PerformedBackupDto> _backups = new();
     private HubConnection? _hubConnection;
-    
+
     protected override async Task OnInitializedAsync()
     {
         if (string.IsNullOrWhiteSpace(
@@ -118,15 +132,15 @@
             return;
 
         await FetchBackups();
-        
+
         _hubConnection = BackupHubHelper.GetBasicHubConnection(Nav.ToAbsoluteUri(BackupHubHelper.HubUrl));
-        
-        _hubConnection.On<Guid>(BackupHubHelper.Events.ServerHasChangedEvent.ToString(), (id) =>
+
+        _hubConnection.On<Guid>(BackupHubHelper.Events.ServerHasChangedEvent.ToString(), id =>
         {
             if (_backups.FirstOrDefault(x => x.ServerConnectionId == id) is not null)
                 InvokeAsync(FetchBackups);
         });
-        _hubConnection.On<string>(BackupHubHelper.Events.BackupCreatedEvent.ToString(), (userName) =>
+        _hubConnection.On<string>(BackupHubHelper.Events.BackupCreatedEvent.ToString(), userName =>
         {
             if (Auth.GetAuthenticationStateAsync().Result.User.Identity!.Name!.Equals(userName, StringComparison.OrdinalIgnoreCase))
                 InvokeAsync(FetchBackups);
@@ -134,7 +148,7 @@
 
         await _hubConnection.StartAsync();
     }
-    
+
     private async Task FetchBackups()
     {
         var getBackupsResult = await Service.GetAllBackupsAsync();

@@ -1,5 +1,4 @@
-﻿using System.Data.Common;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Modules.Administration.Shared.Interfaces;
@@ -17,7 +16,7 @@ using OneOf.Types;
 
 namespace Modules.Backup.Application.Services;
 
-public class ServersService (
+public class ServersService(
     BackupsDbContext db,
     AppIdentityDbContext appIdentityDbContext,
     UserManager<AppUser> userManager,
@@ -30,11 +29,11 @@ public class ServersService (
     {
         if (string.IsNullOrWhiteSpace(identityName))
             return "Can't access user name";
-        
+
         var user = await userManager.FindByNameAsync(identityName);
         if (user is null)
             return "Can't find user";
-        
+
         var isAdmin = await userManager.IsInRoleAsync(user, AppRoles.Admin);
 
         List<DbServerConnection> dbServers;
@@ -49,12 +48,12 @@ public class ServersService (
 
             if (userServers.Count == 0)
                 return new List<ServerConnectionDto>();
-        
+
             dbServers = db.DbConnections
                 .AsNoTracking()
                 .Where(x => userServers.Contains(x.Id))
                 .ToList();
-            
+
             dbServers.RemoveAll(x => x.IsDisabled);
         }
         else
@@ -65,7 +64,7 @@ public class ServersService (
         }
 
         var dtoServers = new List<ServerConnectionDto>();
-        
+
         foreach (var server in dbServers)
         {
             var dto = new ServerConnectionDto
@@ -79,11 +78,10 @@ public class ServersService (
                 DbUser = server.DbUser,
                 IsTunnelRequired = server.IsTunnelRequired
             };
-            
+
             var dbTunnel = db.DbServerTunnels.FirstOrDefault(x => x.Id == server.TunnelId);
 
             if (dbTunnel is not null)
-            {
                 dto.Tunnel = new ServerTunnelDto
                 {
                     Id = dbTunnel.Id,
@@ -95,23 +93,22 @@ public class ServersService (
                     RemotePort = dbTunnel.RemotePort,
                     Description = dbTunnel.Description
                 };
-            }
-            
+
             dtoServers.Add(dto);
         }
 
         return dtoServers;
     }
-    
+
     public async Task<OneOf<List<ServerNameIdDto>, string>> GetAvailableServersBasic(string? identityName)
     {
         if (string.IsNullOrWhiteSpace(identityName))
             return "Can't access user name";
-        
+
         var user = await userManager.FindByNameAsync(identityName);
         if (user is null)
             return "Can't find user";
-        
+
         var isAdmin = await userManager.IsInRoleAsync(user, AppRoles.Admin);
 
         List<DbServerConnection> dbServers;
@@ -126,12 +123,12 @@ public class ServersService (
 
             if (userServers.Count == 0)
                 return new List<ServerNameIdDto>();
-        
+
             dbServers = db.DbConnections
                 .AsNoTracking()
                 .Where(x => userServers.Contains(x.Id))
                 .ToList();
-            
+
             dbServers.RemoveAll(x => x.IsDisabled);
         }
         else
@@ -144,14 +141,14 @@ public class ServersService (
         var dtoServers = dbServers
             .Select(x => new ServerNameIdDto(x.Id, x.ConnectionName))
             .ToList();
-        
+
         return dtoServers;
     }
 
     public async Task<OneOf<Success, string>> CreateServer(ServerConnectionDto newServer, string? identityName)
     {
         List<string> errors = new();
-        
+
         if (string.IsNullOrWhiteSpace(newServer.ConnectionName))
             errors.Add("Connection name is required");
         if (string.IsNullOrWhiteSpace(newServer.ServerHost))
@@ -179,12 +176,14 @@ public class ServersService (
 
                 if (string.IsNullOrWhiteSpace(newServer.Tunnel.PrivateKeyContent))
                 {
-                    if (string.IsNullOrWhiteSpace(newServer.Tunnel.Password)) 
+                    if (string.IsNullOrWhiteSpace(newServer.Tunnel.Password))
                         errors.Add("Tunnel password is required");
                 }
                 else if (string.IsNullOrWhiteSpace(newServer.Tunnel.PrivateKeyPassphrase))
+                {
                     errors.Add("Tunnel private key password is required");
-                
+                }
+
                 if (newServer.Tunnel.LocalPort is <= 0 or > 65535)
                     errors.Add("Invalid tunnel local port");
                 if (string.IsNullOrWhiteSpace(newServer.Tunnel.RemoteHost))
@@ -193,7 +192,7 @@ public class ServersService (
                     errors.Add("Invalid tunnel remote port");
             }
         }
-        
+
         if (errors.Any())
             return string.Join(", ", errors);
 
@@ -208,7 +207,7 @@ public class ServersService (
             DbName = newServer.DbName,
             DbType = newServer.DbType,
             DbUser = newServer.DbUser,
-            DbPasswd = encryptedDbPasswd,
+            DbPasswd = encryptedDbPasswd ?? throw new ArgumentException("Db password can't be null"),
             IsTunnelRequired = newServer.IsTunnelRequired,
             IsDisabled = false
         };
@@ -219,7 +218,7 @@ public class ServersService (
             var encryptedPassword = cryptoService.Encrypt(newServer.Tunnel?.Password);
             var encryptedPem = cryptoService.Encrypt(newServer.Tunnel?.PrivateKeyContent);
             var encryptedPemPassphrase = cryptoService.Encrypt(newServer.Tunnel?.PrivateKeyPassphrase);
-            
+
             var dbTunnel = new DbServerTunnel
             {
                 Id = Guid.CreateVersion7(),
@@ -236,7 +235,7 @@ public class ServersService (
                 Description = newServer.Tunnel.Description,
                 IsActive = true
             };
-            
+
             // zapisujemy tunel
             db.DbServerTunnels.Add(dbTunnel);
             dbServer.TunnelId = dbTunnel.Id;
@@ -247,12 +246,12 @@ public class ServersService (
 
         if (string.IsNullOrWhiteSpace(identityName))
             return "Can't access username";
-        
+
         var user = await userManager.FindByNameAsync(identityName);
-        
+
         if (user is null)
             return "Can't find user";
-        
+
         var isAdmin = await userManager.IsInRoleAsync(user, AppRoles.Admin);
 
         var serverUser = new ServersUsers
@@ -260,23 +259,23 @@ public class ServersService (
             UserId = Guid.Parse(user.Id),
             ServerId = dbServer.Id
         };
-        
+
         if (!isAdmin)
             db.UsersServers.Add(serverUser);
-        
+
         var serverBackupConfig = new ServerBackupsConfiguration
         {
             Id = Guid.CreateVersion7(),
             ServerId = dbServer.Id,
             TimeInDaysToHoldBackups = 4
         };
-        
+
         db.Configurations.Add(serverBackupConfig);
-        
+
         await db.SaveChangesAsync();
 
         await notifyService.CallServerCreatedEvent(user.UserName!);
-        
+
         return new Success();
     }
 
@@ -284,7 +283,7 @@ public class ServersService (
     {
         // TODO: Implement checking if user has access to server or is admin
         List<string> errors = [];
-        
+
         if (string.IsNullOrWhiteSpace(server.ConnectionName))
             errors.Add("Connection name is required");
         if (string.IsNullOrWhiteSpace(server.ServerHost))
@@ -307,7 +306,7 @@ public class ServersService (
                     errors.Add("Tunnel host is required");
                 if (string.IsNullOrWhiteSpace(server.Tunnel.Username))
                     errors.Add("Tunnel username is required");
-                
+
                 if (server.Tunnel.LocalPort is <= 0 or > 65535)
                     errors.Add("Invalid tunnel local port");
                 if (string.IsNullOrWhiteSpace(server.Tunnel.RemoteHost))
@@ -319,7 +318,7 @@ public class ServersService (
 
         if (errors.Any())
             return string.Join(", ", errors);
-        
+
         // 2. Szukamy istniejącego serwera
         var dbServer = await db.DbConnections
             .FirstOrDefaultAsync(s => s.Id == server.Id);
@@ -334,13 +333,13 @@ public class ServersService (
         dbServer.DbName = server.DbName;
         dbServer.DbType = server.DbType;
         dbServer.DbUser = server.DbUser;
-        
+
         if (!string.IsNullOrWhiteSpace(server.DbPasswd))
         {
             var encryptedDbPasswd = cryptoService.Encrypt(server.DbPasswd);
             dbServer.DbPasswd = encryptedDbPasswd!;
         }
-        
+
         dbServer.IsTunnelRequired = server.IsTunnelRequired;
 
         // 4. Obsługa tunelu
@@ -360,7 +359,7 @@ public class ServersService (
                     Username = "",
                     RemoteHost = ""
                 };
-                
+
                 db.DbServerTunnels.Add(dbTunnel);
             }
 
@@ -374,26 +373,26 @@ public class ServersService (
                 var encryptedPassword = cryptoService.Encrypt(server.Tunnel?.Password);
                 var encryptedPem = cryptoService.Encrypt(server.Tunnel?.PrivateKeyContent);
                 var encryptedPemPassphrase = cryptoService.Encrypt(server.Tunnel?.PrivateKeyPassphrase);
-                
+
                 dbTunnel.Password = encryptedPassword;
                 dbTunnel.PrivateKeyContent = encryptedPem;
                 dbTunnel.PrivateKeyPassphrase = encryptedPemPassphrase;
             }
-            
+
             dbTunnel.LocalPort = server.Tunnel!.LocalPort;
             dbTunnel.RemoteHost = server.Tunnel!.RemoteHost!;
             dbTunnel.RemotePort = server.Tunnel.RemotePort;
             dbTunnel.Description = server.Tunnel.Description;
 
             dbTunnel.UsePasswordAuth = string.IsNullOrWhiteSpace(dbTunnel.PrivateKeyContent);
-            
+
             dbServer.TunnelId = dbTunnel.Id;
         }
 
         await db.SaveChangesAsync();
 
         await notifyService.CallServerHasChangedEvent(dbServer.Id);
-        
+
         return new Success();
     }
 
@@ -409,14 +408,16 @@ public class ServersService (
 
         if (string.IsNullOrWhiteSpace(username))
             return "Can't access username";
-        
+
         var user = await userManager.FindByNameAsync(username);
         if (user is null)
             return "Can't find user";
-        
+
         var isAdmin = await userManager.IsInRoleAsync(user, AppRoles.Admin);
         if (isAdmin)
+        {
             server.IsDisabled = !server.IsDisabled;
+        }
         else
         {
             var access = await db.UsersServers
@@ -425,14 +426,16 @@ public class ServersService (
 
             if (access is null)
                 return "User does not have required access to this server";
-            
+
             server.IsDisabled = true;
         }
-        
+
         await db.SaveChangesAsync();
-        
+
         if (server.IsDisabled)
+        {
             await notifyService.CallServerHasChangedEvent(server.Id);
+        }
         else
         {
             var usersWithAccess = db.UsersServers
@@ -446,7 +449,7 @@ public class ServersService (
                 await notifyService.CallServerCreatedEvent(tempUser?.UserName!);
             }
         }
-        
+
         return new Success();
     }
 
@@ -456,8 +459,8 @@ public class ServersService (
             .AsNoTracking()
             .Select(x => new ServersUsersListDto
             {
-                ServerId = x.Id, 
-                IsServerDisabled = x.IsDisabled, 
+                ServerId = x.Id,
+                IsServerDisabled = x.IsDisabled,
                 ServerConnectionName = x.ConnectionName
             }).ToList();
 
@@ -465,7 +468,7 @@ public class ServersService (
         {
             var usersWithAccess = db.UsersServers
                 .Count(x => x.ServerId == server.ServerId);
-            
+
             server.UsersWithAccess = usersWithAccess;
         }
 
@@ -476,7 +479,7 @@ public class ServersService (
     {
         if (serverId == Guid.Empty)
             return Task.FromResult<OneOf<List<string>, string>>("Id cant be empty");
-        
+
         try
         {
             var serversUsersIds = db.UsersServers
@@ -486,10 +489,11 @@ public class ServersService (
                 .ToList();
 
             var usersEmails = new List<string>();
-            
+
             foreach (var userId in serversUsersIds)
-                usersEmails.Add(appIdentityDbContext.Users.FirstOrDefaultAsync(x => x.Id == userId.ToString()).Result?.Email!);
-            
+                usersEmails.Add(appIdentityDbContext.Users.FirstOrDefaultAsync(x => x.Id == userId.ToString()).Result
+                    ?.Email!);
+
             return Task.FromResult<OneOf<List<string>, string>>(usersEmails!);
         }
         catch (Exception e)
@@ -523,7 +527,7 @@ public class ServersService (
                 var dbUser = await userManager.FindByIdAsync(user.Id);
                 if (await adminApi.AmIAdmin(dbUser?.UserName))
                     continue;
-                
+
                 if (!serversUsersIds.Contains(Guid.Parse(user.Id)))
                     usersWithoutAccess.Add(user.Email!);
             }
@@ -541,7 +545,7 @@ public class ServersService (
     {
         if (request.ServerId == Guid.Empty || string.IsNullOrWhiteSpace(request.UserEmail))
             return "Invalid request";
-        
+
         var user = await userManager.FindByEmailAsync(request.UserEmail);
         if (user is null)
             return "Can't find user";
@@ -556,7 +560,7 @@ public class ServersService (
         await db.SaveChangesAsync();
 
         await notifyService.CallServerHasChangedEvent(request.ServerId);
-        
+
         return new Success();
     }
 
@@ -564,7 +568,7 @@ public class ServersService (
     {
         if (request.ServerId == Guid.Empty || string.IsNullOrWhiteSpace(request.UserEmail))
             return "Invalid request";
-        
+
         var user = await userManager.FindByEmailAsync(request.UserEmail);
         if (user is null)
             return "Can't find user";
@@ -579,14 +583,14 @@ public class ServersService (
         await db.SaveChangesAsync();
 
         await notifyService.CallServerCreatedEvent(user.UserName!);
-        
+
         return new Success();
     }
 
     public async Task<OneOf<Success, string>> TestServerConnection(Guid serverId)
     {
         var serverConn = db.DbConnections.FirstOrDefault(x => x.Id == serverId);
-        
+
         if (serverConn is null)
             return "Can't find server";
 
@@ -614,10 +618,10 @@ public class ServersService (
                 if (usersAccess.Any())
                 {
                     db.UsersServers.RemoveRange(usersAccess);
-                    await db.SaveChangesAsync();   
-                
+                    await db.SaveChangesAsync();
+
                     await notifyService.CallServerHasChangedEvent(serverId);
-                }   
+                }
             }
 
             if (db.Schedules.Any())
@@ -627,27 +631,22 @@ public class ServersService (
                 {
                     db.Schedules.RemoveRange(schedules);
                     await db.SaveChangesAsync();
-            
+
                     await notifyService.CallScheduleHasChangedEvent(schedules.First().Id);
                 }
             }
-            
+
             var serverBackupConfig = db.Configurations.FirstOrDefault(x => x.ServerId == serverId);
-            if (serverBackupConfig is not null)
-            {
-                db.Configurations.Remove(serverBackupConfig);
-            }
+            if (serverBackupConfig is not null) db.Configurations.Remove(serverBackupConfig);
 
             var backups = db.Backups.Where(x => x.ServerConnectionId == server.Id);
             if (backups.Any())
-            {
                 foreach (var backup in backups)
                     backup.ServerConnectionId = null;
-            }
-            
+
             db.DbConnections.Remove(server);
             await db.SaveChangesAsync();
-            
+
             await notifyService.CallServerHasChangedEvent(serverId);
         }
         catch (Exception e)
@@ -655,7 +654,7 @@ public class ServersService (
             logger.LogError(e.Message);
             return e.Message;
         }
-        
+
         return new Success();
     }
 }

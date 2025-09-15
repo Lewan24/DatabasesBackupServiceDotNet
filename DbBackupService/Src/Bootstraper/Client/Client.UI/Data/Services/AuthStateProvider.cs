@@ -8,7 +8,10 @@ using Modules.Auth.Shared.Entities;
 
 namespace Client.UI.Data.Services;
 
-public sealed class AuthStateProvider(IAuthHttpClientService api, NavigationManager nav, ILogger<AuthStateProvider> logger)
+public sealed class AuthStateProvider(
+    IAuthHttpClientService api,
+    NavigationManager nav,
+    ILogger<AuthStateProvider> logger)
     : AuthenticationStateProvider
 {
     private readonly ILoggingIn _loginApi = api;
@@ -64,7 +67,7 @@ public sealed class AuthStateProvider(IAuthHttpClientService api, NavigationMana
 
         return (await CurrentUserInfo())!.IsAuthenticated;
     }
-    
+
     public async Task<(bool Success, string? Msg)> Login(LoginRequest? loginRequest)
     {
         var loginResult = await _loginApi.Login(loginRequest);

@@ -14,6 +14,7 @@ public record ServerConnectionDto
     [Required] public required string DbUser { get; set; }
     public string? DbPasswd { get; set; }
     public bool IsTunnelRequired { get; set; }
+
     public ServerTunnelDto? Tunnel { get; set; }
     //public Guid AutoTestBackupsConfigId { get; set; }
 }

@@ -22,13 +22,13 @@ internal static class AdministrationEndpoints
 
         api.MapGet("GetUsers", AdministrationOperations.GetUsersList)
             .WithSummary("Get all users");
-        
+
         api.MapPost("ToggleUserBlockade", AdministrationOperations.ToggleUserBlockade)
             .WithSummary("Toggle user blockade");
-        
+
         api.MapPost("EditUser", AdministrationOperations.EditUser)
             .WithSummary("Edit existing user");
-        
+
         return app;
     }
 }

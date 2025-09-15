@@ -1,5 +1,4 @@
 @page "/authorizeuser"
-
 @using Blazored.LocalStorage
 @using Client.UI.Data.Interfaces
 @using Client.UI.Data.Services
@@ -15,6 +14,7 @@
 <AuthorizingUserInfoComponent/>
 
 @code {
+
     protected override async Task OnInitializedAsync()
     {
         var token = await LocalStorage.GetItemAsync<string>("TempToken");
@@ -28,4 +28,5 @@
 
         Nav.NavigateTo("/", false);
     }
+
 }

@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
-using Modules.Shared.Common;
 
 namespace Modules.Auth.Infrastructure.DbContexts;
 
@@ -8,9 +7,9 @@ public class AppIdentityDbContextFactory : IDesignTimeDbContextFactory<AppIdenti
 {
     public AppIdentityDbContext CreateDbContext(string[] args)
     {
-        var optionsBuilder = new DbContextOptionsBuilder<AppIdentityDbContext>(); 
-        optionsBuilder.UseSqlite($"Data Source=test.db"); 
-        
+        var optionsBuilder = new DbContextOptionsBuilder<AppIdentityDbContext>();
+        optionsBuilder.UseSqlite("Data Source=test.db");
+
         return new AppIdentityDbContext(optionsBuilder.Options);
     }
 }

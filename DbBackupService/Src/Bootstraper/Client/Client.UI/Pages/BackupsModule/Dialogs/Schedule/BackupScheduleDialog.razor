@@ -1,5 +1,4 @@
 ﻿@using Modules.Backup.Shared.Dtos
-
 @inject ISnackbar Snackbar
 
 <MudDialog>
@@ -10,10 +9,10 @@
                           Required="true"
                           Variant="Variant.Outlined"
                           Adornment="Adornment.Start"
-                          AdornmentIcon="@Icons.Material.Filled.Edit" />
+                          AdornmentIcon="@Icons.Material.Filled.Edit"/>
 
             <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
-                <MudSwitch @bind-Value="_model.IsEnabled" Color="Color.Success" />
+                <MudSwitch @bind-Value="_model.IsEnabled" Color="Color.Success"/>
                 <MudText Typo="Typo.body1">@(_model.IsEnabled ? "Enabled" : "Disabled")</MudText>
             </MudStack>
 
@@ -31,7 +30,7 @@
                     }
                 </MudSelect>
             </MudPaper>
-            
+
             <MudPaper Class="pa-3 rounded-lg">
                 <MudText Typo="Typo.subtitle2" Class="mb-2">Days</MudText>
 
@@ -48,8 +47,8 @@
                 </MudSelect>
 
                 <MudStack Row="true" Wrap="Wrap.Wrap" Spacing="1" Class="mt-2">
-                    @foreach (var d in _model.SelectedDays.OrderBy(x => ((int) x + 6) % 7)
-                                  .ToList())
+                    @foreach (var d in _model.SelectedDays.OrderBy(x => ((int)x + 6) % 7)
+                                      .ToList())
                     {
                         <MudChip T="DayOfWeek"
                                  Value="@d"
@@ -70,9 +69,9 @@
                            MultiSelection="true"
                            Variant="Variant.Outlined"
                            Dense="true">
-                    @for (int h = 0; h < 24; h++)
+                    @for (var h = 0; h < 24; h++)
                     {
-                        for (int m = 0; m < 60; m += 15)
+                        for (var m = 0; m < 60; m += 15)
                         {
                             var time = new TimeOnly(h, m);
                             <MudSelectItem Value="@time">@time.ToString("HH:mm")</MudSelectItem>
@@ -108,16 +107,18 @@
 
     private BackupsScheduleDto _model = new();
     private ServerNameIdDto? _selectedServer;
-    
+
     // wrappers dla MultiSelection
     private IEnumerable<DayOfWeek> SelectedDays
     {
+        // ReSharper disable once UnusedMember.Local
         get => _model.SelectedDays;
         set => _model.SelectedDays = value.ToList();
     }
 
     private IEnumerable<TimeOnly> SelectedTimes
     {
+        // ReSharper disable once UnusedMember.Local
         get => _model.SelectedTimes;
         set => _model.SelectedTimes = value.ToList();
     }
@@ -160,30 +161,35 @@
         {
             Snackbar.Add("Provide schedule name.", Severity.Error);
             return;
-        }    
-        
+        }
+
         if (_model.SelectedDays.Count == 0)
         {
             Snackbar.Add("Select at least 1 day.", Severity.Error);
             return;
-        }    
-        
+        }
+
         if (_model.SelectedTimes.Count == 0)
         {
             Snackbar.Add("Select at least 1 time.", Severity.Error);
             return;
-        }    
-        
+        }
+
         if (_selectedServer is null)
         {
             Snackbar.Add("Select the server assigned to schedule.", Severity.Error);
             return;
         }
-        
+
         _model.DbConnectionId = _selectedServer.Id;
         _model.ServerName = _selectedServer.Name;
-        
+
         MudDialog.Close(DialogResult.Ok(_model));
     }
-    void Cancel() => MudDialog.Cancel();
+
+    void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+
 }

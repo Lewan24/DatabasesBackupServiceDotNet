@@ -10,7 +10,10 @@ using OneOf.Types;
 
 namespace Client.UI.Data.Services;
 
-internal class AuthHttpClientHttpClientService(HttpClient httpClient, IServiceScopeFactory scopeFactory, ILogger<AuthHttpClientHttpClientService> logger)
+internal class AuthHttpClientHttpClientService(
+    HttpClient httpClient,
+    IServiceScopeFactory scopeFactory,
+    ILogger<AuthHttpClientHttpClientService> logger)
     : IAuthHttpClientService
 {
     private const string StorageTokenKeyName = "TokenKey";

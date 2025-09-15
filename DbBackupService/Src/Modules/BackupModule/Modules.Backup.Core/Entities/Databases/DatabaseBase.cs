@@ -2,32 +2,35 @@
 using Modules.Backup.Core.Entities.DbContext;
 using Modules.Backup.Core.Interfaces;
 using Modules.Backup.Core.StaticClasses;
-using Modules.Backup.Shared.Enums;
-using Modules.Crypto.Shared.Interfaces;
 
 namespace Modules.Backup.Core.Entities.Databases;
 
-public abstract class DatabaseBase(DbServerConnection serverConnection, DbServerTunnel serverTunnel, ILogger logger, string? defaulBackupExtension, ICryptoService cryptoService) : IDatabase
+public abstract class DatabaseBase(
+    DbServerConnection serverConnection,
+    DbServerTunnel serverTunnel,
+    ILogger logger,
+    string? defaulBackupExtension) : IDatabase
 {
     protected string BackupExtension = defaulBackupExtension ?? ".sql";
-    
+
     public async Task<string> PerformBackup(ServerBackupsConfiguration serverConfig)
     {
         logger.LogInformation("Performing backup for {DatabaseName}", serverConnection.DbName);
 
-        string fileName = $"{DateTime.Now:yyyy.MM.dd.HH.mm}{BackupExtension}";
+        var fileName = $"{DateTime.Now:yyyy.MM.dd.HH.mm}{BackupExtension}";
         logger.LogInformation("Potential backup file name: {FileName}", fileName);
-        
+
         var backupPath = serverConfig.CreateBackupPath(serverConnection, fileName);
         logger.LogInformation("Prepared backup path: {BackupPath}", backupPath.DirectoryPath);
-        
+
         try
         {
             using var tunnel = serverConnection.IsTunnelRequired
                 ? SshTunnelHelper.OpenTunnel(serverConnection, serverTunnel)
                 : null;
-            
-            logger.LogInformation("Performing internal backup operation for file: {FullFilePath}", backupPath.FullFilePath);
+
+            logger.LogInformation("Performing internal backup operation for file: {FullFilePath}",
+                backupPath.FullFilePath);
             await PerformBackupInternal(backupPath.FullFilePath!);
             return fileName;
         }
@@ -42,14 +45,36 @@ public abstract class DatabaseBase(DbServerConnection serverConnection, DbServer
             }
             catch (Exception cleanupEx)
             {
-                logger.LogWarning(cleanupEx, "Failed to clean up corrupted backup file {File}", backupPath.FullFilePath);
+                logger.LogWarning(cleanupEx, "Failed to clean up corrupted backup file {File}",
+                    backupPath.FullFilePath);
             }
 
             throw;
         }
     }
 
+    public string GetDatabaseName()
+    {
+        return serverConnection.DbName;
+    }
+
+    public Guid GetServerId()
+    {
+        return serverConnection.Id;
+    }
+
+    public DbServerConnection GetServerConnection()
+    {
+        return serverConnection;
+    }
+
+    public string GetBackupExtension()
+    {
+        return BackupExtension;
+    }
+
     protected abstract Task PerformBackupInternal(string fullFilePath);
+
     protected (string Host, int Port) GetHostAndPort()
     {
         var host = serverConnection.IsTunnelRequired ? "127.0.0.1" : serverConnection.ServerHost;
@@ -57,10 +82,4 @@ public abstract class DatabaseBase(DbServerConnection serverConnection, DbServer
 
         return (host, port);
     }
-    public string GetDatabaseName() => serverConnection.DbName;
-    public Guid GetServerId() => serverConnection.Id;
-    public DbServerConnection GetServerConnection() => serverConnection;
-
-    public string GetBackupExtension()
-        => BackupExtension;
 }

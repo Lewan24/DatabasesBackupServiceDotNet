@@ -1,12 +1,12 @@
 ﻿using System.Data;
+using System.Text;
 using Microsoft.Data.SqlClient;
 using Modules.Backup.Core.Entities.DbContext;
 using Modules.Backup.Shared.Enums;
+using Modules.Crypto.Shared.Interfaces;
 using MySqlConnector;
 using Npgsql;
 using Renci.SshNet;
-using System.Text;
-using Modules.Crypto.Shared.Interfaces;
 
 namespace Modules.Backup.Application.Static;
 
@@ -22,7 +22,7 @@ internal static class ServerConnectionTester
 
         try
         {
-            string host = conn.ServerHost;
+            var host = conn.ServerHost;
             int port = conn.ServerPort;
 
             if (conn.IsTunnelRequired && tunnel is not null)
@@ -37,7 +37,7 @@ internal static class ServerConnectionTester
                 {
                     var decryptedPem = cryptoService.Decrypt(tunnel.PrivateKeyContent);
                     var decryptedPemPassphrase = cryptoService.Decrypt(tunnel.PrivateKeyPassphrase);
-                    
+
                     using var keyStream = new MemoryStream(Encoding.UTF8.GetBytes(decryptedPem ?? ""));
                     auth = !string.IsNullOrEmpty(decryptedPemPassphrase)
                         ? new PrivateKeyAuthenticationMethod(
@@ -58,9 +58,9 @@ internal static class ServerConnectionTester
                 sshClient.Connect();
 
                 portForward = new ForwardedPortLocal("127.0.0.1",
-                                                    (uint)tunnel.LocalPort,
-                                                    tunnel.RemoteHost,
-                                                    (uint)tunnel.RemotePort);
+                    (uint)tunnel.LocalPort,
+                    tunnel.RemoteHost,
+                    (uint)tunnel.RemotePort);
                 sshClient.AddForwardedPort(portForward);
                 portForward.Start();
 
@@ -69,7 +69,7 @@ internal static class ServerConnectionTester
             }
 
             var decryptedDbPasswd = cryptoService.Decrypt(conn.DbPasswd);
-            
+
             IDbConnection dbConn = conn.DbType switch
             {
                 DatabaseType.MySql => new MySqlConnection(

@@ -1,5 +1,4 @@
 ﻿@page "/administration/dashboard"
-
 @using Client.UI.Data.Services
 
 @inject AuthStateProvider Auth
@@ -8,9 +7,9 @@
 
 <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="pa-6">
     <MudText Typo="Typo.h4" Color="Color.Primary" Class="mb-6">Panel Administracyjny</MudText>
-    
+
     <!-- Statystyki w kartach -->
-    <MudGrid GutterSize="3">
+    <MudGrid>
         <MudItem xs="12" sm="6" md="3">
             <MudPaper Class="pa-4 mud-elevation-2 rounded-2xl d-flex flex-column align-center">
                 <MudText Typo="Typo.h6">Użytkownicy</MudText>
@@ -23,7 +22,7 @@
                 <MudText Typo="Typo.h4" Color="Color.Primary">5</MudText>
             </MudPaper>
         </MudItem>
-        
+
         <MudItem xs="12" sm="6" md="3">
             <MudPaper Class="pa-4 mud-elevation-2 rounded-2xl d-flex flex-column align-center">
                 <MudText Typo="Typo.h6">Serwery</MudText>
@@ -66,7 +65,7 @@
 @code{
 
     protected override async Task OnInitializedAsync()
-    { 
+    {
         await Auth.AuthorizeUser(returnPageAfterValidPasswordAuthorization: "administration-dashboard");
     }
 

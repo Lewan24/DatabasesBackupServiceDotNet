@@ -1,5 +1,4 @@
 ﻿@page "/account/login"
-
 @using Blazored.LocalStorage
 @using Client.UI.Data.Services
 @using Modules.Auth.Shared.ActionsRequests
@@ -13,10 +12,14 @@
 
 <MudContainer MaxWidth="MaxWidth.ExtraSmall" Class="d-flex flex-column align-center justify-center min-vh-100 pa-4">
     <!-- Logo i tytuł -->
-    <MudPaper Class="d-flex flex-column align-center justify-center pa-6 mud-elevation-6 rounded-2xl" Style="width:100%; max-width:420px;">
-        <MudImage Src="@Assets["media/OctoBackupLogo.png"]" Alt="OctoBackup" Width="200" Class="mb-4" />
+    <MudPaper Class="d-flex flex-column align-center justify-center pa-6 mud-elevation-6 rounded-2xl"
+              Style="width:100%; max-width:420px;">
+        <MudImage Src="@Assets["media/OctoBackupLogo.png"]" Alt="OctoBackup" Width="200" Class="mb-4"/>
         <MudText Typo="Typo.h5" Align="Align.Center" Class="mb-6" Color="Color.Primary">
-            Logowanie do <MudButton Color="Color.Primary" Variant="Variant.Text" Size="Size.Large" OnClick="@(() => NavigationManager.NavigateTo("/", false))">OctoBackup</MudButton>
+            Logowanie do
+            <MudButton Color="Color.Primary" Variant="Variant.Text" Size="Size.Large"
+                       OnClick="@(() => NavigationManager.NavigateTo("/", false))">OctoBackup
+            </MudButton>
         </MudText>
 
         <!-- Formularz -->
@@ -44,11 +47,11 @@
                               Adornment="Adornment.Start"
                               AdornmentIcon="@Icons.Material.Filled.Lock"/>
 
-                <MudCheckBox T="bool" @bind-Value="@LoginRequest.RememberMe" Label="Zapamiętaj mnie" />
+                <MudCheckBox T="bool" @bind-Value="@LoginRequest.RememberMe" Label="Zapamiętaj mnie"/>
             </MudStack>
 
             <!-- Akcje -->
-            <MudStack Row="true" AlignItems="AlignItems.Center" JustifyContent="SpaceBetween" Class="mt-4">
+            <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mt-4">
                 <MudButton Variant="Variant.Text"
                            Color="Color.Secondary"
                            Disabled="@_isLoggingIn"
@@ -75,7 +78,8 @@
     </MudPaper>
 
     <!-- Stopka -->
-    <MudText Typo="Typo.caption" Align="Align.Center" Class="mt-6" Style="@($"color: {DefaultLayout.ThemePalette.TextSecondary}")">
+    <MudText Typo="Typo.caption" Align="Align.Center" Class="mt-6"
+             Style="@($"color: {DefaultLayout.ThemePalette.TextSecondary}")">
         © @(DateTime.Now.Year) OctoBackup. Wszystkie prawa zastrzeżone.
     </MudText>
 </MudContainer>
@@ -113,4 +117,5 @@
         await AuthStateProvider.AuthorizeUser(LoginRequest.Password, rememberMe: LoginRequest.RememberMe);
         NavigationManager.NavigateTo("/", false);
     }
+
 }

@@ -25,12 +25,16 @@ internal abstract class AdministrationOperations
     public static async Task<IResult> AmIAdmin(
         HttpContext context,
         [FromServices] IAdminModuleApi api)
-        => TypedResults.Ok(await api.AmIAdmin(context.User.Identity?.Name));
+    {
+        return TypedResults.Ok(await api.AmIAdmin(context.User.Identity?.Name));
+    }
 
     public static async Task<IResult> GetUsersList(
         HttpContext context,
         [FromServices] AdminService api)
-        => TypedResults.Ok(await api.GetUsersList());
+    {
+        return TypedResults.Ok(await api.GetUsersList());
+    }
 
     public static async Task<IResult> ToggleUserBlockade(
         HttpContext context,
@@ -38,7 +42,7 @@ internal abstract class AdministrationOperations
         [FromBody] string userId)
     {
         var result = await api.ToggleUserBlockade(userId);
-        
+
         return result.Match<IResult>(
             _ => TypedResults.Ok(),
             error => TypedResults.BadRequest(error)
@@ -51,7 +55,7 @@ internal abstract class AdministrationOperations
         [FromBody] EditUserRequest request)
     {
         var result = await api.EditUser(request);
-        
+
         return result.Match<IResult>(
             _ => TypedResults.Ok(),
             error => TypedResults.BadRequest(error)

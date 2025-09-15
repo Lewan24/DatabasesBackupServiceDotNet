@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Text;
 using Microsoft.Extensions.Logging;
 using Modules.Backup.Core.Entities.DbContext;
 using Modules.Backup.Core.StaticClasses;
@@ -9,15 +10,15 @@ namespace Modules.Backup.Core.Entities.Databases;
 
 public sealed class PostgreSqlDatabase : DatabaseBase
 {
-    private readonly DbServerConnection _serverConnection;
-    private readonly ILogger _logger;
     private readonly ICryptoService _cryptoService;
+    private readonly ILogger _logger;
+    private readonly DbServerConnection _serverConnection;
 
     public PostgreSqlDatabase(
-        DbServerConnection serverConnection, 
-        DbServerTunnel serverTunnel, 
+        DbServerConnection serverConnection,
+        DbServerTunnel serverTunnel,
         ILogger logger,
-        ICryptoService cryptoService) : base(serverConnection, serverTunnel, logger, null, cryptoService)
+        ICryptoService cryptoService) : base(serverConnection, serverTunnel, logger, null)
     {
         _serverConnection = serverConnection;
         _logger = logger;
@@ -26,7 +27,7 @@ public sealed class PostgreSqlDatabase : DatabaseBase
         if (!ToolChecker.IsToolAvailable("pg_dump"))
             BackupExtension = ".csv";
     }
-    
+
     protected override async Task PerformBackupInternal(string fullFilePath)
     {
         if (ToolChecker.IsToolAvailable("pg_dump"))
@@ -38,10 +39,11 @@ public sealed class PostgreSqlDatabase : DatabaseBase
     private async Task PerformBackupWithDump(string fullFilePath)
     {
         var hostPort = GetHostAndPort();
-        var args = $"--host={hostPort.Host} --port={hostPort.Port} --username={_serverConnection.DbUser} --no-password --dbname={_serverConnection.DbName}";
+        var args =
+            $"--host={hostPort.Host} --port={hostPort.Port} --username={_serverConnection.DbUser} --no-password --dbname={_serverConnection.DbName}";
 
         var decryptedDbPasswd = _cryptoService.Decrypt(_serverConnection.DbPasswd);
-        
+
         var process = new Process
         {
             StartInfo = new ProcessStartInfo
@@ -74,12 +76,12 @@ public sealed class PostgreSqlDatabase : DatabaseBase
         var hostPort = GetHostAndPort();
         var decryptedDbPasswd = _cryptoService.Decrypt(_serverConnection.DbPasswd);
         var connStr =
-            $"Host={hostPort.Host};Port={hostPort.Port};Database={_serverConnection.DbName};Username={_serverConnection.DbUser };Password={decryptedDbPasswd};";
+            $"Host={hostPort.Host};Port={hostPort.Port};Database={_serverConnection.DbName};Username={_serverConnection.DbUser};Password={decryptedDbPasswd};";
         await using var conn = new NpgsqlConnection(connStr);
         await conn.OpenAsync();
-        
+
         _logger.LogInformation("Connection opened.");
-        
+
         var tables = new List<(string Schema, string Table)>();
 
         await using (var cmd = new NpgsqlCommand(@"
@@ -93,7 +95,7 @@ public sealed class PostgreSqlDatabase : DatabaseBase
                 tables.Add((reader.GetString(0), reader.GetString(1)));
         }
 
-        await using var writer = new StreamWriter(fullFilePath, false, System.Text.Encoding.UTF8);
+        await using var writer = new StreamWriter(fullFilePath, false, Encoding.UTF8);
 
         foreach (var (schema, table) in tables)
         {

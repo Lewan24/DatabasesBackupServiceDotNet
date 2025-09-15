@@ -1,5 +1,4 @@
 ﻿@page "/administration/users"
-
 @using Client.UI.Data.Services
 @using Client.UI.Pages.Administration.Dialogs.UsersManagement
 @using Modules.Auth.Shared.ActionsRequests
@@ -65,12 +64,13 @@
                 </MudTd>
                 <MudTd DataLabel="Role">@string.Join(", ", context.Roles!)</MudTd>
                 <MudTd>
-                    <MudIconButton Disabled="@_isProcessing" Icon="@Icons.Material.Filled.Edit" Variant="Variant.Filled" OnClick="@(() => OpenEditUserDialog(context))" Color="Color.Warning"/>
+                    <MudIconButton Disabled="@_isProcessing" Icon="@Icons.Material.Filled.Edit" Variant="Variant.Filled"
+                                   OnClick="@(() => OpenEditUserDialog(context))" Color="Color.Warning"/>
                 </MudTd>
             </RowTemplate>
-            
+
             <PagerContent>
-                <MudTablePager PageSizeOptions="@([10, 25, 50, 100])" />
+                <MudTablePager PageSizeOptions="@( [10, 25, 50, 100])"/>
             </PagerContent>
         </MudTable>
     </MudPaper>
@@ -79,27 +79,27 @@
 @code {
     private List<UserDto> _users = new();
     private bool _isProcessing;
-    
+
     protected override async Task OnInitializedAsync()
     {
         if (string.IsNullOrWhiteSpace(
                 await Auth.AuthorizeUser(returnPageAfterValidPasswordAuthorization: "administration-users")))
             return;
-        
+
         await FetchUsers();
     }
 
     private async Task FetchUsers()
     {
         _isProcessing = true;
-        
+
         var getUsersResult = await Service.GetUsersList();
 
         getUsersResult.Switch(
             users => _users = users,
             error => Snackbar.Add(error, Severity.Error)
         );
-        
+
         _isProcessing = false;
         StateHasChanged();
     }
@@ -107,14 +107,14 @@
     private async Task ToggleBlock(string userId)
     {
         _isProcessing = true;
-        
+
         var result = await Service.ToggleUserBlockade(userId);
-        
+
         result.Switch(
             async void (_) => await FetchUsers(),
             error => Snackbar.Add(error, Severity.Error)
         );
-        
+
         _isProcessing = false;
     }
 
@@ -132,9 +132,9 @@
                 }
             }
         };
-        
-        var dialog = await DialogService.ShowAsync<EditUserDialog>($"Edit user {user.Email}", parameters: dialogParameters);
-        
+
+        var dialog = await DialogService.ShowAsync<EditUserDialog>($"Edit user {user.Email}", dialogParameters);
+
         var dialogResult = await dialog.Result;
 
         if (dialogResult is not null && !dialogResult.Canceled)
@@ -144,10 +144,11 @@
     private async Task OpenCreateNewUserDialog()
     {
         var dialog = await DialogService.ShowAsync<CreateNewUserDialog>("Create new User");
-        
+
         var dialogResult = await dialog.Result;
 
         if (dialogResult is not null && !dialogResult.Canceled)
             await FetchUsers();
     }
+
 }

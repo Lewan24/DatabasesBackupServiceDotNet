@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using Modules.Administration.Shared.Interfaces;
 using Modules.Backup.Core.Entities.DbContext;
 using Modules.Backup.Infrastructure.DbContexts;
@@ -12,7 +11,6 @@ namespace Modules.Backup.Application.Services;
 
 public sealed class SchedulesService(
     BackupsDbContext db,
-    ILogger<SchedulesService> logger,
     ServersService serversService,
     IAdminModuleApi adminApi,
     NotifyService notifyService)
@@ -27,14 +25,14 @@ public sealed class SchedulesService(
         var availableServers = getAvailableServersResult.AsT0 ?? new List<ServerNameIdDto>();
 
         var schedules = new List<BackupsScheduleDto>();
-        
+
         var isAdmin = await adminApi.AmIAdmin(identityName);
         if (isAdmin)
         {
             schedules = db.Schedules.AsNoTracking().Select(x => new BackupsScheduleDto
             {
-                Id = x.Id, 
-                Name =  x.Name, 
+                Id = x.Id,
+                Name = x.Name,
                 ServerName = "",
                 DbConnectionId = x.DbConnectionId,
                 IsEnabled = x.IsEnabled,
@@ -54,8 +52,8 @@ public sealed class SchedulesService(
                     .ToList();
                 schedules.AddRange(tempDbSchedule.Select(x => new BackupsScheduleDto
                 {
-                    Id = x.Id, 
-                    Name =  x.Name, 
+                    Id = x.Id,
+                    Name = x.Name,
                     ServerName = server.Name,
                     DbConnectionId = x.DbConnectionId,
                     IsEnabled = x.IsEnabled,
@@ -98,7 +96,7 @@ public sealed class SchedulesService(
         await db.SaveChangesAsync();
 
         await notifyService.CallScheduleCreatedEvent(schedule.DbConnectionId);
-        
+
         return new Success();
     }
 
@@ -127,12 +125,12 @@ public sealed class SchedulesService(
             Times = schedule.SelectedTimes
         };
         entity.NextBackupDate = BackupScheduleHelper.GetNextDateTime(schedule);
-        
+
         db.Schedules.Update(entity);
         await db.SaveChangesAsync();
 
         await notifyService.CallScheduleHasChangedEvent(entity.Id);
-        
+
         return new Success();
     }
 
@@ -156,8 +154,7 @@ public sealed class SchedulesService(
         await db.SaveChangesAsync();
 
         await notifyService.CallScheduleHasChangedEvent(scheduleId);
-        
+
         return new Success();
     }
-
 }

@@ -8,12 +8,12 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.8"/>
-      <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.8" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.8"/>
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\Shared\Modules.Shared\Modules.Shared.csproj" />
-      <ProjectReference Include="..\Modules.Administration.Application\Modules.Administration.Application.csproj" />
+        <ProjectReference Include="..\..\Shared\Modules.Shared\Modules.Shared.csproj"/>
+        <ProjectReference Include="..\Modules.Administration.Application\Modules.Administration.Application.csproj"/>
     </ItemGroup>
 
 </Project>

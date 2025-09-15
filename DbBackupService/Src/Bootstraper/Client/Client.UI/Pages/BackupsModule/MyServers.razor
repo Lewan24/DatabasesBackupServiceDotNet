@@ -1,18 +1,17 @@
 ﻿@page "/servers"
 
-@using Client.UI.Data.Services
-@using Client.UI.Pages.BackupsModule.Dialogs.Servers
-@using Microsoft.AspNetCore.SignalR.Client
-@using Modules.Auth.Shared.Static.Entities
-@using Modules.Backup.Shared.Dtos
-@using Modules.Backup.Shared.Hubs
-
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
 @inject BackupsHttpClientService Service
 @inject NavigationManager Nav
 @inject AuthStateProvider Auth
 
+@using Client.UI.Data.Services
+@using Client.UI.Pages.BackupsModule.Dialogs.Servers
+@using Microsoft.AspNetCore.SignalR.Client
+@using Modules.Auth.Shared.Static.Entities
+@using Modules.Backup.Shared.Dtos
+@using Modules.Backup.Shared.Hubs
 @implements IDisposable
 
 <PageTitle>Servers</PageTitle>
@@ -24,16 +23,28 @@
         <MudStack Justify="Justify.SpaceBetween" Row="true" Class="mb-4">
             <MudText Typo="Typo.h6">Servers list</MudText>
             <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add"
-                       Disabled="@_isProcessing" OnClick="OpenCreateNewServerDialog">Add server</MudButton>
+                       Disabled="@_isProcessing" OnClick="OpenCreateNewServerDialog">Add server
+            </MudButton>
         </MudStack>
 
         <MudTable Items="@_servers" Hover="true" Dense="true">
             <HeaderContent>
-                <MudTh><MudTableSortLabel SortBy="new Func<ServerConnectionDto, object>(x => x.ConnectionName)">Name</MudTableSortLabel></MudTh>
+                <MudTh>
+                    <MudTableSortLabel SortBy="new Func<ServerConnectionDto, object>(x => x.ConnectionName)">Name
+                    </MudTableSortLabel>
+                </MudTh>
                 <MudTh>Host</MudTh>
                 <MudTh>Database</MudTh>
-                <MudTh><MudTableSortLabel SortBy="new Func<ServerConnectionDto, object>(x => x.IsTunnelRequired)">Tunnel Status</MudTableSortLabel></MudTh>
-                <MudTh><MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<ServerConnectionDto, object>(x => x.DbType)">Type</MudTableSortLabel></MudTh>
+                <MudTh>
+                    <MudTableSortLabel SortBy="new Func<ServerConnectionDto, object>(x => x.IsTunnelRequired)">Tunnel
+                        Status
+                    </MudTableSortLabel>
+                </MudTh>
+                <MudTh>
+                    <MudTableSortLabel InitialDirection="SortDirection.Ascending"
+                                       SortBy="new Func<ServerConnectionDto, object>(x => x.DbType)">Type
+                    </MudTableSortLabel>
+                </MudTh>
                 <MudTh>Operations</MudTh>
             </HeaderContent>
             <RowTemplate>
@@ -52,40 +63,48 @@
                 </MudTd>
                 <MudTd DataLabel="Type">@context.DbType</MudTd>
                 <MudTd DataLabel="Operations" Class="d-flex flex-row flex-nowrap justify-center gap-1 align-center">
-                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Disabled="@_isProcessing" Color="Color.Warning" OnClick="@(() => OpenEditServerDialog(context))" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Disabled="@_isProcessing" Color="Color.Warning"
+                                   OnClick="@(() => OpenEditServerDialog(context))"/>
                     <AuthorizeView Roles="@AppRoles.Admin">
                         <Authorized Context="authCtx">
-                            <MudTooltip Delay="100" Text="Permanently delete server and it's schedules and users access">
-                                <MudIconButton Icon="@Icons.Material.Filled.DeleteForever" Disabled="@_isProcessing" Color="Color.Error" OnClick="@(() => DeleteServer(context.Id))" />
+                            <MudTooltip Delay="100"
+                                        Text="Permanently delete server and it's schedules and users access">
+                                <MudIconButton Icon="@Icons.Material.Filled.DeleteForever" Disabled="@_isProcessing"
+                                               Color="Color.Error" OnClick="@(() => DeleteServer(context.Id))"/>
                             </MudTooltip>
                         </Authorized>
                         <NotAuthorized Context="authCtx">
                             <MudTooltip Delay="100" Text="Disable server">
-                                <MudIconButton Icon="@Icons.Material.Filled.Delete" Disabled="@_isProcessing" Color="Color.Error" OnClick="@(() => DisableServer(context.Id))" />
+                                <MudIconButton Icon="@Icons.Material.Filled.Delete" Disabled="@_isProcessing"
+                                               Color="Color.Error" OnClick="@(() => DisableServer(context.Id))"/>
                             </MudTooltip>
                         </NotAuthorized>
                     </AuthorizeView>
                     <MudMenu>
                         <ActivatorContent>
-                            <MudIconButton Icon="@Icons.Material.Filled.Menu" Disabled="@_isProcessing" />
+                            <MudIconButton Icon="@Icons.Material.Filled.Menu" Disabled="@_isProcessing"/>
                         </ActivatorContent>
                         <ChildContent>
-                            <MudMenuItem Disabled="@_isProcessing" OnClick="@(() => OpenTestServerDialog(context.Id))">Test Connection</MudMenuItem>
-                            <MudMenuItem Disabled="@_isProcessing" OnClick="@(() => PerformServerBackup(context.Id))">Perform Backup</MudMenuItem>
+                            <MudMenuItem Disabled="@_isProcessing" OnClick="@(() => OpenTestServerDialog(context.Id))">
+                                Test Connection
+                            </MudMenuItem>
+                            <MudMenuItem Disabled="@_isProcessing" OnClick="@(() => PerformServerBackup(context.Id))">
+                                Perform Backup
+                            </MudMenuItem>
                         </ChildContent>
                     </MudMenu>
                 </MudTd>
             </RowTemplate>
 
             <PagerContent>
-                <MudTablePager PageSizeOptions="@([10, 25, 50, 100])" />
+                <MudTablePager PageSizeOptions="@( [10, 25, 50, 100])"/>
             </PagerContent>
         </MudTable>
     </MudPaper>
 </MudContainer>
 
 <MudOverlay @bind-Visible="_isProcessing" DarkBackground ZIndex="9999">
-    <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+    <MudProgressCircular Color="Color.Primary" Indeterminate="true"/>
 </MudOverlay>
 
 @code {
@@ -93,25 +112,25 @@
 
     private HubConnection? _hubConnection;
     private bool _isProcessing;
-    
+
     protected override async Task OnInitializedAsync()
     {
         if (string.IsNullOrWhiteSpace(
                 await Auth.AuthorizeUser(returnPageAfterValidPasswordAuthorization: "servers")))
             return;
-        
+
         await FetchServers();
 
         _hubConnection = BackupHubHelper.GetBasicHubConnection(Nav.ToAbsoluteUri(BackupHubHelper.HubUrl));
-        
-        _hubConnection.On<string>(BackupHubHelper.Events.ServerCreatedEvent.ToString(), (userName) =>
+
+        _hubConnection.On<string>(BackupHubHelper.Events.ServerCreatedEvent.ToString(), userName =>
         {
             var currentUserName = Auth.GetAuthenticationStateAsync().Result.User.Identity?.Name;
-            
+
             if (currentUserName!.Equals(userName, StringComparison.OrdinalIgnoreCase))
                 InvokeAsync(FetchServers);
         });
-        _hubConnection.On<Guid>(BackupHubHelper.Events.ServerHasChangedEvent.ToString(), (id) =>
+        _hubConnection.On<Guid>(BackupHubHelper.Events.ServerHasChangedEvent.ToString(), id =>
         {
             if (_servers.FirstOrDefault(x => x.Id == id) is not null)
                 InvokeAsync(FetchServers);
@@ -123,9 +142,9 @@
     private async Task FetchServers()
     {
         _isProcessing = true;
-        
+
         var result = await Service.GetServersAsync();
-        
+
         result.Switch(
             servers => _servers = servers,
             error => Snackbar.Add(error, Severity.Error)
@@ -138,9 +157,9 @@
     private async Task DisableServer(Guid id)
     {
         _isProcessing = true;
-        
+
         var result = await Service.ToggleServerDisabledStatus(id);
-        
+
         result.Switch(
             success => _ = FetchServers(),
             error => Snackbar.Add(error, Severity.Error)
@@ -148,16 +167,16 @@
 
         _isProcessing = false;
     }
-    
+
     private async Task OpenEditServerDialog(ServerConnectionDto server)
     {
         var dialogParameters = new DialogParameters<EditServerDialog>
         {
-            { x => x.Server, server with{} }
+            { x => x.Server, server with { } }
         };
-        
-        var dialog = await DialogService.ShowAsync<EditServerDialog>($"Edit server {server.ConnectionName}", parameters: dialogParameters);
-        
+
+        var dialog = await DialogService.ShowAsync<EditServerDialog>($"Edit server {server.ConnectionName}", dialogParameters);
+
         var dialogResult = await dialog.Result;
 
         if (dialogResult is not null && !dialogResult.Canceled)
@@ -167,7 +186,7 @@
     private async Task OpenCreateNewServerDialog()
     {
         var dialog = await DialogService.ShowAsync<CreateServerDialog>("Create new server");
-        
+
         var dialogResult = await dialog.Result;
 
         if (dialogResult is not null && !dialogResult.Canceled)
@@ -183,18 +202,18 @@
     {
         var parameters = new DialogParameters<TestServerDialog>
         {
-            { x => x.ServerId, serverId}
+            { x => x.ServerId, serverId }
         };
-        
-        await DialogService.ShowAsync<TestServerDialog>($"Test server [{serverId}] connection", parameters: parameters);
+
+        await DialogService.ShowAsync<TestServerDialog>($"Test server [{serverId}] connection", parameters);
     }
 
     private async Task DeleteServer(Guid serverId)
     {
         _isProcessing = true;
-        
+
         var result = await Service.CascadeDeleteServer(serverId);
-        
+
         result.Switch(
             success => _ = FetchServers(),
             error => Snackbar.Add(error, Severity.Error)
@@ -208,12 +227,12 @@
         _isProcessing = true;
 
         var result = await Service.BackupServerAsync(serverId);
-        
+
         result.Switch(
             _ => Snackbar.Add("Successfully performed backup", Severity.Success),
             error => Snackbar.Add(error, Severity.Error)
         );
-        
+
         _isProcessing = false;
     }
 

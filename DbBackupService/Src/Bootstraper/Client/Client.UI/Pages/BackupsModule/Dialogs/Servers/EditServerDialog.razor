@@ -1,7 +1,6 @@
 ﻿@using Client.UI.Data.Services
 @using Modules.Backup.Shared.Dtos
 @using Modules.Backup.Shared.Enums
-
 @inject ISnackbar SnackBar
 @inject BackupsHttpClientService Service
 
@@ -9,7 +8,7 @@
     <DialogContent>
         <EditForm Model="Server" OnValidSubmit="Save"
                   OnInvalidSubmit="@(() => SnackBar.Add("Please check entered data", Severity.Warning))">
-            <DataAnnotationsValidator />
+            <DataAnnotationsValidator/>
 
             <MudCard Elevation="3" Class="pa-4 rounded-2xl mb-5">
                 <MudCardContent>
@@ -73,7 +72,7 @@
 
                         <MudItem xs="12">
                             <MudSwitch T="bool" @bind-Value="Server.IsTunnelRequired" Disabled="@_isSaving"
-                                       Label="Use SSH Tunnel?" Color="Color.Primary" />
+                                       Label="Use SSH Tunnel?" Color="Color.Primary"/>
                         </MudItem>
 
                         @if (Server.IsTunnelRequired)
@@ -108,7 +107,8 @@
                                         </MudItem>
 
                                         <MudItem xs="12" sm="6">
-                                            <MudTooltip Text="Password for SSH login (optional if private key is provided)">
+                                            <MudTooltip
+                                                Text="Password for SSH login (optional if private key is provided)">
                                                 <MudTextField Label="Tunnel Password" Disabled="@_isSaving"
                                                               InputType="InputType.Password"
                                                               Adornment="Adornment.Start"
@@ -126,9 +126,10 @@
                                                               @bind-Value="Server.Tunnel!.PrivateKeyPassphrase"/>
                                             </MudTooltip>
                                         </MudItem>
-                                        
+
                                         <MudItem xs="12" sm="6">
-                                            <MudTooltip Text="Paste the content of your private key (.pem or .ppk converted to PEM)">
+                                            <MudTooltip
+                                                Text="Paste the content of your private key (.pem or .ppk converted to PEM)">
                                                 <MudTextField Label="Private Key (PEM)" Lines="4" Disabled="@_isSaving"
                                                               Placeholder="Paste private key here..."
                                                               HelperText="Private key content"
@@ -137,9 +138,11 @@
                                         </MudItem>
 
                                         <MudItem xs="12" sm="6">
-                                            <MudTooltip Text="Override existing passwords and private key content with actual values">
-                                                <MudSwitch T="bool" Label="Override Passwords and PEM" Disabled="@_isSaving"
-                                                              @bind-Value="Server.Tunnel!.OverridePasswordsAndPem"/>
+                                            <MudTooltip
+                                                Text="Override existing passwords and private key content with actual values">
+                                                <MudSwitch T="bool" Label="Override Passwords and PEM"
+                                                           Disabled="@_isSaving"
+                                                           @bind-Value="Server.Tunnel!.OverridePasswordsAndPem"/>
                                             </MudTooltip>
                                         </MudItem>
 
@@ -164,7 +167,8 @@
                                         </MudItem>
 
                                         <MudItem xs="12" sm="6">
-                                            <MudTooltip Text="Database host address as seen from the SSH server (often 127.0.0.1)">
+                                            <MudTooltip
+                                                Text="Database host address as seen from the SSH server (often 127.0.0.1)">
                                                 <MudTextField Disabled="@_isSaving"
                                                               Label="Remote Host"
                                                               HelperText="Database host accessible via SSH"
@@ -174,7 +178,8 @@
                                         </MudItem>
 
                                         <MudItem xs="12" sm="6">
-                                            <MudTooltip Text="Database port (5432 for PostgreSQL, 3306 for MySQL, etc.)">
+                                            <MudTooltip
+                                                Text="Database port (5432 for PostgreSQL, 3306 for MySQL, etc.)">
                                                 <MudNumericField T="int" Disabled="@_isSaving"
                                                                  Label="Remote Port"
                                                                  HelperText="Port of the database server"
@@ -184,7 +189,8 @@
                                         </MudItem>
 
                                         <MudItem xs="12">
-                                            <MudTooltip Text="Description for tunnel like any kind of additional info. (optional)">
+                                            <MudTooltip
+                                                Text="Description for tunnel like any kind of additional info. (optional)">
                                                 <MudTextField Disabled="@_isSaving" Lines="3"
                                                               Label="Description"
                                                               HelperText="Additional optional info"
@@ -200,8 +206,11 @@
             </MudCard>
 
             <MudContainer Class="d-flex justify-between pa-4">
-                <MudButton OnClick="Cancel" Variant="Variant.Text" Color="Color.Default" Disabled="@_isSaving">Cancel</MudButton>
-                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Success" Disabled="@_isSaving">Save</MudButton>
+                <MudButton OnClick="Cancel" Variant="Variant.Text" Color="Color.Default" Disabled="@_isSaving">Cancel
+                </MudButton>
+                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Success"
+                           Disabled="@_isSaving">Save
+                </MudButton>
             </MudContainer>
         </EditForm>
     </DialogContent>
@@ -212,22 +221,25 @@
 
     [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = null!;
     private bool _isSaving;
-    
+
     protected override void OnInitialized()
     {
-        Server.Tunnel ??= new();
+        Server.Tunnel ??= new ServerTunnelDto();
     }
 
-    private void Cancel() => MudDialog.Cancel();
+    private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
 
     private async Task Save()
     {
         _isSaving = true;
-        
+
         var result = await Service.EditServerAsync(Server);
-        
+
         result.Switch(
-            success =>
+            _ =>
             {
                 SnackBar.Add("Server changes saved", Severity.Success);
                 MudDialog.Close(DialogResult.Ok(true));
@@ -237,4 +249,5 @@
 
         _isSaving = false;
     }
+
 }

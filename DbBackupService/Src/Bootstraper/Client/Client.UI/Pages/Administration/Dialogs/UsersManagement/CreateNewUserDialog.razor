@@ -1,6 +1,5 @@
 ﻿@using Client.UI.Data.Services
 @using Modules.Auth.Shared.ActionsRequests
-
 @inject AuthStateProvider AuthStateProvider
 @inject ISnackbar SnackBar
 
@@ -22,7 +21,7 @@
                                           Adornment="Adornment.Start"
                                           AdornmentIcon="@Icons.Material.Filled.Email"
                                           @bind-Value="_request.Email"
-                                          For="@(() => _request.Email)" />
+                                          For="@(() => _request.Email)"/>
                         </MudItem>
 
                         <MudItem xs="12" sm="6">
@@ -33,7 +32,7 @@
                                           Adornment="Adornment.Start"
                                           AdornmentIcon="@Icons.Material.Filled.Lock"
                                           @bind-Value="_request.Password"
-                                          For="@(() => _request.Password)" />
+                                          For="@(() => _request.Password)"/>
                         </MudItem>
 
                         <MudItem xs="12" sm="6">
@@ -44,7 +43,7 @@
                                           Adornment="Adornment.Start"
                                           AdornmentIcon="@Icons.Material.Filled.LockReset"
                                           @bind-Value="_request.PasswordConfirm"
-                                          For="@(() => _request.PasswordConfirm)" />
+                                          For="@(() => _request.PasswordConfirm)"/>
                         </MudItem>
                     </MudGrid>
                 </MudCardContent>
@@ -77,7 +76,10 @@
 
     private readonly RegisterRequest _request = new();
 
-    private void Cancel() => MudDialog.Cancel();
+    private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
 
     private async Task Save()
     {
@@ -95,4 +97,5 @@
         MudDialog.Close(DialogResult.Ok(true));
         _isSaving = false;
     }
+
 }

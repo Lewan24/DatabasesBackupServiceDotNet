@@ -1,6 +1,5 @@
 ﻿@using Client.UI.Data.Services
 
-@inject ISnackbar SnackBar
 @inject BackupsHttpClientService Service
 
 <MudDialog>
@@ -9,7 +8,7 @@
             <MudCardContent Class="d-flex flex-column align-center">
                 @if (_isTesting)
                 {
-                    <MudProgressCircular Color="Color.Primary" Size="Size.Medium" Indeterminate="true" Class="mb-3" />
+                    <MudProgressCircular Color="Color.Primary" Size="Size.Medium" Indeterminate="true" Class="mb-3"/>
                     <MudText Typo="Typo.body1" Color="Color.Primary">Testing connection, please wait...</MudText>
                 }
                 else if (_testResult is not null)
@@ -17,15 +16,16 @@
                     @if (_testResult.Success)
                     {
                         <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
-                            <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Success" />
+                            <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Success"/>
                             <MudText Typo="Typo.body1" Color="Color.Success">Server test successful!</MudText>
                         </MudStack>
                     }
                     else
                     {
                         <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
-                            <MudIcon Icon="@Icons.Material.Filled.Error" Color="Color.Error" />
-                            <MudText Typo="Typo.body1" Color="Color.Error">@(_testResult.ErrorMessage ?? "Server test failed")</MudText>
+                            <MudIcon Icon="@Icons.Material.Filled.Error" Color="Color.Error"/>
+                            <MudText Typo="Typo.body1"
+                                     Color="Color.Error">@(_testResult.ErrorMessage ?? "Server test failed")</MudText>
                         </MudStack>
                     }
                 }
@@ -37,8 +37,10 @@
         </MudCard>
 
         <MudContainer Class="d-flex justify-between pa-4">
-            <MudButton OnClick="Close" Variant="Variant.Text" Color="Color.Default" Disabled="@_isTesting">Close</MudButton>
-            <MudButton OnClick="Save" Variant="Variant.Filled" Color="Color.Success" Disabled="@_isTesting">Start test</MudButton>
+            <MudButton OnClick="Close" Variant="Variant.Text" Color="Color.Default" Disabled="@_isTesting">Close
+            </MudButton>
+            <MudButton OnClick="Save" Variant="Variant.Filled" Color="Color.Success" Disabled="@_isTesting">Start test
+            </MudButton>
         </MudContainer>
     </DialogContent>
 </MudDialog>
@@ -46,19 +48,22 @@
 @code {
     [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = null!;
     [Parameter] public Guid ServerId { get; set; }
-    
+
     private bool _isTesting;
     private TestResult? _testResult;
 
-    private void Close() => MudDialog.Cancel();
+    private void Close()
+    {
+        MudDialog.Cancel();
+    }
 
     private async Task Save()
     {
         _isTesting = true;
         _testResult = null;
-        
+
         var result = await Service.TestServer(ServerId);
-        
+
         result.Switch(
             _ => _testResult = new TestResult(true, null),
             error => _testResult = new TestResult(false, error));
@@ -67,4 +72,5 @@
     }
 
     private record TestResult(bool Success, string? ErrorMessage);
+
 }

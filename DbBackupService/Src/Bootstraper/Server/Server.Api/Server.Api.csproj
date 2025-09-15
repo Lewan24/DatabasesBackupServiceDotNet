@@ -24,10 +24,10 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\..\Modules\AdministrationModule\Modules.Administration.Api\Modules.Administration.Api.csproj" />
+        <ProjectReference Include="..\..\..\Modules\AdministrationModule\Modules.Administration.Api\Modules.Administration.Api.csproj"/>
         <ProjectReference Include="..\..\..\Modules\AuthModule\Modules.Auth.Api\Modules.Auth.Api.csproj"/>
         <ProjectReference Include="..\..\..\Modules\BackupModule\Modules.Backup.Api\Modules.Backup.Api.csproj"/>
-        <ProjectReference Include="..\..\..\Modules\CryptoModule\Modules.Crypto.Api\Modules.Crypto.Api.csproj" />
+        <ProjectReference Include="..\..\..\Modules\CryptoModule\Modules.Crypto.Api\Modules.Crypto.Api.csproj"/>
         <ProjectReference Include="..\..\Client\Client.UI\Client.UI.csproj"/>
     </ItemGroup>
 

@@ -10,20 +10,30 @@ public class NotifyService(
     IConfiguration config)
 {
     public async Task CallServerCreatedEvent(string userName)
-        => await CallEvent(nameof(BackupHub.CallServerCreatedEvent), userName);
-    
+    {
+        await CallEvent(nameof(BackupHub.CallServerCreatedEvent), userName);
+    }
+
     public async Task CallServerHasChangedEvent(Guid id)
-        => await CallEvent(nameof(BackupHub.CallServerChangedEvent), id);
-    
+    {
+        await CallEvent(nameof(BackupHub.CallServerChangedEvent), id);
+    }
+
     public async Task CallScheduleCreatedEvent(Guid serverId)
-        => await CallEvent(nameof(BackupHub.CallScheduleCreatedEvent), serverId);
-    
+    {
+        await CallEvent(nameof(BackupHub.CallScheduleCreatedEvent), serverId);
+    }
+
     public async Task CallScheduleHasChangedEvent(Guid id)
-        => await CallEvent(nameof(BackupHub.CallScheduleChangedEvent), id);
+    {
+        await CallEvent(nameof(BackupHub.CallScheduleChangedEvent), id);
+    }
 
     public async Task CallBackupCreatedEvent(string userName)
-        => await CallEvent(nameof(BackupHub.CallBackupCreatedEvent), userName);
-    
+    {
+        await CallEvent(nameof(BackupHub.CallBackupCreatedEvent), userName);
+    }
+
     private async Task CallEvent<T>(string eventName, T data)
     {
         logger.LogInformation("Sending event [{EventName}] to BackupHub with data: {@data}", eventName, data);
@@ -31,7 +41,7 @@ public class NotifyService(
         var env = config["NotifyServiceSettings:Env"];
         var scheme = config["NotifyServiceSettings:Scheme"];
 
-        string hostDomain = env!.Equals("Production", StringComparison.OrdinalIgnoreCase)
+        var hostDomain = env!.Equals("Production", StringComparison.OrdinalIgnoreCase)
             ? $"{scheme}://{config["NotifyServiceSettings:ProductionHost"]}"
             : $"{scheme}://localhost:{config["NotifyServiceSettings:DevelopmentPort"]}";
 
@@ -51,5 +61,4 @@ public class NotifyService(
             logger.LogError(e, "Error while connecting to the BackupHub");
         }
     }
-
 }

@@ -1,5 +1,4 @@
 ﻿@page "/administration/serversusers"
-
 @using Client.UI.Data.Services
 @using Client.UI.Pages.Administration.Dialogs.ServersUsersManagement
 @using Modules.Backup.Shared.Dtos
@@ -24,7 +23,11 @@
             <HeaderContent>
                 <MudTh>Server Id</MudTh>
                 <MudTh>Server Name</MudTh>
-                <MudTh><MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<ServersUsersListDto, object>(x => x.IsServerDisabled)">Status</MudTableSortLabel></MudTh>
+                <MudTh>
+                    <MudTableSortLabel InitialDirection="SortDirection.Ascending"
+                                       SortBy="new Func<ServersUsersListDto, object>(x => x.IsServerDisabled)">Status
+                    </MudTableSortLabel>
+                </MudTh>
                 <MudTh>Users with Access</MudTh>
                 <MudTh>Operations</MudTh>
             </HeaderContent>
@@ -48,16 +51,18 @@
                 <MudTd DataLabel="Access">@context.UsersWithAccess users</MudTd>
                 <MudTd>
                     <MudTooltip Delay="100" Text="Toggle server status">
-                        <MudIconButton Disabled="@_isProcessing" Icon="@Icons.Material.Filled.ChangeCircle" Color="Color.Secondary" OnClick="@(() => ToggleServerStatus(context.ServerId))" />
+                        <MudIconButton Disabled="@_isProcessing" Icon="@Icons.Material.Filled.ChangeCircle"
+                                       Color="Color.Secondary" OnClick="@(() => ToggleServerStatus(context.ServerId))"/>
                     </MudTooltip>
                     <MudTooltip Delay="100" Text="Manage users that access this server">
-                        <MudIconButton Disabled="@_isProcessing" Icon="@Icons.Material.Filled.People" Color="Color.Primary" OnClick="@(() => OpenManageUsersDialog(context))"/>
+                        <MudIconButton Disabled="@_isProcessing" Icon="@Icons.Material.Filled.People"
+                                       Color="Color.Primary" OnClick="@(() => OpenManageUsersDialog(context))"/>
                     </MudTooltip>
                 </MudTd>
             </RowTemplate>
 
             <PagerContent>
-                <MudTablePager PageSizeOptions="@([10, 25, 50])" />
+                <MudTablePager PageSizeOptions="@( [10, 25, 50])"/>
             </PagerContent>
         </MudTable>
     </MudPaper>
@@ -66,22 +71,22 @@
 @code {
     private List<ServersUsersListDto> _serversUsers = new();
     private bool _isProcessing;
-    
+
     protected override async Task OnInitializedAsync()
     {
         if (string.IsNullOrWhiteSpace(
                 await Auth.AuthorizeUser(returnPageAfterValidPasswordAuthorization: "administration-serversusers")))
             return;
-        
+
         await FetchServersUsers();
     }
 
     private async Task ToggleServerStatus(Guid serverId)
     {
         _isProcessing = true;
-        
+
         var result = await BackupService.ToggleServerDisabledStatus(serverId);
-        
+
         result.Switch(
             success => _ = FetchServersUsers(),
             error => Snackbar.Add(error, Severity.Error)
@@ -93,23 +98,24 @@
     private async Task FetchServersUsers()
     {
         _isProcessing = true;
-        
+
         var result = await AdminService.FetchServersUsers();
-        
+
         result.Switch(
             serversUsers => _serversUsers = serversUsers,
             error => Snackbar.Add(error, Severity.Error)
         );
-        
+
         _isProcessing = false;
         StateHasChanged();
     }
-    
+
     private async Task OpenManageUsersDialog(ServersUsersListDto server)
     {
-        var parameters = new DialogParameters<ManageUsersInServerDialog> { {x => x.ServerId, server.ServerId} };
+        var parameters = new DialogParameters<ManageUsersInServerDialog> { { x => x.ServerId, server.ServerId } };
         var options = new DialogOptions { MaxWidth = MaxWidth.Medium, FullWidth = true };
 
         await DialogService.ShowAsync<ManageUsersInServerDialog>($"Manage users access to server {server.ServerConnectionName}", parameters, options);
     }
+
 }

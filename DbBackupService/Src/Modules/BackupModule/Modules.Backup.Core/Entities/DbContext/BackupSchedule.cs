@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json;
-using Modules.Backup.Core.Entities.Models;
 using Modules.Backup.Shared.Dtos;
 
 namespace Modules.Backup.Core.Entities.DbContext;
@@ -12,6 +11,7 @@ public sealed record BackupSchedule
     public bool IsEnabled { get; set; } = true;
     public Guid DbConnectionId { get; set; }
     public string? ConfigurationJson { get; set; }
+
     [NotMapped]
     public BackupScheduleConfiguration? Configuration
     {

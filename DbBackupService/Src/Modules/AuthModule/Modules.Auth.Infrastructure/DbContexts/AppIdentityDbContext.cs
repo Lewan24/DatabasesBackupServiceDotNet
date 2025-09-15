@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Modules.Auth.Core.Entities;
 using Modules.Auth.Shared.Static.Entities;
-using Modules.Shared.Common;
 
 namespace Modules.Auth.Infrastructure.DbContexts;
 
@@ -17,13 +16,13 @@ public sealed class AppIdentityDbContext(DbContextOptions<AppIdentityDbContext> 
         builder.Entity<IdentityRole>().HasData(
             new IdentityRole
             {
-                Id = "D52B5C07-A797-42D7-A2ED-324D0F71AB2F", 
+                Id = "D52B5C07-A797-42D7-A2ED-324D0F71AB2F",
                 Name = AppRoles.User,
                 NormalizedName = AppRoles.User.ToUpper()
             },
             new IdentityRole
             {
-                Id = "E21CEFB4-4B40-458C-B7F1-1F9DDBFAA3F9", 
+                Id = "E21CEFB4-4B40-458C-B7F1-1F9DDBFAA3F9",
                 Name = AppRoles.Admin,
                 NormalizedName = AppRoles.Admin.ToUpper()
             });

@@ -12,9 +12,9 @@ public static class Extensions
         services.AddScoped<SchedulesService>();
 
         services.AddScoped<IDbBackupService, DbBackupService>();
-        
+
         services.AddTransient<NotifyService>();
-        
+
         return services;
     }
 }

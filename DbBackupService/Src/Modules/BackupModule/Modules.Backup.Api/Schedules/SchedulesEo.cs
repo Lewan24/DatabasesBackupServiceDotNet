@@ -17,16 +17,16 @@ internal static class SchedulesEndpoints
 
         api.MapGet("GetMySchedules", SchedulesOperations.GetSchedules)
             .WithSummary("Get user's schedules");
-        
+
         api.MapPost("CreateSchedule", SchedulesOperations.CreateSchedule)
             .WithSummary("Create new schedule");
-        
+
         api.MapPost("EditSchedule", SchedulesOperations.EditSchedule)
             .WithSummary("Edit existing schedule");
-        
+
         api.MapPost("DeleteSchedule", SchedulesOperations.DeleteSchedule)
             .WithSummary("Delete provided schedule");
-        
+
         return app;
     }
 }
@@ -51,7 +51,7 @@ internal abstract class SchedulesOperations
         [FromBody] BackupsScheduleDto schedule)
     {
         var result = await service.CreateSchedule(schedule, context.User.Identity?.Name);
-        
+
         return result.Match<IResult>(
             TypedResults.Ok,
             TypedResults.BadRequest
@@ -64,7 +64,7 @@ internal abstract class SchedulesOperations
         [FromBody] BackupsScheduleDto schedule)
     {
         var result = await service.EditSchedule(schedule, context.User.Identity?.Name);
-        
+
         return result.Match<IResult>(
             TypedResults.Ok,
             TypedResults.BadRequest
@@ -77,7 +77,7 @@ internal abstract class SchedulesOperations
         [FromBody] Guid scheduleId)
     {
         var result = await service.DeleteSchedule(scheduleId, context.User.Identity?.Name);
-        
+
         return result.Match<IResult>(
             TypedResults.Ok,
             TypedResults.BadRequest

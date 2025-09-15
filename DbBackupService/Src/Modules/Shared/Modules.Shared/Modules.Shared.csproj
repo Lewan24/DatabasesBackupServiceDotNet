@@ -16,7 +16,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\AdministrationModule\Modules.Administration.Shared\Modules.Administration.Shared.csproj" />
+        <ProjectReference Include="..\..\AdministrationModule\Modules.Administration.Shared\Modules.Administration.Shared.csproj"/>
         <ProjectReference Include="..\..\AuthModule\Modules.Auth.Shared\Modules.Auth.Shared.csproj"/>
     </ItemGroup>
 

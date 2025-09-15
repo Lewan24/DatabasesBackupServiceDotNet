@@ -19,50 +19,68 @@ internal abstract record AuthOperations
         HttpContext context,
         [FromBody] LoginRequest? request,
         [FromServices] IAuthService authService)
-        => authService.Login(context, request);
+    {
+        return authService.Login(context, request);
+    }
 
     public static Task<IResult> ChangePassword(
         HttpContext context,
         [FromBody] ChangePasswordRequest request,
         [FromServices] IAuthService authService)
-        => authService.ChangePassword(context, request);
+    {
+        return authService.ChangePassword(context, request);
+    }
 
     public static Task<bool> CanLogIn(
         HttpContext context,
         [FromBody] LoginRequest? request,
         [FromServices] IAuthService authService)
-        => authService.CanLogIn(context, request);
+    {
+        return authService.CanLogIn(context, request);
+    }
 
     public static Task<IResult> Register(
         HttpContext context,
         [FromBody] RegisterRequest request,
         [FromServices] IAuthService authService)
-        => authService.Register(context, request);
+    {
+        return authService.Register(context, request);
+    }
 
     public static Task<IResult> Logout(
         HttpContext context,
         [FromServices] IAuthService authService)
-        => authService.Logout(context);
+    {
+        return authService.Logout(context);
+    }
 
     public static CurrentUser GetCurrentUserInfo(
         HttpContext context,
         [FromServices] IAuthService authService)
-        => authService.GetCurrentUserInfo(context);
+    {
+        return authService.GetCurrentUserInfo(context);
+    }
 
     public static Task<IResult> ValidateToken(
         [FromBody] TokenValidationRequest request,
         [FromServices] IAuthService authService)
-        => authService.ValidateToken(request);
+    {
+        return authService.ValidateToken(request);
+    }
 
     public static Task<TokenModelDto> GetUserToken(
         HttpContext context,
         [FromBody] LoginRequest request,
         [FromServices] IAuthService authService)
-        => authService.GetUserToken(context, request);
+    {
+        return authService.GetUserToken(context, request);
+    }
 
     public static Task<TokenModelDto> RefreshToken(
         HttpContext context,
         [FromBody] LoginRequest request,
         [FromServices] IAuthService authService)
-        => authService.RefreshToken(context, request);
+    {
+        return authService.RefreshToken(context, request);
+    }
 }

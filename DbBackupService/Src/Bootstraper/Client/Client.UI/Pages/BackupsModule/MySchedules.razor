@@ -1,19 +1,17 @@
 ﻿@page "/schedules"
 
-@using Client.UI.Data.Services
-@using Client.UI.Pages.BackupsModule.Dialogs.Schedule
-@using Microsoft.AspNetCore.SignalR.Client
-@using Modules.Backup.Shared.Dtos
-@using Modules.Backup.Shared.Helpers
-@using Modules.Backup.Shared.Hubs
-@using OneOf.Types
-
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
 @inject BackupsHttpClientService Service
 @inject NavigationManager Nav
 @inject AuthStateProvider Auth
 
+@using Client.UI.Data.Services
+@using Client.UI.Pages.BackupsModule.Dialogs.Schedule
+@using Microsoft.AspNetCore.SignalR.Client
+@using Modules.Backup.Shared.Dtos
+@using Modules.Backup.Shared.Helpers
+@using Modules.Backup.Shared.Hubs
 @implements IDisposable
 
 <PageTitle>Backup Schedules</PageTitle>
@@ -24,15 +22,24 @@
     <MudPaper Class="pa-4 mud-elevation-2 rounded-2xl">
         <MudStack Row="true" Justify="Justify.SpaceBetween" Class="mb-4">
             <MudText Typo="Typo.h6">Schedules list</MudText>
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@_isProcessing" StartIcon="@Icons.Material.Filled.Add"
-                       OnClick="OpenNewScheduleDialog">New Schedule</MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@_isProcessing"
+                       StartIcon="@Icons.Material.Filled.Add"
+                       OnClick="OpenNewScheduleDialog">New Schedule
+            </MudButton>
         </MudStack>
 
         <MudTable Items="@_schedules" Hover="true" Dense="true">
             <HeaderContent>
                 <MudTh>Name</MudTh>
-                <MudTh><MudTableSortLabel SortBy="new Func<BackupsScheduleDto, object>(x => x.ServerName!)">Server</MudTableSortLabel></MudTh>
-                <MudTh><MudTableSortLabel InitialDirection="SortDirection.Descending" SortBy="new Func<BackupsScheduleDto, object>(x => x.IsEnabled)">Status</MudTableSortLabel></MudTh>
+                <MudTh>
+                    <MudTableSortLabel SortBy="new Func<BackupsScheduleDto, object>(x => x.ServerName!)">Server
+                    </MudTableSortLabel>
+                </MudTh>
+                <MudTh>
+                    <MudTableSortLabel InitialDirection="SortDirection.Descending"
+                                       SortBy="new Func<BackupsScheduleDto, object>(x => x.IsEnabled)">Status
+                    </MudTableSortLabel>
+                </MudTh>
                 <MudTh>Next Backup</MudTh>
                 <MudTh>Actions</MudTh>
             </HeaderContent>
@@ -52,14 +59,14 @@
                 <MudTd>@BackupScheduleHelper.GetNextBackupDateString(context)</MudTd>
                 <MudTd>
                     <MudIconButton Disabled="@_isProcessing" Icon="@Icons.Material.Filled.Edit" Color="Color.Warning"
-                                   OnClick="() => OpenEditScheduleDialog(context)" />
+                                   OnClick="() => OpenEditScheduleDialog(context)"/>
                     <MudIconButton Disabled="@_isProcessing" Icon="@Icons.Material.Filled.Delete" Color="Color.Error"
-                                   OnClick="() => DeleteSchedule(context.Id)" />
+                                   OnClick="() => DeleteSchedule(context.Id)"/>
                 </MudTd>
             </RowTemplate>
 
             <PagerContent>
-                <MudTablePager PageSizeOptions="@([25, 50, 100])" />
+                <MudTablePager PageSizeOptions="@( [25, 50, 100])"/>
             </PagerContent>
         </MudTable>
     </MudPaper>
@@ -76,7 +83,7 @@
         if (string.IsNullOrWhiteSpace(
                 await Auth.AuthorizeUser(returnPageAfterValidPasswordAuthorization: "schedules")))
             return;
-        
+
         await FetchSchedules();
 
         var getAvailableServersResult = await Service.GetServersNamesForSchedulesAsync();
@@ -84,14 +91,14 @@
             list => _availableServers = list,
             error => Snackbar.Add(error, Severity.Error)
         );
-        
+
         _hubConnection = BackupHubHelper.GetBasicHubConnection(Nav.ToAbsoluteUri(BackupHubHelper.HubUrl));
-        _hubConnection.On<Guid>(BackupHubHelper.Events.ScheduleCreatedEvent.ToString(), (serverId) =>
+        _hubConnection.On<Guid>(BackupHubHelper.Events.ScheduleCreatedEvent.ToString(), serverId =>
         {
             if (_availableServers.FirstOrDefault(x => x.Id == serverId) is not null)
                 InvokeAsync(FetchSchedules);
         });
-        _hubConnection.On<Guid>(BackupHubHelper.Events.ScheduleHasChangedEvent.ToString(), (id) =>
+        _hubConnection.On<Guid>(BackupHubHelper.Events.ScheduleHasChangedEvent.ToString(), id =>
         {
             if (_schedules.FirstOrDefault(x => x.Id == id) is not null)
                 InvokeAsync(FetchSchedules);
@@ -103,7 +110,7 @@
     private async Task FetchSchedules()
     {
         _isProcessing = true;
-        
+
         var getSchedulesResult = await Service.GetSchedulesAsync();
         getSchedulesResult.Switch(
             list => _schedules = list,
@@ -117,9 +124,9 @@
     private async Task DeleteSchedule(Guid id)
     {
         _isProcessing = true;
-        
+
         var result = await Service.DeleteScheduleAsync(id);
-        
+
         result.Switch(
             async void (_) =>
             {
@@ -139,14 +146,14 @@
             { x => x.AvailableServers, _availableServers }
         };
         var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
-        
+
         var dialog = await DialogService.ShowAsync<BackupScheduleDialog>("New Schedule", parameters, options);
         var result = await dialog.Result;
 
         if (!result!.Canceled && result.Data is BackupsScheduleDto dto)
         {
             var createScheduleResult = await Service.CreateScheduleAsync(dto);
-            
+
             createScheduleResult.Switch(
                 async void (_) =>
                 {
@@ -163,17 +170,17 @@
         var parameters = new DialogParameters<BackupScheduleDialog>
         {
             { x => x.Schedule, schedule },
-            { x => x.AvailableServers, _availableServers}
+            { x => x.AvailableServers, _availableServers }
         };
         var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
-        
+
         var dialog = await DialogService.ShowAsync<BackupScheduleDialog>("Edit Schedule", parameters, options);
         var result = await dialog.Result;
 
         if (!result!.Canceled && result.Data is BackupsScheduleDto dto)
         {
             var editScheduleResult = await Service.EditScheduleAsync(dto);
-            
+
             editScheduleResult.Switch(
                 async void (_) =>
                 {

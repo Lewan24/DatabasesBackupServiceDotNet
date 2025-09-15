@@ -1,5 +1,4 @@
 ﻿@using Client.UI.Data.Services
-
 @inject AdministrationHttpService Service
 @inject ISnackbar Snackbar
 
@@ -25,7 +24,7 @@
                 </RowTemplate>
 
                 <PagerContent>
-                    <MudTablePager PageSizeOptions="@([10, 25, 50, 100])" />
+                    <MudTablePager PageSizeOptions="@( [10, 25, 50, 100])"/>
                 </PagerContent>
             </MudTable>
         </MudPaper>
@@ -52,10 +51,14 @@
         );
     }
 
-    private void Cancel() => MudDialog.Cancel();
+    private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
 
     private void AddUser(string email)
     {
         MudDialog.Close(DialogResult.Ok(email));
     }
+
 }

@@ -8,24 +8,23 @@ namespace Modules.Backup.Application.Workers;
 public class BackupWorker(IServiceScopeFactory scopeFactory, ILogger<BackupWorker> logger) : BackgroundService
 {
     private readonly TimeSpan _interval = TimeSpan.FromMinutes(5);
-    
+
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         using var timer = new PeriodicTimer(_interval);
 
         logger.LogInformation("Running backup worker in 20 seconds...");
         await Task.Delay(TimeSpan.FromSeconds(20), stoppingToken);
-        
+
         logger.LogInformation("Worker will run each 10 seconds from now...");
         while (await timer.WaitForNextTickAsync(stoppingToken))
-        {
             try
             {
                 using var scope = scopeFactory.CreateScope();
                 var backupService = scope.ServiceProvider.GetRequiredService<IDbBackupService>();
-                
+
                 var result = await backupService.BackupFromSchedules();
-                
+
                 result.Switch(
                     _ => logger.LogInformation("Work done."),
                     error => logger.LogWarning(error)
@@ -35,6 +34,5 @@ public class BackupWorker(IServiceScopeFactory scopeFactory, ILogger<BackupWorke
             {
                 logger.LogError(ex, "Error while backing up schedules.");
             }
-        }
     }
 }
