@@ -11,6 +11,7 @@ using Modules.Backup.Core.Entities.DbContext;
 using Modules.Backup.Infrastructure.DbContexts;
 using Modules.Backup.Shared.Dtos;
 using Modules.Backup.Shared.Requests;
+using Modules.Crypto.Shared.Interfaces;
 using OneOf;
 using OneOf.Types;
 
@@ -22,6 +23,7 @@ public class ServersService (
     UserManager<AppUser> userManager,
     ILogger<ServersService> logger,
     NotifyService notifyService,
+    ICryptoService cryptoService,
     IAdminModuleApi adminApi)
 {
     public async Task<OneOf<List<ServerConnectionDto>, string>> GetServers(string? identityName)
@@ -195,6 +197,7 @@ public class ServersService (
         if (errors.Any())
             return string.Join(", ", errors);
 
+        var encryptedDbPasswd = cryptoService.Encrypt(newServer.DbPasswd!);
         // 2. Tworzymy obiekt encji serwera
         var dbServer = new DbServerConnection
         {
@@ -205,7 +208,7 @@ public class ServersService (
             DbName = newServer.DbName,
             DbType = newServer.DbType,
             DbUser = newServer.DbUser,
-            DbPasswd = newServer.DbPasswd!,
+            DbPasswd = encryptedDbPasswd,
             IsTunnelRequired = newServer.IsTunnelRequired,
             IsDisabled = false
         };
@@ -213,6 +216,10 @@ public class ServersService (
         // 3. Obsługa tunelu (opcjonalna)
         if (newServer.IsTunnelRequired)
         {
+            var encryptedPassword = cryptoService.Encrypt(newServer.Tunnel?.Password);
+            var encryptedPem = cryptoService.Encrypt(newServer.Tunnel?.PrivateKeyContent);
+            var encryptedPemPassphrase = cryptoService.Encrypt(newServer.Tunnel?.PrivateKeyPassphrase);
+            
             var dbTunnel = new DbServerTunnel
             {
                 Id = Guid.CreateVersion7(),
@@ -220,9 +227,9 @@ public class ServersService (
                 SshPort = newServer.Tunnel.SshPort,
                 Username = newServer.Tunnel.Username!,
                 UsePasswordAuth = string.IsNullOrWhiteSpace(newServer.Tunnel.PrivateKeyContent),
-                Password = newServer.Tunnel.Password,
-                PrivateKeyContent = newServer.Tunnel.PrivateKeyContent,
-                PrivateKeyPassphrase = newServer.Tunnel.PrivateKeyPassphrase,
+                Password = encryptedPassword,
+                PrivateKeyContent = encryptedPem,
+                PrivateKeyPassphrase = encryptedPemPassphrase,
                 LocalPort = newServer.Tunnel.LocalPort,
                 RemoteHost = newServer.Tunnel.RemoteHost!,
                 RemotePort = newServer.Tunnel.RemotePort,
@@ -329,7 +336,10 @@ public class ServersService (
         dbServer.DbUser = server.DbUser;
         
         if (!string.IsNullOrWhiteSpace(server.DbPasswd))
-            dbServer.DbPasswd = server.DbPasswd;
+        {
+            var encryptedDbPasswd = cryptoService.Encrypt(server.DbPasswd);
+            dbServer.DbPasswd = encryptedDbPasswd!;
+        }
         
         dbServer.IsTunnelRequired = server.IsTunnelRequired;
 
@@ -361,13 +371,17 @@ public class ServersService (
 
             if (server.Tunnel.OverridePasswordsAndPem)
             {
-                dbTunnel.Password = server.Tunnel.Password;
-                dbTunnel.PrivateKeyContent = server.Tunnel.PrivateKeyContent;
-                dbTunnel.PrivateKeyPassphrase = server.Tunnel.PrivateKeyPassphrase;
+                var encryptedPassword = cryptoService.Encrypt(server.Tunnel?.Password);
+                var encryptedPem = cryptoService.Encrypt(server.Tunnel?.PrivateKeyContent);
+                var encryptedPemPassphrase = cryptoService.Encrypt(server.Tunnel?.PrivateKeyPassphrase);
+                
+                dbTunnel.Password = encryptedPassword;
+                dbTunnel.PrivateKeyContent = encryptedPem;
+                dbTunnel.PrivateKeyPassphrase = encryptedPemPassphrase;
             }
             
-            dbTunnel.LocalPort = server.Tunnel.LocalPort;
-            dbTunnel.RemoteHost = server.Tunnel.RemoteHost!;
+            dbTunnel.LocalPort = server.Tunnel!.LocalPort;
+            dbTunnel.RemoteHost = server.Tunnel!.RemoteHost!;
             dbTunnel.RemotePort = server.Tunnel.RemotePort;
             dbTunnel.Description = server.Tunnel.Description;
 
@@ -581,7 +595,7 @@ public class ServersService (
         if (serverConn.IsTunnelRequired)
             tunnel = db.DbServerTunnels.FirstOrDefault(x => x.Id == serverConn.TunnelId);
 
-        var testResult = await ServerConnectionTester.TestConnectionAsync(serverConn, tunnel);
+        var testResult = await ServerConnectionTester.TestConnectionAsync(serverConn, tunnel, cryptoService);
 
         return testResult.Result ? new Success() : testResult.ErrorMsg!;
     }

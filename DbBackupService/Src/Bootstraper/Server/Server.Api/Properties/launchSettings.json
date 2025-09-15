@@ -4,7 +4,8 @@
       "commandName": "Project",
       "launchBrowser": true,
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "CRYPTO_KEY": "C5Znh9Rwota8gSeeTLCMn4ag0OvD5vI9aj0me39/G0g="
       },
       "dotnetRunMessages": true,
       "inspectUri": "{wsProtocol}://{url.hostname}:{url.port}/_framework/debug/ws-proxy?browser={browserInspectUri}",
@@ -16,7 +17,8 @@
       "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}",
       "environmentVariables": {
         "ASPNETCORE_HTTPS_PORTS": "5000",
-        "ASPNETCORE_HTTP_PORTS": "5001"
+        "ASPNETCORE_HTTP_PORTS": "5001",
+        "CRYPTO_KEY": "C5Znh9Rwota8gSeeTLCMn4ag0OvD5vI9aj0me39/G0g="
       },
       "publishAllPorts": true,
       "useSSL": true

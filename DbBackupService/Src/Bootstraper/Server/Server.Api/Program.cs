@@ -12,6 +12,7 @@ using Modules.Backup.Api;
 using Modules.Backup.Application.Workers;
 using Modules.Backup.Infrastructure.DbContexts;
 using Modules.Backup.Shared.Hubs;
+using Modules.Crypto.Api;
 using Modules.Shared.Common;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Logs;
@@ -135,6 +136,7 @@ builder.Services.AddAuthModule()
     .AddTokenProvider<DataProtectorTokenProvider<AppUser>>(TokenOptions.DefaultProvider);
 
 builder.Services.AddAdministrationModule();
+builder.Services.AddCryptoModule();
 
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddSignalR();

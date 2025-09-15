@@ -56,6 +56,14 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Modules.Administration.Shar
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Modules.Backup.Shared", "Src\Modules\BackupModule\Modules.Backup.Shared\Modules.Backup.Shared.csproj", "{B3DAFDD6-2BBA-48B4-92AE-C90A745D558F}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CryptoModule", "CryptoModule", "{7EFE67DE-F557-4212-BF9E-57F7F1DAECA7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Modules.Crypto.Application", "Src\Modules\CryptoModule\Modules.Crypto.Application\Modules.Crypto.Application.csproj", "{32E6D088-AFE2-42A8-BE7F-7FC5348E356D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Modules.Crypto.Shared", "Src\Modules\CryptoModule\Modules.Crypto.Shared\Modules.Crypto.Shared.csproj", "{8F76EA6E-8657-4581-9666-F484BE627D45}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Modules.Crypto.Api", "Src\Modules\CryptoModule\Modules.Crypto.Api\Modules.Crypto.Api.csproj", "{81471CFC-061C-48E4-ACCA-FBE583DCAC01}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -126,6 +134,18 @@ Global
 		{B3DAFDD6-2BBA-48B4-92AE-C90A745D558F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B3DAFDD6-2BBA-48B4-92AE-C90A745D558F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B3DAFDD6-2BBA-48B4-92AE-C90A745D558F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{32E6D088-AFE2-42A8-BE7F-7FC5348E356D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{32E6D088-AFE2-42A8-BE7F-7FC5348E356D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{32E6D088-AFE2-42A8-BE7F-7FC5348E356D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{32E6D088-AFE2-42A8-BE7F-7FC5348E356D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8F76EA6E-8657-4581-9666-F484BE627D45}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8F76EA6E-8657-4581-9666-F484BE627D45}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8F76EA6E-8657-4581-9666-F484BE627D45}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8F76EA6E-8657-4581-9666-F484BE627D45}.Release|Any CPU.Build.0 = Release|Any CPU
+		{81471CFC-061C-48E4-ACCA-FBE583DCAC01}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{81471CFC-061C-48E4-ACCA-FBE583DCAC01}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{81471CFC-061C-48E4-ACCA-FBE583DCAC01}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{81471CFC-061C-48E4-ACCA-FBE583DCAC01}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -154,6 +174,10 @@ Global
 		{A13D3D7C-CF54-488B-9063-E8CF930703BD} = {5B617756-AA30-4DA9-8B38-5A2C0D32C12D}
 		{1241BE6A-464B-4A4D-AC96-955F89DCB264} = {5B617756-AA30-4DA9-8B38-5A2C0D32C12D}
 		{B3DAFDD6-2BBA-48B4-92AE-C90A745D558F} = {748DDBC5-AEE4-4872-8B8B-3EB1ADC2F816}
+		{7EFE67DE-F557-4212-BF9E-57F7F1DAECA7} = {00FABD4C-5920-4940-A122-342F45F5B31A}
+		{32E6D088-AFE2-42A8-BE7F-7FC5348E356D} = {7EFE67DE-F557-4212-BF9E-57F7F1DAECA7}
+		{8F76EA6E-8657-4581-9666-F484BE627D45} = {7EFE67DE-F557-4212-BF9E-57F7F1DAECA7}
+		{81471CFC-061C-48E4-ACCA-FBE583DCAC01} = {7EFE67DE-F557-4212-BF9E-57F7F1DAECA7}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {05F3A4BF-6277-46FD-9537-F78E8FABE0DA}

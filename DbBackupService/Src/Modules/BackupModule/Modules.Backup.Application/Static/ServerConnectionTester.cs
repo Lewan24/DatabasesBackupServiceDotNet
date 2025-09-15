@@ -6,6 +6,7 @@ using MySqlConnector;
 using Npgsql;
 using Renci.SshNet;
 using System.Text;
+using Modules.Crypto.Shared.Interfaces;
 
 namespace Modules.Backup.Application.Static;
 
@@ -13,7 +14,8 @@ internal static class ServerConnectionTester
 {
     public static async Task<(bool Result, string? ErrorMsg)> TestConnectionAsync(
         DbServerConnection conn,
-        DbServerTunnel? tunnel = null)
+        DbServerTunnel? tunnel,
+        ICryptoService cryptoService)
     {
         SshClient? sshClient = null;
         ForwardedPortLocal? portForward = null;
@@ -28,15 +30,19 @@ internal static class ServerConnectionTester
                 AuthenticationMethod auth;
                 if (tunnel.UsePasswordAuth)
                 {
-                    auth = new PasswordAuthenticationMethod(tunnel.Username, tunnel.Password);
+                    var decryptedPassword = cryptoService.Decrypt(tunnel.Password);
+                    auth = new PasswordAuthenticationMethod(tunnel.Username, decryptedPassword);
                 }
                 else
                 {
-                    using var keyStream = new MemoryStream(Encoding.UTF8.GetBytes(tunnel.PrivateKeyContent ?? ""));
-                    auth = !string.IsNullOrEmpty(tunnel.PrivateKeyPassphrase)
+                    var decryptedPem = cryptoService.Decrypt(tunnel.PrivateKeyContent);
+                    var decryptedPemPassphrase = cryptoService.Decrypt(tunnel.PrivateKeyPassphrase);
+                    
+                    using var keyStream = new MemoryStream(Encoding.UTF8.GetBytes(decryptedPem ?? ""));
+                    auth = !string.IsNullOrEmpty(decryptedPemPassphrase)
                         ? new PrivateKeyAuthenticationMethod(
                             tunnel.Username,
-                            new PrivateKeyFile(keyStream, tunnel.PrivateKeyPassphrase))
+                            new PrivateKeyFile(keyStream, decryptedPemPassphrase))
                         : new PrivateKeyAuthenticationMethod(
                             tunnel.Username,
                             new PrivateKeyFile(keyStream));
@@ -62,6 +68,8 @@ internal static class ServerConnectionTester
                 port = tunnel.LocalPort;
             }
 
+            var decryptedDbPasswd = cryptoService.Decrypt(conn.DbPasswd);
+            
             IDbConnection dbConn = conn.DbType switch
             {
                 DatabaseType.MySql => new MySqlConnection(
@@ -71,7 +79,7 @@ internal static class ServerConnectionTester
                         Port = (uint)port,
                         Database = conn.DbName,
                         UserID = conn.DbUser,
-                        Password = conn.DbPasswd,
+                        Password = decryptedDbPasswd,
                         ConnectionTimeout = 5
                     }.ToString()),
 
@@ -82,7 +90,7 @@ internal static class ServerConnectionTester
                         Port = port,
                         Database = conn.DbName,
                         Username = conn.DbUser,
-                        Password = conn.DbPasswd,
+                        Password = decryptedDbPasswd,
                         Timeout = 5,
                         CommandTimeout = 5
                     }.ToString()),
@@ -93,7 +101,7 @@ internal static class ServerConnectionTester
                         DataSource = $"{host},{port}",
                         InitialCatalog = conn.DbName,
                         UserID = conn.DbUser,
-                        Password = conn.DbPasswd,
+                        Password = decryptedDbPasswd,
                         ConnectTimeout = 5,
                         TrustServerCertificate = true
                     }.ToString()),
