@@ -18,3 +18,10 @@
       CRYPTO_KEY: "C5Znh9Rwota8gSeeTLCMn4ag0OvD5vI9aj0me39/G0g=" # base64 crypto key used to encrypt data 
     volumes:
       - ./certs/:/app/Certificate/:ro # certificate location
+      #- serviceDb:/db # local database with users, app data, settings etc.
+      #- backups:/backups # directory where all backups made are stored. You can bind it to external server
+        
+# uncomment to bind local db and backups directories
+#volumes:
+  #serviceDb:
+  #backups:
