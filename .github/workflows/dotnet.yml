@@ -20,11 +20,9 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 9.0.x
-    - name: Change to project directory
-      run: cd DbBackupService
     - name: Restore dependencies
-      run: dotnet restore ./OctoBackup.sln
+      run: dotnet restore DbBackupService/OctoBackup.sln
     - name: Build
-      run: dotnet build ./OctoBackup.sln --no-restore
+      run: dotnet build DbBackupService/OctoBackup.sln --no-restore
     - name: Test
-      run: dotnet test ./OctoBackup.sln --no-build --verbosity normal
+      run: dotnet test DbBackupService/OctoBackup.sln --no-build --verbosity normal
