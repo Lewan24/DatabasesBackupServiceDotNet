@@ -23,8 +23,8 @@ jobs:
     - name: Change to project directory
       run: cd DbBackupService
     - name: Restore dependencies
-      run: dotnet restore
+      run: dotnet restore ./OctoBackup.sln
     - name: Build
-      run: dotnet build --no-restore
+      run: dotnet build ./OctoBackup.sln --no-restore
     - name: Test
-      run: dotnet test --no-build --verbosity normal
+      run: dotnet test ./OctoBackup.sln --no-build --verbosity normal
