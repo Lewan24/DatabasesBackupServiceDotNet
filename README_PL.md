@@ -10,6 +10,8 @@
 ![Database](https://img.shields.io/badge/Databases-MySQL%20%7C%20PostgreSQL%20%7C%20SqlServer-red)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
+[![.NET](https://github.com/Lewan24/DatabasesBackupServiceDotNet/actions/workflows/dotnet.yml/badge.svg)](https://github.com/Lewan24/DatabasesBackupServiceDotNet/actions/workflows/dotnet.yml)
+
 ---
 
 **DatabasesBackupServiceDotNet** to otwarto-źródłowa aplikacja konteneryzowana w **Dockerze**, napisana w **.NET 9 Blazor WebAssembly** w architekturze modularnego monolitu.  
