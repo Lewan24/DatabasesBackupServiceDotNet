@@ -4,16 +4,16 @@
 
 ---
 
-![.NET](https://img.shields.io/badge/.NET-9-blueviolet?logo=dotnet&logoColor=white)
+![.NET](https://img.shields.io/badge/.NET-9-blueviolet)
 ![Blazor](https://img.shields.io/badge/Blazor-WebAssembly-purple?logo=blazor&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-Ready-blue?logo=docker&logoColor=white)
-![Database](https://img.shields.io/badge/Databases-MySQL%20|%20PostgreSQL%20|%20SQLite-lightgrey)
+![Database](https://img.shields.io/badge/Databases-MySQL%20%7C%20PostgreSQL%20%7C%20SqlServer-red)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
 ---
 
 **DatabasesBackupServiceDotNet** is an open-source, containerized application built with **.NET 9 Blazor WebAssembly** using a modular monolith architecture.  
-The application allows **centralized management of database backups across multiple servers** – currently supporting **MySQL** and **PostgreSQL**, with **MS SQL Server** planned.  
+The application allows **centralized management of database backups across multiple servers** – currently supporting **MySQL**, **PostgreSQL** and **MS SQL Server**.  
 
 ---
 
@@ -23,7 +23,7 @@ The application allows **centralized management of database backups across multi
 - 🔐 Encryption and compression of backup files  
 - 📊 Backup history and statistics  
 - 📧 Email notifications about backup status  
-- 👥 **Groups and roles system** – the administrator can create groups with specific permissions, assign them to databases, and allow users to access (e.g., view the latest backup of a given database)  
+- 👥 **Roles system and Server groups** – the administrator can assign users to servers, and allow users to access (e.g., view the latest backup of a given database, server configuration, tunnel settings etc.)  
 - 🗄️ Configuration and management data are stored in **SQLite** (lightweight embedded database)  
 
 ---
@@ -41,10 +41,10 @@ The application allows **centralized management of database backups across multi
 - **UI** – Blazor WebAssembly  
 - **API/Server** – business logic, backup engine, database communication  
 - **Application Database** – SQLite (users, groups, configurations, backup history)  
-- **Authorization** – users, roles, groups linked to specific databases  
+- **Authorization** – users, roles, servers groups 
 - **Backup Engine** – generation, encryption, compression, archiving of backups  
 - **Notifications** – email system (statuses, reminders, errors)  
-- **Testing** – option to restore and verify backups in a temporary test environment  
+- **Testing** – option to restore and verify backups in a temporary test container environment (if set, tests runs automatically)
 
 ---
 
@@ -63,13 +63,15 @@ Go to the **WIKI** section and follow the setup instructions.
 - User, role & group management system  
 - Backup scheduling  
 - Email notifications  
-- Configuration storage in **SQLite**  
+- Configuration storage in **SQLite**
+- Support for **MS SQL Server**
+- Statistics and reporting in UI
+- Tunnels compability
+- SignalR 
 
 ### 🛠️ In Progress / Planned  
-- Support for **MS SQL Server**  
 - Advanced backup testing (temporary containers + SQL check queries)  
-- Statistics and reporting in UI  
-- Cloud storage integration (AWS S3, Azure Blob, GCP Storage)  
+- Multilanguage
 
 ---
 
