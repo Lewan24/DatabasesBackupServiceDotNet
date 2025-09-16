@@ -21,7 +21,7 @@ jobs:
       with:
         dotnet-version: 9.0.x
     - name: Change to project directory
-      run: cd src/DatabasesBackupServiceDotNet
+      run: cd DbBackupService
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
