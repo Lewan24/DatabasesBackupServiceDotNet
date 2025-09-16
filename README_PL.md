@@ -4,16 +4,16 @@
 
 ---
 
-![.NET](https://img.shields.io/badge/.NET-9-blueviolet?logo=dotnet&logoColor=white)
+![.NET](https://img.shields.io/badge/.NET-9-blueviolet)
 ![Blazor](https://img.shields.io/badge/Blazor-WebAssembly-purple?logo=blazor&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-Ready-blue?logo=docker&logoColor=white)
-![Database](https://img.shields.io/badge/Databases-MySQL%20|%20PostgreSQL%20|%20SQLite-lightgrey)
+![Database](https://img.shields.io/badge/Databases-MySQL%20%7C%20PostgreSQL%20%7C%20SqlServer-red)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
 ---
 
 **DatabasesBackupServiceDotNet** to otwarto-źródłowa aplikacja konteneryzowana w **Dockerze**, napisana w **.NET 9 Blazor WebAssembly** w architekturze modularnego monolitu.  
-Aplikacja umożliwia **centralne zarządzanie kopiami zapasowymi wielu baz danych** – obecnie wspiera **MySQL** i **PostgreSQL**, a w planach znajduje się obsługa **MS SQL Server**.  
+Aplikacja umożliwia **centralne zarządzanie kopiami zapasowymi wielu baz danych** – obecnie wspiera **MySQL**, **PostgreSQL** oraz **MS SQL Server**.  
 
 ---
 
@@ -23,7 +23,7 @@ Aplikacja umożliwia **centralne zarządzanie kopiami zapasowymi wielu baz danyc
 - 🔐 Szyfrowanie oraz kompresja plików kopii  
 - 📊 Historia backupów i statystyki  
 - 📧 Powiadomienia mailowe o statusach zadań  
-- 👥 **System grup i ról użytkowników** – administrator może tworzyć grupy z określonymi uprawnieniami, przypisywać je do baz danych oraz nadawać użytkownikom dostęp np. tylko do podglądu kopii danej bazy  
+- 👥 **System grup i ról użytkowników** – administrator może przypisywać użytkowników do serwerów oraz nadawać użytkownikom dostęp np. podglądu kopii danej bazy, konfiguracji serwera, tunelów itd.
 - 🗄️ Konfiguracja i wszystkie dane zarządzające są przechowywane w **SQLite** (prosta, lekka baza do obsługi aplikacji)  
 
 ---
@@ -62,12 +62,13 @@ Przejdź do sekcji **WIKI** i zapoznaj się z instrukcjami.
 - Harmonogramy backupów  
 - Powiadomienia e-mail  
 - Przechowywanie konfiguracji w **SQLite**  
+- Obsługa **MS SQL Server**  
+- Statystyki i raporty w UI  
+- Kompatybilność z tunelami do zewnętrznych zabezpieczonych serwerów
+- SignalR 
 
 ### 🛠️ W trakcie / Do zrobienia  
-- Obsługa **MS SQL Server**  
 - Zaawansowane testowanie backupów (tymczasowe kontenery + SQL check queries)  
-- Statystyki i raporty w UI  
-- Integracje z chmurą (AWS S3, Azure Blob, GCP Storage)  
 
 ## 📜 Licencja
 Projekt udostępniany jest na licencji MIT.<br>
