@@ -1,25 +1,34 @@
 ﻿services:
-  server.api:
-    image: server.api
+  octobackup:
+    # local testing
+    #image: server.api
+    image: lewan24/octobackup
     container_name: octobackup
     restart: always
-    build:
-      context: .
-      dockerfile: Src/Bootstraper/Server/Server.Api/Dockerfile
+    # local testing
+    #build:
+      #context: .
+      #dockerfile: Src/Bootstraper/Server/Server.Api/Dockerfile
     ports:
       - "10000:80"
       - "10443:443"
     environment:
       ASPNETCORE_ENVIRONMENT: Production
       ASPNETCORE_URLS: "https://+;http://+"
-      Kestrel__Certificates__Default__Path: "/app/Certificate/OctoBackupCert.pfx" # your cert, could be anything to only run if you use proxy
-      Kestrel__Certificates__Default__Password: "Password" # generated cert password
+      # your cert, could be anything to only run if you use proxy
+      Kestrel__Certificates__Default__Path: "/app/Certificate/OctoBackupCert.pfx"
+      # generated cert password
+      Kestrel__Certificates__Default__Password: "Password"
       # \/ change on production
-      CRYPTO_KEY: "C5Znh9Rwota8gSeeTLCMn4ag0OvD5vI9aj0me39/G0g=" # base64 crypto key used to encrypt data 
+      # base64 crypto key used to encrypt data 
+      CRYPTO_KEY: "C5Znh9Rwota8gSeeTLCMn4ag0OvD5vI9aj0me39/G0g="
     volumes:
-      - ./certs/:/app/Certificate/:ro # certificate location
-      #- serviceDb:/db # local database with users, app data, settings etc.
-      #- backups:/backups # directory where all backups made are stored. You can bind it to external server
+      # certificate location
+      - ./certs/:/app/Certificate/:ro
+      # local database with users, app data, settings etc.
+      #- serviceDb:/db
+      # directory where all backups made are stored. You can bind it to external server
+      #- backups:/backups
         
 # uncomment to bind local db and backups directories
 #volumes:
