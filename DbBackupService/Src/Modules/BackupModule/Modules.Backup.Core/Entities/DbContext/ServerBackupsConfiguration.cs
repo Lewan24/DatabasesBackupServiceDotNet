@@ -8,9 +8,21 @@ public sealed class ServerBackupsConfiguration
     public Guid ServerId { get; set; }
     public int TimeInDaysToHoldBackups { get; set; } = 4;
 
-    [NotMapped]
-    public string BackupSaveDirectory { get; set; } =
-        Path.Combine(Path.GetDirectoryName(Environment.ProcessPath)!, "backups");
+    [NotMapped] private string BackupSaveDirectory { get; } = GetBackupDirectory();
+
+    private static string GetBackupDirectory()
+    {
+        if (OperatingSystem.IsWindows())
+            return Path.Combine(
+                Path.GetDirectoryName(Environment.ProcessPath)!,
+                "backups");
+        
+        if (OperatingSystem.IsLinux())
+            return "/backups";
+
+        throw new PlatformNotSupportedException("Unsupported OS");
+    }
+
 
     /// <summary>
     ///     Create required directories for provided server and database
