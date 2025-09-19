@@ -52,7 +52,7 @@ Aplikacja umożliwia **centralne zarządzanie kopiami zapasowymi wielu baz danyc
 
 ## 🚀 Uruchomienie i konfiguracja
 
-Przejdź do sekcji **WIKI** i zapoznaj się z instrukcjami.
+Przejdź do sekcji **[WIKI](https://github.com/Lewan24/OctoBackup/wiki)** i zapoznaj się z instrukcjami.
 
 ## 🗺️ Roadmap  
 
