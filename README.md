@@ -53,7 +53,7 @@ The application allows **centralized management of database backups across multi
 
 ## 🚀 Setup & Configuration  
 
-Go to the **WIKI** section and follow the setup instructions.  
+Go to the **[WIKI](https://github.com/Lewan24/OctoBackup/wiki)** section and follow the setup instructions.  
 
 ---
 
