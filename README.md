@@ -1,4 +1,4 @@
-# 💾 DatabasesBackupServiceDotNet  
+# 💾 OctoBackup  
 
 [🇵🇱 Read in Polish](README_PL.md)
 
