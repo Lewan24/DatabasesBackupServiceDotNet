@@ -1,4 +1,4 @@
-# 💾 DatabasesBackupServiceDotNet  
+# 💾 OctoBackup  
 
 [🇵🇱 Read in English](README.md)
 
@@ -14,7 +14,7 @@
 
 ---
 
-**DatabasesBackupServiceDotNet** to otwarto-źródłowa aplikacja konteneryzowana w **Dockerze**, napisana w **.NET 9 Blazor WebAssembly** w architekturze modularnego monolitu.  
+**OctoBackup** to otwarto-źródłowa aplikacja konteneryzowana w **Dockerze**, napisana w **.NET 9 Blazor WebAssembly** w architekturze modularnego monolitu.  
 Aplikacja umożliwia **centralne zarządzanie kopiami zapasowymi wielu baz danych** – obecnie wspiera **MySQL**, **PostgreSQL** oraz **MS SQL Server**.  
 
 ---
